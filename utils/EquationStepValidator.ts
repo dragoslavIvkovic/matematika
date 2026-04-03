@@ -8,6 +8,7 @@ export interface ValidationResult {
   failedAtStep?: number;
   expectedProcedure?: string[];
   modalMessage?: string;
+  fallbackLevel?: string;
 }
 
 interface ExpectedStep {
@@ -23,10 +24,24 @@ export class EquationStepValidator {
     if (!str) return '';
     return str
       .toString()
-      .replace(/\s+/g, '')       // Uklanja razmake
-      .toLowerCase()             // Sve u mala slova
-      .replace(/:/g, '/')        // Tretira : kao /
-      .replace(/[·.]/g, '*');    // Tretira tačku kao *
+      .replace(/\s+/g, '')       // Remove spaces
+      .toLowerCase()             // Lowercase
+      .replace(/:/g, '/')        // Treat : as /
+      .replace(/·/g, '*')        // Treat middle dot as *
+      .replace(/×/g, '*')        // Treat × as *
+      .replace(/÷/g, '/')        // Treat ÷ as /
+      .replace(/[,.]$/g, '')     // Strip trailing comma/period (iOS keyboard quirk)
+      .replace(/^[,.]|[,.]$/g, ''); // Strip leading/trailing punctuation
+  }
+
+  /**
+   * Extract just the numeric value from a string (strips everything non-numeric)
+   */
+  static extractNumber(str: string): number | null {
+    if (!str) return null;
+    const cleaned = str.replace(/[^0-9.-]/g, '').replace(/\.$/g, '');
+    const num = Number(cleaned);
+    return isNaN(num) ? null : num;
   }
 
   /**
@@ -55,8 +70,8 @@ export class EquationStepValidator {
         else if (type === '*') { val1 = a * b; } 
         else if (type === '/') { val1 = a / b; }
         else { val1 = 0; }
-        // Dodajemo samo rezultat u niz
-        steps.push({ display: `${val1}`, variations: [`${val1}`] });
+        // Only the numeric result is needed
+        steps.push({ display: `${val1}`, variations: [`${val1}`, `${val1}.0`, `${val1},0`] });
         break;
 
       case '1.3':
@@ -160,6 +175,15 @@ export class EquationStepValidator {
 
       if (currentValidVariations.includes(normalizedInput)) {
         continue;
+      }
+
+      // For basic arithmetic (1.1/1.2), also try numeric comparison
+      if (level === '1.1' || level === '1.2') {
+        const userNum = this.extractNumber(activeInputs[i]);
+        const expectedNum = this.extractNumber(expectedSteps[i].variations[0]);
+        if (userNum !== null && expectedNum !== null && userNum === expectedNum) {
+          continue;
+        }
       }
 
       let isSkipped = false;

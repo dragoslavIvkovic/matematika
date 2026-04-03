@@ -17,7 +17,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.xmilioner.math-tutor"
     },
-    "android": {},
+    "android": {
+      "package": "com.xmilioner.mathtutor"
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
@@ -34,6 +36,14 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {
+        "origin": "https://replit.com/"
+      },
+      "eas": {
+        "projectId": "b6d9bc92-5a74-4cf6-a48d-634ff66c606d"
+      }
     }
   }
 }
