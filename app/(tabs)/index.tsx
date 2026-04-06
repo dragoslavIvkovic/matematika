@@ -116,7 +116,6 @@ export default function LearnScreen() {
           entering={FadeInDown.delay(100).duration(400)}
           style={styles.dashboardWelcome}
         >
-          <Text style={styles.dashboardTitle}>Your Path</Text>
           <View style={styles.progressSummary}>
             <ProgressBar
               progress={(completedCount / LEVEL_CONFIGS.length) * 100}
@@ -141,17 +140,18 @@ export default function LearnScreen() {
             <Text style={styles.miniStatValue}>{completedCount}</Text>
             <Text style={styles.miniStatLabel}>Levels</Text>
           </View>
-          <View style={styles.miniStat}>
-            <Ionicons name="flash" size={14} color={C.orange} />
-            <Text style={styles.miniStatValue}>Lv {currentLevel}</Text>
-            <Text style={styles.miniStatLabel}>Current</Text>
-          </View>
         </Animated.View>
 
         {/* Current level CTA */}
         <Animated.View entering={FadeInDown.delay(200).duration(400)}>
           <TouchableOpacity
-            style={styles.continueCta}
+            style={[
+              styles.continueCta,
+              {
+                backgroundColor: C.levels[currentLevel] || C.primary,
+                shadowColor: C.levels[currentLevel] || C.primary,
+              },
+            ]}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               router.push("/(tabs)/practice");
@@ -159,10 +159,8 @@ export default function LearnScreen() {
             activeOpacity={0.9}
           >
             <View style={styles.ctaLeft}>
-              <View
-                style={[styles.ctaIcon, { backgroundColor: C.levels[currentLevel] || C.primary }]}
-              >
-                <Ionicons name="play" size={24} color={C.white} />
+              <View style={styles.ctaIconContainer}>
+                <Ionicons name="play" size={32} color={C.white} />
               </View>
               <View style={styles.ctaTextBlock}>
                 <Text style={styles.ctaTitle}>Continue Practice</Text>
@@ -171,7 +169,9 @@ export default function LearnScreen() {
                 </Text>
               </View>
             </View>
-            <Ionicons name="arrow-forward" size={22} color={C.primary} />
+            <View style={styles.ctaArrow}>
+              <Ionicons name="arrow-forward" size={24} color={C.white} />
+            </View>
           </TouchableOpacity>
         </Animated.View>
 
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 16,
+    paddingBottom: 0,
     backgroundColor: C.background,
   },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: { padding: 16, gap: 14 },
 
-  dashboardWelcome: { gap: 8, marginTop: 4 },
+  dashboardWelcome: { gap: 8, marginTop: 0 },
   dashboardTitle: {
     fontFamily: "Inter_800ExtraBold",
     fontSize: 28,
@@ -379,35 +379,41 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: C.surface,
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 2,
-    borderColor: C.primaryLight,
-    shadowColor: C.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 3,
+    borderRadius: 24,
+    padding: 20,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 6,
   },
-  ctaLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
-  ctaIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+  ctaLeft: { flexDirection: "row", alignItems: "center", gap: 16, flex: 1 },
+  ctaIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     alignItems: "center",
     justifyContent: "center",
   },
-  ctaTextBlock: { gap: 2, flex: 1 },
+  ctaTextBlock: { gap: 4, flex: 1 },
   ctaTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 16,
-    color: C.text,
+    fontFamily: "Inter_800ExtraBold",
+    fontSize: 20,
+    color: C.white,
+    letterSpacing: -0.5,
   },
   ctaSub: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-    color: C.textSecondary,
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    color: "rgba(255, 255, 255, 0.9)",
+  },
+  ctaArrow: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // Section header
