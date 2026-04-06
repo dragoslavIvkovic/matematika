@@ -106,7 +106,7 @@ function Slide3() {
       <Animated.View entering={FadeInUp.delay(350).duration(500)} style={slideStyles.methodsGrid}>
         <View style={[slideStyles.methodCard, { borderColor: C.primary }]}>
           <View style={[slideStyles.methodIcon, { backgroundColor: C.primary }]}>
-            <Ionicons name="camera" size={28} color="#FFFFFF" />
+            <Ionicons name="camera" size={28} color={C.white} />
           </View>
           <Text style={slideStyles.methodTitle}>Snap a Photo</Text>
           <Text style={slideStyles.methodDesc}>
@@ -119,14 +119,14 @@ function Slide3() {
 
         <View style={[slideStyles.methodCard, { borderColor: C.accent }]}>
           <View style={[slideStyles.methodIcon, { backgroundColor: C.accent }]}>
-            <Feather name="edit-3" size={26} color="#FFFFFF" />
+            <Feather name="edit-3" size={26} color={C.white} />
           </View>
           <Text style={slideStyles.methodTitle}>Type It In</Text>
           <Text style={slideStyles.methodDesc}>
             Tap the keyboard and type your answer directly. Fast and simple!
           </Text>
-          <View style={[slideStyles.methodBadge, { backgroundColor: "#DCFCE7", borderColor: C.accentLight }]}>
-            <Text style={[slideStyles.methodBadgeText, { color: "#166534" }]}>Option B</Text>
+          <View style={[slideStyles.methodBadge, { backgroundColor: C.cardCorrect, borderColor: C.accentLight }]}>
+            <Text style={[slideStyles.methodBadgeText, { color: C.successDark }]}>Option B</Text>
           </View>
         </View>
       </Animated.View>
@@ -141,8 +141,8 @@ function Slide4() {
         <RobotMascot size={100} />
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(400).duration(500)} style={slideStyles.textBlock}>
-        <View style={[slideStyles.badge, { backgroundColor: "#DCFCE7", borderColor: C.accentLight }]}>
-          <Text style={[slideStyles.badgeText, { color: "#166534" }]}>All Set!</Text>
+        <View style={[slideStyles.badge, { backgroundColor: C.cardCorrect, borderColor: C.accentLight }]}>
+          <Text style={[slideStyles.badgeText, { color: C.successDark }]}>All Set!</Text>
         </View>
         <Text style={slideStyles.title}>Let's Start{"\n"}Solving!</Text>
         <Text style={slideStyles.subtitle}>
@@ -268,7 +268,7 @@ export default function OnboardingScreen() {
           <Ionicons
             name={isLast ? "rocket" : "arrow-forward"}
             size={18}
-            color="#FFFFFF"
+            color={C.white}
           />
         </TouchableOpacity>
       </View>
@@ -297,7 +297,7 @@ const slideStyles = StyleSheet.create({
     gap: 8,
   },
   badge: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: C.cardNeutral,
     borderWidth: 1.5,
     borderColor: C.primaryLight,
     paddingHorizontal: 14,
@@ -333,10 +333,10 @@ const slideStyles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   demoCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 24,
     padding: 18,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
     shadowRadius: 20,
@@ -387,12 +387,12 @@ const slideStyles = StyleSheet.create({
   },
   methodCard: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 20,
     padding: 16,
     borderWidth: 2,
     gap: 8,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.07,
     shadowRadius: 12,
@@ -418,7 +418,7 @@ const slideStyles = StyleSheet.create({
     flex: 1,
   },
   methodBadge: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: C.cardNeutral,
     borderWidth: 1,
     borderColor: C.primaryLight,
     alignSelf: "flex-start",
@@ -440,7 +440,7 @@ const slideStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: C.surfaceAlt,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 100,
-    backgroundColor: "rgba(255,255,255,0.8)",
+    backgroundColor: C.whiteOverlay,
   },
   skipText: {
     fontFamily: "Inter_600SemiBold",
@@ -519,6 +519,6 @@ const styles = StyleSheet.create({
   ctaBtnText: {
     fontFamily: "Inter_700Bold",
     fontSize: 17,
-    color: "#FFFFFF",
+    color: C.white,
   },
 });

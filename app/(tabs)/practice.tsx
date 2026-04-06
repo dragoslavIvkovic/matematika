@@ -414,7 +414,7 @@ export default function PracticeScreen() {
         <View style={styles.levelCompleteCenter}>
           <Animated.View entering={FadeInDown.duration(500)} style={styles.levelCompleteContent}>
             <View style={styles.celebrationIcon}>
-              <Ionicons name="trophy" size={48} color="#FFF" />
+              <Ionicons name="trophy" size={48} color={C.white} />
             </View>
             <Text style={styles.levelCompleteTitle}>Level Complete! 🎉</Text>
             <Text style={styles.levelCompleteMessage}>
@@ -449,7 +449,7 @@ export default function PracticeScreen() {
               <Ionicons
                 name={levelCompleteInfo?.toLevel ? "arrow-forward" : "grid"}
                 size={18}
-                color="#FFF"
+                color={C.white}
               />
             </TouchableOpacity>
 
@@ -507,7 +507,7 @@ export default function PracticeScreen() {
           </View>
           {state.consecutiveErrors > 0 && (
             <View style={styles.errorBadge}>
-              <Ionicons name="alert-circle" size={12} color="#DC2626" />
+              <Ionicons name="alert-circle" size={12} color={C.errorDark} />
               <Text style={styles.errorBadgeText}>{state.consecutiveErrors}</Text>
             </View>
           )}
@@ -571,7 +571,7 @@ export default function PracticeScreen() {
                       <Ionicons
                         name="close-circle"
                         size={18}
-                        color="#FCA5A5"
+                        color={C.errorLight}
                       />
                     </TouchableOpacity>
                   )}
@@ -585,7 +585,7 @@ export default function PracticeScreen() {
                         ? "Type your answer..."
                         : `Step ${idx + 1}...`
                     }
-                    placeholderTextColor="#94A3B8"
+                    placeholderTextColor={C.textMuted}
                     value={ans}
                     onChangeText={(text) => {
                       const newAns = [...typedAnswers];
@@ -629,7 +629,7 @@ export default function PracticeScreen() {
                         disabled={!ans.trim()}
                         activeOpacity={0.9}
                       >
-                        <Ionicons name="arrow-down" size={18} color="#FFFFFF" />
+                        <Ionicons name="arrow-down" size={18} color={C.white} />
                       </TouchableOpacity>
                     )}
                 </View>
@@ -649,7 +649,7 @@ export default function PracticeScreen() {
                 <Ionicons
                   name="checkmark-circle"
                   size={20}
-                  color="#FFFFFF"
+                  color={C.white}
                 />
                 <Text style={styles.checkAnswerBtnText}>Check Answer</Text>
               </TouchableOpacity>
@@ -680,8 +680,8 @@ export default function PracticeScreen() {
                 styles.resultCard,
                 resultCardStyle,
                 {
-                  backgroundColor: "#DCFCE7",
-                  borderColor: "#86EFAC",
+                  backgroundColor: C.cardCorrect,
+                  borderColor: C.cardCorrectBorder,
                 },
               ]}
             >
@@ -692,7 +692,7 @@ export default function PracticeScreen() {
                     { backgroundColor: C.accent },
                   ]}
                 >
-                  <Ionicons name="checkmark" size={24} color="#FFFFFF" />
+                  <Ionicons name="checkmark" size={24} color={C.white} />
                 </View>
                 <View style={styles.resultTextBlock}>
                   <Text style={styles.resultTitle}>Correct! 🎉</Text>
@@ -708,7 +708,7 @@ export default function PracticeScreen() {
                 activeOpacity={0.9}
               >
                 <Text style={styles.nextProblemBtnText}>Next Problem</Text>
-                <Ionicons name="arrow-forward" size={16} color="#FFF" />
+                <Ionicons name="arrow-forward" size={16} color={C.white} />
               </TouchableOpacity>
             </Animated.View>
           </View>
@@ -786,7 +786,7 @@ const styles = StyleSheet.create({
   },
   miniProgressBar: {
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
     borderRadius: 2,
     overflow: "hidden" as const,
   },
@@ -799,22 +799,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    backgroundColor: "#FEE2E2",
+    backgroundColor: C.errorLighter,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: "#FCA5A5",
+    borderColor: C.errorLight,
   },
   errorBadgeText: {
     fontFamily: "Inter_700Bold",
     fontSize: 11,
-    color: "#DC2626",
+    color: C.errorDark,
   },
 
   // Equation
   equationCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 24,
     paddingHorizontal: 24,
     paddingVertical: 22,
@@ -846,14 +846,14 @@ const styles = StyleSheet.create({
   notebookInputCard: {
     marginHorizontal: 16,
     marginTop: 12,
-    backgroundColor: "#FFFEF7",
+    backgroundColor: C.paper,
     borderRadius: 16,
     paddingRight: 16,
     paddingLeft: 48,
     paddingTop: 16,
     paddingBottom: 24,
     minHeight: 160,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: "#DBEAFE",
+    backgroundColor: C.infoLight,
   },
   marginLine: {
     position: "absolute",
@@ -874,7 +874,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 1.5,
-    backgroundColor: "#FCA5A5",
+    backgroundColor: C.errorLight,
     opacity: 0.6,
   },
   typeInputHeader: {
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: "Inter_500Medium",
     fontSize: 22,
-    color: "#1E293B",
+    color: C.text,
     letterSpacing: 0.5,
     padding: 0,
   },
@@ -935,7 +935,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopColor: C.border,
     paddingTop: 16,
   },
   checkAnswerBtn: {
@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
   checkAnswerBtnText: {
     fontFamily: "Inter_700Bold",
     fontSize: 15,
-    color: "#FFFFFF",
+    color: C.white,
   },
 
   // Middle area
@@ -983,7 +983,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     gap: 14,
     width: "100%",
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
@@ -1033,7 +1033,7 @@ const styles = StyleSheet.create({
   nextProblemBtnText: {
     fontFamily: "Inter_700Bold",
     fontSize: 16,
-    color: "#FFFFFF",
+    color: C.white,
   },
 
   // Level complete
@@ -1077,12 +1077,12 @@ const styles = StyleSheet.create({
   },
   levelCompleteStats: {
     flexDirection: "row",
-    backgroundColor: "#FFF",
+    backgroundColor: C.white,
     borderRadius: 16,
     padding: 16,
     gap: 0,
     width: "100%",
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -1095,7 +1095,7 @@ const styles = StyleSheet.create({
   },
   lcStatDivider: {
     width: 1,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
   },
   lcStatValue: {
     fontFamily: "Inter_700Bold",
@@ -1126,7 +1126,7 @@ const styles = StyleSheet.create({
   lcContinueBtnText: {
     fontFamily: "Inter_700Bold",
     fontSize: 17,
-    color: "#FFF",
+    color: C.white,
   },
   lcBackBtn: {
     paddingVertical: 8,

@@ -70,7 +70,7 @@ export function StreakCounter({
     <Animated.View style={[styles.container, counterStyle]}>
       <View style={styles.topRow}>
         <View style={styles.levelBadge}>
-          <MaterialCommunityIcons name="fire" size={14} color="#F97316" />
+          <MaterialCommunityIcons name="fire" size={14} color={C.orange} />
           <Text style={styles.levelText}>Level {level}</Text>
         </View>
         <View style={styles.streakPill}>
@@ -101,7 +101,7 @@ export function StreakCounter({
               styles.tick,
               {
                 left: `${((i + 1) / required) * 100}%`,
-                backgroundColor: i < current ? "transparent" : "#CBD5E1",
+                backgroundColor: i < current ? C.transparent : C.border,
               },
             ]}
           />
@@ -118,11 +118,11 @@ export function StreakCounter({
               <View
                 style={[
                   styles.opDot,
-                  { backgroundColor: filled ? C.accent : "#E2E8F0" },
+                  { backgroundColor: filled ? C.accent : C.border },
                 ]}
               >
                 {filled && (
-                  <Ionicons name="checkmark" size={8} color="#FFF" />
+                  <Ionicons name="checkmark" size={8} color={C.white} />
                 )}
               </View>
               <Text
@@ -143,11 +143,11 @@ export function StreakCounter({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 16,
     padding: 14,
     gap: 10,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -162,23 +162,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: "#FEF3C7",
+    backgroundColor: C.warningLight,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: "#FCD34D",
+    borderColor: C.warningBorder,
   },
   levelText: {
     fontFamily: "Inter_700Bold",
     fontSize: 12,
-    color: "#92400E",
+    color: C.warning,
   },
   streakPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#DCFCE7",
+    backgroundColor: C.cardCorrect,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 100,
@@ -186,11 +186,11 @@ const styles = StyleSheet.create({
   streakText: {
     fontFamily: "Inter_700Bold",
     fontSize: 13,
-    color: "#166534",
+    color: C.successDark,
   },
   barTrack: {
     height: 8,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
     borderRadius: 4,
     overflow: "hidden",
     position: "relative",
@@ -228,6 +228,6 @@ const styles = StyleSheet.create({
   opLabel: {
     fontFamily: "Inter_500Medium",
     fontSize: 11,
-    color: "#94A3B8",
+    color: C.textMuted,
   },
 });

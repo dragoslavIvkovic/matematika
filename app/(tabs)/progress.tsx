@@ -27,14 +27,7 @@ import { LEVEL_CONFIGS } from "@/utils/ProblemGenerator";
 
 const C = Colors.light;
 
-const LEVEL_COLORS: Record<string, string> = {
-  "1.1": "#10B981",
-  "1.2": "#3B82F6",
-  "1.3": "#F97316",
-  "1.4": "#8B5CF6",
-  "1.5": "#EC4899",
-  "1.6": "#06B6D4",
-};
+const LEVEL_COLORS: Record<string, string> = C.levels;
 
 function ProgressBar({
   progress,
@@ -66,7 +59,7 @@ function ProgressBar({
 const progressBarStyles = StyleSheet.create({
   track: {
     height: 8,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
     borderRadius: 4,
     overflow: "hidden",
     flex: 1,
@@ -147,7 +140,7 @@ export default function ProgressScreen() {
         </View>
         <TouchableOpacity onPress={handleReset} activeOpacity={0.7}>
           <View style={styles.resetBtn}>
-            <Ionicons name="refresh" size={14} color="#DC2626" />
+            <Ionicons name="refresh" size={14} color={C.errorDark} />
             <Text style={styles.resetBtnText}>Reset</Text>
           </View>
         </TouchableOpacity>
@@ -217,7 +210,7 @@ export default function ProgressScreen() {
                 <Ionicons
                   name="checkmark-circle"
                   size={22}
-                  color="#FFFFFF"
+                  color={C.white}
                 />
               ),
               label: "Problems Solved",
@@ -230,7 +223,7 @@ export default function ProgressScreen() {
                 <MaterialCommunityIcons
                   name="fire"
                   size={22}
-                  color="#FFFFFF"
+                  color={C.white}
                 />
               ),
               label: "Current Streak",
@@ -240,16 +233,16 @@ export default function ProgressScreen() {
             },
             {
               icon: (
-                <Ionicons name="trophy" size={22} color="#FFFFFF" />
+                <Ionicons name="trophy" size={22} color={C.white} />
               ),
               label: "Accuracy",
               value: `${accuracy}%`,
               sub: `${totalErrors} errors`,
-              color: "#8B5CF6",
+              color: C.levels["1.4"],
             },
             {
               icon: (
-                <Ionicons name="layers" size={22} color="#FFFFFF" />
+                <Ionicons name="layers" size={22} color={C.white} />
               ),
               label: "Levels Done",
               value: `${completedCount}`,
@@ -313,12 +306,12 @@ export default function ProgressScreen() {
                     style={[
                       styles.topicDot,
                       {
-                        backgroundColor: completed ? color : "#E2E8F0",
+                        backgroundColor: completed ? color : C.border,
                       },
                     ]}
                   >
                     {completed && (
-                      <Ionicons name="checkmark" size={8} color="#FFF" />
+                      <Ionicons name="checkmark" size={8} color={C.white} />
                     )}
                   </View>
                   <View style={{ flex: 1 }}>
@@ -375,7 +368,7 @@ export default function ProgressScreen() {
               id: "a1",
               title: "First Steps",
               description: "Solve your first problem",
-              icon: <Ionicons name="star" size={24} color="#FFFFFF" />,
+              icon: <Ionicons name="star" size={24} color={C.white} />,
               earned: totalSolved >= 1,
               color: C.orange,
             },
@@ -383,23 +376,23 @@ export default function ProgressScreen() {
               id: "a2",
               title: "Getting Good",
               description: "Solve 10 problems",
-              icon: <Ionicons name="ribbon" size={24} color="#FFFFFF" />,
+              icon: <Ionicons name="ribbon" size={24} color={C.white} />,
               earned: totalSolved >= 10,
-              color: "#8B5CF6",
+              color: C.levels["1.4"],
             },
             {
               id: "a3",
               title: "Math Whiz",
               description: "Solve 50 problems",
-              icon: <Ionicons name="flash" size={24} color="#FFFFFF" />,
+              icon: <Ionicons name="flash" size={24} color={C.white} />,
               earned: totalSolved >= 50,
-              color: "#06B6D4",
+              color: C.levels["1.6"],
             },
             {
               id: "a4",
               title: "Level Up!",
               description: "Complete your first level",
-              icon: <Ionicons name="trophy" size={24} color="#FFFFFF" />,
+              icon: <Ionicons name="trophy" size={24} color={C.white} />,
               earned: completedCount >= 1,
               color: C.accent,
             },
@@ -407,7 +400,7 @@ export default function ProgressScreen() {
               id: "a5",
               title: "Halfway There",
               description: "Complete 3 levels",
-              icon: <MaterialCommunityIcons name="fire" size={24} color="#FFFFFF" />,
+              icon: <MaterialCommunityIcons name="fire" size={24} color={C.white} />,
               earned: completedCount >= 3,
               color: C.orange,
             },
@@ -415,9 +408,9 @@ export default function ProgressScreen() {
               id: "a6",
               title: "Math Master",
               description: "Complete all 6 levels",
-              icon: <Ionicons name="medal" size={24} color="#FFFFFF" />,
+              icon: <Ionicons name="medal" size={24} color={C.white} />,
               earned: completedCount >= 6,
-              color: "#EC4899",
+              color: C.levels["1.5"],
             },
           ].map((badge) => (
             <View
@@ -431,14 +424,14 @@ export default function ProgressScreen() {
                 style={[
                   styles.achievementBadge,
                   {
-                    backgroundColor: badge.earned ? badge.color : "#E2E8F0",
+                    backgroundColor: badge.earned ? badge.color : C.border,
                   },
                 ]}
               >
                 {badge.earned ? (
                   badge.icon
                 ) : (
-                  <Ionicons name="lock-closed" size={20} color="#94A3B8" />
+                  <Ionicons name="lock-closed" size={20} color={C.textMuted} />
                 )}
               </View>
               <Text
@@ -491,27 +484,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#FEE2E2",
+    backgroundColor: C.errorLighter,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: "#FCA5A5",
+    borderColor: C.errorLight,
   },
   resetBtnText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 12,
-    color: "#DC2626",
+    color: C.errorDark,
   },
   scrollContent: { padding: 16, gap: 12 },
   robotGreeting: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 20,
     padding: 16,
     gap: 14,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -570,13 +563,13 @@ const styles = StyleSheet.create({
   },
   statsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   statCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 16,
     padding: 14,
     flex: 1,
     minWidth: "44%",
     gap: 4,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 6,
@@ -608,11 +601,11 @@ const styles = StyleSheet.create({
     color: C.textMuted,
   },
   topicCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 20,
     padding: 16,
     gap: 0,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -670,14 +663,14 @@ const styles = StyleSheet.create({
   },
   achievementsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   achievementCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 16,
     padding: 14,
     flex: 1,
     minWidth: "28%",
     alignItems: "center",
     gap: 6,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 6,

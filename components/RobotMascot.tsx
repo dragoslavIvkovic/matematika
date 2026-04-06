@@ -134,7 +134,7 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
               left: 0,
               right: 0,
               height: headH * 0.45,
-              backgroundColor: "rgba(255,255,255,0.12)",
+              backgroundColor: C.sheen,
               borderTopLeftRadius: headW * 0.22,
               borderTopRightRadius: headW * 0.22,
             }}
@@ -161,7 +161,7 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
                   backgroundColor: C.robot.eye,
                   alignItems: "center",
                   justifyContent: "center",
-                  shadowColor: "#fff",
+                  shadowColor: C.white,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: 0.9,
                   shadowRadius: 4,
@@ -183,7 +183,7 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
                     width: pupilSize * 0.35,
                     height: pupilSize * 0.35,
                     borderRadius: 100,
-                    backgroundColor: "rgba(255,255,255,0.8)",
+                    backgroundColor: C.whiteOverlay,
                   }}
                 />
               </View>
@@ -245,7 +245,7 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
               left: 0,
               right: 0,
               height: bodyH * 0.35,
-              backgroundColor: "rgba(255,255,255,0.15)",
+              backgroundColor: C.sheen,
             }}
           />
 
@@ -262,7 +262,7 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
               gap: s * 0.06,
             }}
           >
-            {[C.robot.antenna, "#10B981", "#F97316"].map((color, i) => (
+            {[C.robot.antenna, C.success, C.orange].map((color, i) => (
               <View
                 key={i}
                 style={{

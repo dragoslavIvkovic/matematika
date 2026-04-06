@@ -30,15 +30,6 @@ import { getTheoryContent, hasTheory } from "@/utils/TheoryContent";
 const C = Colors.light;
 const ONBOARDING_KEY = "math_tutor_onboarding_v1";
 
-const LEVEL_COLORS: Record<string, string> = {
-  "1.1": "#10B981",
-  "1.2": "#3B82F6",
-  "1.3": "#F97316",
-  "1.4": "#8B5CF6",
-  "1.5": "#EC4899",
-  "1.6": "#06B6D4",
-};
-
 function ProgressBar({
   progress,
   color,
@@ -69,7 +60,7 @@ function ProgressBar({
 const pbStyles = StyleSheet.create({
   track: {
     height: 6,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
     borderRadius: 3,
     overflow: "hidden",
     flex: 1,
@@ -189,10 +180,10 @@ export default function LearnScreen() {
               <View
                 style={[
                   styles.ctaIcon,
-                  { backgroundColor: LEVEL_COLORS[currentLevel] || C.primary },
+                  { backgroundColor: C.levels[currentLevel] || C.primary },
                 ]}
               >
-                <Ionicons name="play" size={24} color="#FFF" />
+                <Ionicons name="play" size={24} color={C.white} />
               </View>
               <View style={styles.ctaTextBlock}>
                 <Text style={styles.ctaTitle}>Continue Practice</Text>
@@ -217,7 +208,7 @@ export default function LearnScreen() {
         {LEVEL_CONFIGS.map((config, index) => {
           const completed = state?.completedLevels.includes(config.id) || false;
           const isCurrent = config.id === currentLevel;
-          const color = LEVEL_COLORS[config.id] || C.primary;
+          const color = C.levels[config.id] || C.primary;
           const stats = state?.levelStats[config.id];
           const solved = stats?.solved || 0;
           const bestStreak = stats?.bestStreak || 0;
@@ -240,7 +231,7 @@ export default function LearnScreen() {
                   <View
                     style={[
                       styles.connectorLine,
-                      { backgroundColor: completed ? color : "#E2E8F0" },
+                      { backgroundColor: completed ? color : C.border },
                     ]}
                   />
                 )}
@@ -248,14 +239,14 @@ export default function LearnScreen() {
                   style={[
                     styles.roadmapDot,
                     {
-                      backgroundColor: completed ? color : isCurrent ? color : "#E2E8F0",
-                      borderColor: isCurrent ? color : "transparent",
+                      backgroundColor: completed ? color : isCurrent ? color : C.border,
+                      borderColor: isCurrent ? color : C.transparent,
                       borderWidth: isCurrent ? 3 : 0,
                     },
                   ]}
                 >
                   {completed ? (
-                    <Ionicons name="checkmark" size={14} color="#FFF" />
+                    <Ionicons name="checkmark" size={14} color={C.white} />
                   ) : (
                     <Text style={styles.roadmapDotText}>{config.id}</Text>
                   )}
@@ -352,17 +343,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: "#FEF3C7",
+    backgroundColor: C.cardNeutral,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: "#FCD34D",
+    borderColor: C.cardNeutralBorder,
   },
   levelPillText: {
     fontFamily: "Inter_700Bold",
     fontSize: 13,
-    color: "#92400E",
+    color: C.warning,
   },
   scrollContent: { padding: 16, gap: 14 },
 
@@ -394,7 +385,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: C.surface,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -418,7 +409,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFF",
+    backgroundColor: C.surface,
     borderRadius: 20,
     padding: 16,
     borderWidth: 2,
@@ -485,15 +476,15 @@ const styles = StyleSheet.create({
   roadmapDotText: {
     fontFamily: "Inter_700Bold",
     fontSize: 9,
-    color: "#FFF",
+    color: C.white,
   },
   roadmapContent: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: C.surface,
     borderRadius: 16,
     padding: 14,
     gap: 6,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
@@ -519,17 +510,17 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   currentChip: {
-    backgroundColor: "#FEF3C7",
+    backgroundColor: C.cardNeutral,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "#FCD34D",
+    borderColor: C.cardNeutralBorder,
   },
   currentChipText: {
     fontFamily: "Inter_700Bold",
     fontSize: 9,
-    color: "#92400E",
+    color: C.warning,
     letterSpacing: 0.5,
   },
   roadmapDesc: {

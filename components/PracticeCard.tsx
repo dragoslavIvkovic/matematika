@@ -65,11 +65,11 @@ function OptionButton({
   if (answered && isCorrect) {
     bgColor = C.cardCorrect;
     borderColor = C.cardCorrectBorder;
-    textColor = "#166534";
+    textColor = C.successDark;
   } else if (answered && isSelected && !isCorrect) {
     bgColor = C.cardWrong;
     borderColor = C.cardWrongBorder;
-    textColor = "#991B1B";
+    textColor = C.errorDark;
   }
 
   const optionLetters = ["A", "B", "C", "D"];
@@ -167,8 +167,8 @@ export function PracticeCard({ question, questionNumber, onAnswer }: PracticeCar
           style={[
             styles.explanationBox,
             {
-              backgroundColor: isCorrectAnswer ? "#DCFCE7" : "#FEF3C7",
-              borderColor: isCorrectAnswer ? "#86EFAC" : "#FCD34D",
+              backgroundColor: isCorrectAnswer ? C.cardCorrect : C.warningLight,
+              borderColor: isCorrectAnswer ? C.cardCorrectBorder : C.warningBorder,
             },
             explanationStyle,
           ]}
@@ -185,10 +185,10 @@ export function PracticeCard({ question, questionNumber, onAnswer }: PracticeCar
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 20,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 16,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   questionNumberText: {
-    color: "#FFFFFF",
+    color: C.white,
     fontFamily: "Inter_700Bold",
     fontSize: 11,
   },
@@ -265,12 +265,12 @@ const styles = StyleSheet.create({
   explanationTitle: {
     fontFamily: "Inter_700Bold",
     fontSize: 13,
-    color: "#1E293B",
+    color: C.text,
   },
   explanationText: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: "#374151",
+    color: C.textSecondary,
     lineHeight: 18,
   },
 });

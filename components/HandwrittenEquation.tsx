@@ -104,12 +104,12 @@ export function HandwrittenEquation({ steps }: HandwrittenEquationProps) {
 
 const styles = StyleSheet.create({
   notebookPage: {
-    backgroundColor: "#FFFEF7",
+    backgroundColor: C.notebook,
     borderRadius: 16,
     padding: 16,
     paddingLeft: 48,
     minHeight: 200,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: "#DBEAFE",
+    backgroundColor: C.cardNeutralBorder,
   },
   marginLine: {
     position: "absolute",
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 1.5,
-    backgroundColor: "#FCA5A5",
+    backgroundColor: C.cardWrongBorder,
     opacity: 0.6,
   },
   content: {
@@ -145,15 +145,15 @@ const styles = StyleSheet.create({
   stepText: {
     fontFamily: "Inter_500Medium",
     fontSize: 22,
-    color: "#1E293B",
+    color: C.text,
     letterSpacing: 0.5,
   },
   completedText: {
-    color: "#64748B",
+    color: C.textSecondary,
     textDecorationLine: "line-through",
   },
   pendingText: {
-    color: "#94A3B8",
+    color: C.textMuted,
   },
   highlightedContainer: {
     flexDirection: "row",
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   highlightedText: {
-    color: "#92400E",
+    color: C.warning,
     fontFamily: "Inter_700Bold",
     fontSize: 24,
   },
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   exclamationText: {
-    color: "#FFFFFF",
+    color: C.white,
     fontFamily: "Inter_700Bold",
     fontSize: 14,
     lineHeight: 16,
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   checkText: {
-    color: "#FFFFFF",
+    color: C.white,
     fontSize: 12,
     fontFamily: "Inter_700Bold",
   },

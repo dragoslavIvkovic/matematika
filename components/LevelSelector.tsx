@@ -24,14 +24,7 @@ const LEVEL_ICONS: Record<string, { name: string; lib: "ion" | "mci" | "feather"
   "1.6": { name: "divide", lib: "feather" },
 };
 
-const LEVEL_COLORS: Record<string, string> = {
-  "1.1": "#10B981",
-  "1.2": "#3B82F6",
-  "1.3": "#F97316",
-  "1.4": "#8B5CF6",
-  "1.5": "#EC4899",
-  "1.6": "#06B6D4",
-};
+const LEVEL_COLORS = C.levels;
 
 interface LevelSelectorProps {
   completedLevels: string[];
@@ -85,7 +78,7 @@ export function LevelSelector({
           activeOpacity={0.9}
         >
           <View style={styles.assessmentIcon}>
-            <MaterialCommunityIcons name="clipboard-check-outline" size={28} color="#FFF" />
+            <MaterialCommunityIcons name="clipboard-check-outline" size={28} color={C.white} />
           </View>
           <View style={styles.assessmentText}>
             <Text style={styles.assessmentTitle}>Assessment Test</Text>
@@ -137,13 +130,13 @@ export function LevelSelector({
                 <View
                   style={[
                     styles.levelIconWrap,
-                    { backgroundColor: unlocked ? color : "#E2E8F0" },
+                    { backgroundColor: unlocked ? color : C.border },
                   ]}
                 >
                   {unlocked ? (
-                    renderIcon(config.id, "#FFF", 22)
+                    renderIcon(config.id, C.white, 22)
                   ) : (
-                    <Ionicons name="lock-closed" size={18} color="#94A3B8" />
+                    <Ionicons name="lock-closed" size={18} color={C.textMuted} />
                   )}
                 </View>
                 <View style={styles.levelInfo}>
@@ -158,7 +151,7 @@ export function LevelSelector({
                     </Text>
                     {completed && (
                       <View style={styles.completeBadge}>
-                        <Ionicons name="checkmark" size={10} color="#FFF" />
+                        <Ionicons name="checkmark" size={10} color={C.white} />
                       </View>
                     )}
                     {isCurrent && !completed && (
@@ -227,7 +220,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    backgroundColor: "#EFF6FF",
+    backgroundColor: C.backgroundAlt,
     borderRadius: 20,
     padding: 16,
     borderWidth: 2,
@@ -269,28 +262,28 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
   },
   dividerText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 11,
-    color: "#94A3B8",
+    color: C.textMuted,
     letterSpacing: 1,
   },
   levelCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: C.white,
     borderRadius: 20,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
-    borderColor: "transparent",
+    borderColor: C.transparent,
   },
   levelCardLocked: {
     opacity: 0.5,
@@ -334,7 +327,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   textLocked: {
-    color: "#94A3B8",
+    color: C.textMuted,
   },
   completeBadge: {
     width: 18,
@@ -345,17 +338,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   currentBadge: {
-    backgroundColor: "#FEF3C7",
+    backgroundColor: C.warningLight,
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderWidth: 1,
-    borderColor: "#FCD34D",
+    borderColor: C.warningBorder,
   },
   currentBadgeText: {
     fontFamily: "Inter_700Bold",
     fontSize: 9,
-    color: "#92400E",
+    color: C.warning,
     letterSpacing: 0.5,
   },
   levelCardRight: {

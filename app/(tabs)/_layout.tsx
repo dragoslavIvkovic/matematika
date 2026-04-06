@@ -42,9 +42,9 @@ function ClassicTabLayout() {
         headerShown: false,
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: isIOS ? "transparent" : "#FFFFFF",
+          backgroundColor: isIOS ? C.transparent : C.white,
           borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: "#E2E8F0",
+          borderTopColor: C.border,
           elevation: 0,
           ...(isWeb ? { height: 84 } : {}),
         },
@@ -57,7 +57,7 @@ function ClassicTabLayout() {
             />
           ) : isWeb ? (
             <View
-              style={[StyleSheet.absoluteFill, { backgroundColor: "#FFFFFF" }]}
+              style={[StyleSheet.absoluteFill, { backgroundColor: C.white }]}
             />
           ) : null,
       }}

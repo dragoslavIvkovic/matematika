@@ -58,7 +58,7 @@ export function WeeklyStreak({ activeDays, currentStreak }: WeeklyStreakProps) {
               </Text>
               {day.isActive && (
                 <View style={styles.checkIcon}>
-                  <MaterialCommunityIcons name="check" size={8} color="#FFF" />
+                  <MaterialCommunityIcons name="check" size={8} color={C.white} />
                 </View>
               )}
             </View>
@@ -77,12 +77,12 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: C.surface,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 10,
     gap: 12,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   todayCircle: {
     borderWidth: 1.5,
     borderColor: C.primary,
-    backgroundColor: "#FFF",
+    backgroundColor: C.white,
   },
   dayLabel: {
     fontFamily: "Inter_700Bold",
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     color: C.textSecondary,
   },
   activeLabel: {
-    color: "#FFF",
+    color: C.white,
   },
   todayLabel: {
     color: C.primary,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#FFF",
+    borderColor: C.white,
   },
   streakInfo: {
     flexDirection: "row",

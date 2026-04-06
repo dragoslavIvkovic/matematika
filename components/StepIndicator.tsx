@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   connector: {
     flex: 1,
     height: 2,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
     marginHorizontal: 4,
   },
   connectorActive: {
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -121,20 +121,20 @@ const styles = StyleSheet.create({
   dotNumber: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 12,
-    color: "#94A3B8",
+    color: C.textMuted,
   },
   dotNumberActive: {
-    color: "#FFFFFF",
+    color: C.white,
   },
   dotCheckmark: {
     fontFamily: "Inter_700Bold",
     fontSize: 12,
-    color: "#FFFFFF",
+    color: C.white,
   },
   stepLabel: {
     fontFamily: "Inter_400Regular",
     fontSize: 10,
-    color: "#94A3B8",
+    color: C.textMuted,
     textAlign: "center",
   },
   stepLabelActive: {

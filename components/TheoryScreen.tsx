@@ -58,13 +58,13 @@ export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) 
               <View
                 style={[
                   styles.ruleIcon,
-                  { backgroundColor: rule.highlight ? C.primary : "#E2E8F0" },
+                  { backgroundColor: rule.highlight ? C.primary : C.border },
                 ]}
               >
                 <Ionicons
                   name={rule.icon as any}
                   size={16}
-                  color={rule.highlight ? "#FFF" : C.textSecondary}
+                  color={rule.highlight ? C.white : C.textSecondary}
                 />
               </View>
               <Text
@@ -108,7 +108,7 @@ export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) 
                 ))}
               </View>
               <View style={styles.explanationBox}>
-                <Ionicons name="bulb" size={14} color="#92400E" />
+                <Ionicons name="bulb" size={14} color={C.warning} />
                 <Text style={styles.explanationText}>{example.explanation}</Text>
               </View>
             </View>
@@ -132,7 +132,7 @@ export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) 
             activeOpacity={0.9}
           >
             <Text style={styles.ctaText}>Got it, let's practice!</Text>
-            <Ionicons name="arrow-forward" size={18} color="#FFF" />
+            <Ionicons name="arrow-forward" size={18} color={C.white} />
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
@@ -210,11 +210,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   rulesCard: {
-    backgroundColor: "#FFF",
+    backgroundColor: C.white,
     borderRadius: 20,
     padding: 16,
     gap: 10,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   ruleRowHighlight: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: C.background,
     borderRadius: 10,
     paddingHorizontal: 10,
     marginHorizontal: -10,
@@ -260,11 +260,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   exampleCard: {
-    backgroundColor: "#FFF",
+    backgroundColor: C.white,
     borderRadius: 20,
     padding: 16,
     gap: 12,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   stepNumText: {
     fontFamily: "Inter_700Bold",
     fontSize: 12,
-    color: "#FFF",
+    color: C.white,
   },
   stepText: {
     fontFamily: "Inter_500Medium",
@@ -308,22 +308,22 @@ const styles = StyleSheet.create({
   },
   stepTextFinal: {
     fontFamily: "Inter_700Bold",
-    color: "#166534",
+    color: C.successDark,
   },
   explanationBox: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 8,
-    backgroundColor: "#FEF3C7",
+    backgroundColor: C.warningLight,
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#FCD34D",
+    borderColor: C.warningBorder,
   },
   explanationText: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: "#92400E",
+    color: C.warning,
     flex: 1,
     lineHeight: 18,
   },
@@ -331,16 +331,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 10,
-    backgroundColor: "#FFF7ED",
+    backgroundColor: C.orangeLighter,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1.5,
-    borderColor: "#FED7AA",
+    borderColor: C.orangeSubtle,
   },
   tipText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 14,
-    color: "#9A3412",
+    color: C.orangeDark,
     flex: 1,
     lineHeight: 20,
   },
@@ -361,6 +361,6 @@ const styles = StyleSheet.create({
   ctaText: {
     fontFamily: "Inter_700Bold",
     fontSize: 17,
-    color: "#FFF",
+    color: C.white,
   },
 });

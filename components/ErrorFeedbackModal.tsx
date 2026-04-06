@@ -37,9 +37,9 @@ export function ErrorFeedbackModal({
     if (!errorAction) return C.orange;
     switch (errorAction.type) {
       case "fallback_level":
-        return "#DC2626";
+        return C.error;
       case "show_theory":
-        return "#F97316";
+        return C.orange;
       default:
         return C.primary;
     }
@@ -82,7 +82,7 @@ export function ErrorFeedbackModal({
       >
         {/* Error icon */}
         <View style={[styles.iconCircle, { backgroundColor: actionColor }]}>
-          <Ionicons name={getActionIcon() as any} size={32} color="#FFF" />
+          <Ionicons name={getActionIcon() as any} size={32} color={C.white} />
         </View>
 
         {/* Error text */}
@@ -167,7 +167,7 @@ export function ErrorFeedbackModal({
           activeOpacity={0.9}
         >
           <Text style={styles.dismissBtnText}>{getActionLabel()}</Text>
-          <Ionicons name="arrow-forward" size={16} color="#FFF" />
+          <Ionicons name="arrow-forward" size={16} color={C.white} />
         </TouchableOpacity>
       </Animated.View>
     </Animated.View>
@@ -177,21 +177,21 @@ export function ErrorFeedbackModal({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: C.overlay,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 200,
     padding: 24,
   },
   card: {
-    backgroundColor: "#FFF",
+    backgroundColor: C.surface,
     borderRadius: 24,
     padding: 24,
     width: "100%",
     maxWidth: 400,
     alignItems: "center",
     gap: 12,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
     shadowRadius: 20,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#FEF2F2",
+    backgroundColor: C.cardWrong,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 100,
@@ -232,13 +232,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   procedureBox: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: C.surfaceAlt,
     borderRadius: 16,
     padding: 14,
     width: "100%",
     gap: 8,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: C.border,
   },
   procedureTitle: {
     fontFamily: "Inter_600SemiBold",
@@ -257,14 +257,14 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 7,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
     alignItems: "center",
     justifyContent: "center",
   },
   procedureNumText: {
     fontFamily: "Inter_700Bold",
     fontSize: 11,
-    color: "#FFF",
+    color: C.white,
   },
   procedureStep: {
     fontFamily: "Inter_500Medium",
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 8,
-    backgroundColor: "#FFF",
+    backgroundColor: C.surface,
     borderRadius: 12,
     padding: 12,
     width: "100%",
@@ -306,6 +306,6 @@ const styles = StyleSheet.create({
   dismissBtnText: {
     fontFamily: "Inter_700Bold",
     fontSize: 16,
-    color: "#FFF",
+    color: C.white,
   },
 });

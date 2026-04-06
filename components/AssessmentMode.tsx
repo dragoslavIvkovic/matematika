@@ -189,7 +189,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
             activeOpacity={0.9}
           >
             <Text style={styles.startBtnText}>Start Assessment</Text>
-            <Ionicons name="arrow-forward" size={18} color="#FFF" />
+            <Ionicons name="arrow-forward" size={18} color={C.white} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -222,7 +222,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
               entering={FadeInDown.delay(100 + i * 60).duration(400)}
               style={[
                 styles.resultCard,
-                { borderLeftColor: passed ? C.accent : "#FCA5A5", borderLeftWidth: 4 },
+                { borderLeftColor: passed ? C.accent : C.errorLight, borderLeftWidth: 4 },
               ]}
             >
               <View style={styles.resultCardLeft}>
@@ -236,15 +236,15 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
                   style={[
                     styles.resultBadge,
                     {
-                      backgroundColor: passed ? "#DCFCE7" : "#FEE2E2",
-                      borderColor: passed ? "#86EFAC" : "#FCA5A5",
+                    backgroundColor: passed ? C.cardCorrect : C.errorLighter,
+                    borderColor: passed ? C.cardCorrectBorder : C.errorLight,
                     },
                   ]}
                 >
                   <Text
                     style={[
                       styles.resultBadgeText,
-                      { color: passed ? "#166534" : "#991B1B" },
+                      { color: passed ? C.successDark : C.errorDark },
                     ]}
                   >
                     {r.correct}/{r.total}
@@ -253,7 +253,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
                 {passed ? (
                   <Ionicons name="checkmark-circle" size={20} color={C.accent} />
                 ) : (
-                  <Ionicons name="close-circle" size={20} color="#FCA5A5" />
+                  <Ionicons name="close-circle" size={20} color={C.errorLight} />
                 )}
               </View>
             </Animated.View>
@@ -320,7 +320,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
               ref={idx === typedAnswers.length - 1 ? inputRef : undefined}
               style={styles.testInput}
               placeholder={`Step ${idx + 1}...`}
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={C.textMuted}
               value={ans}
               onChangeText={(text) => {
                 const newAns = [...typedAnswers];
@@ -373,7 +373,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
             onPress={handleCheck}
             activeOpacity={0.9}
           >
-            <Ionicons name="checkmark" size={18} color="#FFF" />
+            <Ionicons name="checkmark" size={18} color={C.white} />
             <Text style={styles.checkBtnText}>Submit</Text>
           </TouchableOpacity>
         </View>
@@ -409,12 +409,12 @@ const styles = StyleSheet.create({
     maxWidth: 300,
   },
   infoBox: {
-    backgroundColor: "#FFF",
+    backgroundColor: C.white,
     borderRadius: 16,
     padding: 16,
     gap: 10,
     width: "100%",
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
   startBtnText: {
     fontFamily: "Inter_700Bold",
     fontSize: 17,
-    color: "#FFF",
+    color: C.white,
   },
   cancelBtn: {
     paddingVertical: 10,
@@ -484,10 +484,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: C.white,
     borderRadius: 16,
     padding: 14,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: C.backgroundSecondary,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -553,21 +553,21 @@ const styles = StyleSheet.create({
     color: C.primary,
   },
   testLevelChip: {
-    backgroundColor: "#FEF3C7",
+    backgroundColor: C.warningLight,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: "#FCD34D",
+    borderColor: C.warningBorder,
   },
   testLevelText: {
     fontFamily: "Inter_700Bold",
     fontSize: 12,
-    color: "#92400E",
+    color: C.warning,
   },
   progressBar: {
     height: 4,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: C.border,
     marginHorizontal: 16,
     borderRadius: 2,
     overflow: "hidden",
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   testEquationCard: {
-    backgroundColor: "#FFF",
+    backgroundColor: C.white,
     borderRadius: 24,
     paddingHorizontal: 24,
     paddingVertical: 22,
@@ -605,11 +605,11 @@ const styles = StyleSheet.create({
   },
   testInputCard: {
     marginHorizontal: 16,
-    backgroundColor: "#FFF",
+    backgroundColor: C.white,
     borderRadius: 20,
     padding: 16,
     gap: 10,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -676,6 +676,6 @@ const styles = StyleSheet.create({
   checkBtnText: {
     fontFamily: "Inter_700Bold",
     fontSize: 16,
-    color: "#FFF",
+    color: C.white,
   },
 });

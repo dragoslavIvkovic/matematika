@@ -12,6 +12,7 @@ import {
   useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Colors from "@/constants/colors";
 
 export type ErrorFallbackProps = {
   error: Error;
@@ -23,14 +24,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
   const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
 
-  const theme = {
-    background: isDark ? "#000000" : "#FFFFFF",
-    backgroundSecondary: isDark ? "#1C1C1E" : "#F2F2F7",
-    text: isDark ? "#FFFFFF" : "#000000",
-    textSecondary: isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)",
-    link: "#007AFF",
-    buttonText: "#FFFFFF",
-  };
+  const theme = isDark ? Colors.dark : Colors.light;
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -92,6 +86,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             styles.button,
             {
               backgroundColor: theme.link,
+              shadowColor: theme.black,
               opacity: pressed ? 0.9 : 1,
               transform: [{ scale: pressed ? 0.98 : 1 }],
             },
@@ -110,7 +105,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
           transparent={true}
           onRequestClose={() => setIsModalVisible(false)}
         >
-          <View style={styles.modalOverlay}>
+          <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
             <View
               style={[
                 styles.modalContainer,
@@ -121,9 +116,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                 style={[
                   styles.modalHeader,
                   {
-                    borderBottomColor: isDark
-                      ? "rgba(255, 255, 255, 0.1)"
-                      : "rgba(0, 0, 0, 0.1)",
+                    borderBottomColor: theme.borderSubtle,
                   },
                 ]}
               >
@@ -222,7 +215,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 24,
     minWidth: 200,
-    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -238,7 +230,6 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
   modalContainer: {
