@@ -1,17 +1,10 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
+import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 import Colors from "@/constants/colors";
-import { LEVEL_CONFIGS, LevelId } from "@/utils/ProblemGenerator";
+import { LEVEL_CONFIGS, type LevelId } from "@/utils/ProblemGenerator";
 
 const C = Colors.light;
 
@@ -49,16 +42,14 @@ export function LevelSelector({
     const cfg = LEVEL_ICONS[levelId];
     if (!cfg) return null;
     if (cfg.lib === "ion") return <Ionicons name={cfg.name as any} size={size} color={color} />;
-    if (cfg.lib === "mci") return <MaterialCommunityIcons name={cfg.name as any} size={size} color={color} />;
+    if (cfg.lib === "mci")
+      return <MaterialCommunityIcons name={cfg.name as any} size={size} color={color} />;
     if (cfg.lib === "feather") return <Feather name={cfg.name as any} size={size} color={color} />;
     return null;
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
+    <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
         <Text style={styles.headerTitle}>Choose Your Level</Text>
@@ -82,9 +73,7 @@ export function LevelSelector({
           </View>
           <View style={styles.assessmentText}>
             <Text style={styles.assessmentTitle}>Assessment Test</Text>
-            <Text style={styles.assessmentSub}>
-              Find out your starting level automatically
-            </Text>
+            <Text style={styles.assessmentSub}>Find out your starting level automatically</Text>
           </View>
           <Ionicons name="arrow-forward" size={20} color={C.primary} />
         </TouchableOpacity>
@@ -128,10 +117,7 @@ export function LevelSelector({
             >
               <View style={styles.levelCardLeft}>
                 <View
-                  style={[
-                    styles.levelIconWrap,
-                    { backgroundColor: unlocked ? color : C.border },
-                  ]}
+                  style={[styles.levelIconWrap, { backgroundColor: unlocked ? color : C.border }]}
                 >
                   {unlocked ? (
                     renderIcon(config.id, C.white, 22)
@@ -141,12 +127,7 @@ export function LevelSelector({
                 </View>
                 <View style={styles.levelInfo}>
                   <View style={styles.levelTitleRow}>
-                    <Text
-                      style={[
-                        styles.levelNumber,
-                        !unlocked && styles.textLocked,
-                      ]}
-                    >
+                    <Text style={[styles.levelNumber, !unlocked && styles.textLocked]}>
                       {config.id}
                     </Text>
                     {completed && (
@@ -160,12 +141,7 @@ export function LevelSelector({
                       </View>
                     )}
                   </View>
-                  <Text
-                    style={[
-                      styles.levelName,
-                      !unlocked && styles.textLocked,
-                    ]}
-                  >
+                  <Text style={[styles.levelName, !unlocked && styles.textLocked]}>
                     {config.name}
                   </Text>
                   <Text style={styles.levelDesc}>{config.description}</Text>
@@ -181,9 +157,7 @@ export function LevelSelector({
                   </View>
                 )}
                 <View style={styles.streakReq}>
-                  <Text style={styles.streakReqText}>
-                    {config.requiredStreak} in a row
-                  </Text>
+                  <Text style={styles.streakReqText}>{config.requiredStreak} in a row</Text>
                 </View>
               </View>
             </TouchableOpacity>

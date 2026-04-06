@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import Animated, {
-  useSharedValue,
+  Easing,
   useAnimatedStyle,
+  useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
 import Colors from "@/constants/colors";
 
@@ -32,18 +32,18 @@ function HighlightedStep({ step }: { step: EquationStep }) {
     glowOpacity.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 700, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0.5, { duration: 700, easing: Easing.inOut(Easing.sin) })
+        withTiming(0.5, { duration: 700, easing: Easing.inOut(Easing.sin) }),
       ),
-      -1
+      -1,
     );
     scale.value = withRepeat(
       withSequence(
         withTiming(1.02, { duration: 700, easing: Easing.inOut(Easing.sin) }),
-        withTiming(1, { duration: 700, easing: Easing.inOut(Easing.sin) })
+        withTiming(1, { duration: 700, easing: Easing.inOut(Easing.sin) }),
       ),
-      -1
+      -1,
     );
-  }, []);
+  }, [scale, glowOpacity]);
 
   const animStyle = useAnimatedStyle(() => ({
     opacity: glowOpacity.value,
@@ -73,7 +73,7 @@ export function HandwrittenEquation({ steps }: HandwrittenEquationProps) {
 
       {/* Content */}
       <View style={styles.content}>
-        {steps.map((step, index) => {
+        {steps.map((step, _index) => {
           if (step.isHighlighted) {
             return <HighlightedStep key={step.id} step={step} />;
           }

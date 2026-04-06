@@ -1,25 +1,14 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  Platform,
-} from "react-native";
-import Animated, {
-  SlideInDown,
-  SlideOutDown,
-  FadeIn,
-} from "react-native-reanimated";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
+import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
+import type React from "react";
+import { useState } from "react";
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { SlideInDown, SlideOutDown } from "react-native-reanimated";
 
 import Colors from "@/constants/colors";
 
 const C = Colors.light;
-const { width: SCREEN_W } = Dimensions.get("window");
 
 interface MathKeyboardProps {
   isVisible: boolean;

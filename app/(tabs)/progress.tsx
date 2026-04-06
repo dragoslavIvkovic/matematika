@@ -1,28 +1,27 @@
-import React, { useEffect, useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
+  Alert,
+  Platform,
   ScrollView,
   StyleSheet,
-  Platform,
+  Text,
   TouchableOpacity,
-  Alert,
+  View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
-  FadeInDown,
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withDelay,
   Easing,
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
 } from "react-native-reanimated";
-import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-
-import Colors from "@/constants/colors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RobotMascot } from "@/components/RobotMascot";
-import { LevelManager, LevelState } from "@/utils/LevelManager";
+import Colors from "@/constants/colors";
+import { LevelManager, type LevelState } from "@/utils/LevelManager";
 import { LEVEL_CONFIGS } from "@/utils/ProblemGenerator";
 
 const C = Colors.light;
@@ -42,17 +41,15 @@ function ProgressBar({
   useEffect(() => {
     width.value = withDelay(
       delay,
-      withTiming(progress, { duration: 800, easing: Easing.out(Easing.cubic) })
+      withTiming(progress, { duration: 800, easing: Easing.out(Easing.cubic) }),
     );
-  }, [progress, delay]);
+  }, [progress, delay, width]);
   const barStyle = useAnimatedStyle(() => ({
     width: `${width.value}%`,
   }));
   return (
     <View style={progressBarStyles.track}>
-      <Animated.View
-        style={[progressBarStyles.fill, barStyle, { backgroundColor: color }]}
-      />
+      <Animated.View style={[progressBarStyles.fill, barStyle, { backgroundColor: color }]} />
     </View>
   );
 }
@@ -107,7 +104,7 @@ export default function ProgressScreen() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -122,16 +119,10 @@ export default function ProgressScreen() {
 
   return (
     <View
-      style={[
-        styles.container,
-        { paddingTop: Platform.OS === "web" ? webTopPadding : insets.top },
-      ]}
+      style={[styles.container, { paddingTop: Platform.OS === "web" ? webTopPadding : insets.top }]}
     >
       {/* Header */}
-      <Animated.View
-        entering={FadeInDown.duration(400)}
-        style={styles.header}
-      >
+      <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerBadge}>
             <Ionicons name="bar-chart" size={16} color={C.primary} />
@@ -150,32 +141,28 @@ export default function ProgressScreen() {
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingBottom:
-              Platform.OS === "web" ? 84 + 16 : insets.bottom + 90,
+            paddingBottom: Platform.OS === "web" ? 84 + 16 : insets.bottom + 90,
           },
         ]}
         showsVerticalScrollIndicator={false}
       >
         {/* Robot greeting */}
-        <Animated.View
-          entering={FadeInDown.delay(100).duration(400)}
-          style={styles.robotGreeting}
-        >
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.robotGreeting}>
           <RobotMascot size={70} />
           <View style={styles.greetingText}>
             <Text style={styles.greetingTitle}>
               {completedCount === 0
                 ? "Getting Started"
                 : completedCount >= LEVEL_CONFIGS.length
-                ? "🏆 Math Master!"
-                : "Great Progress!"}
+                  ? "🏆 Math Master!"
+                  : "Great Progress!"}
             </Text>
             <Text style={styles.greetingMessage}>
               {completedCount === 0
                 ? "Start solving problems to see your progress here!"
                 : completedCount >= LEVEL_CONFIGS.length
-                ? "You've completed all levels! Incredible work!"
-                : `${completedCount}/${LEVEL_CONFIGS.length} levels complete. Keep it up!`}
+                  ? "You've completed all levels! Incredible work!"
+                  : `${completedCount}/${LEVEL_CONFIGS.length} levels complete. Keep it up!`}
             </Text>
             <View style={styles.xpBar}>
               <View
@@ -194,56 +181,34 @@ export default function ProgressScreen() {
         </Animated.View>
 
         {/* Stats grid */}
-        <Animated.View
-          entering={FadeInDown.delay(150).duration(400)}
-          style={styles.sectionHeader}
-        >
+        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Statistics</Text>
         </Animated.View>
-        <Animated.View
-          entering={FadeInDown.delay(200).duration(400)}
-          style={styles.statsGrid}
-        >
+        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.statsGrid}>
           {[
             {
-              icon: (
-                <Ionicons
-                  name="checkmark-circle"
-                  size={22}
-                  color={C.white}
-                />
-              ),
+              icon: <Ionicons name="checkmark-circle" size={22} color={C.white} />,
               label: "Problems Solved",
               value: `${totalSolved}`,
               sub: "Total correct",
               color: C.accent,
             },
             {
-              icon: (
-                <MaterialCommunityIcons
-                  name="fire"
-                  size={22}
-                  color={C.white}
-                />
-              ),
+              icon: <MaterialCommunityIcons name="fire" size={22} color={C.white} />,
               label: "Current Streak",
               value: `${state?.streak || 0}`,
               sub: "In a row",
               color: C.orange,
             },
             {
-              icon: (
-                <Ionicons name="trophy" size={22} color={C.white} />
-              ),
+              icon: <Ionicons name="trophy" size={22} color={C.white} />,
               label: "Accuracy",
               value: `${accuracy}%`,
               sub: `${totalErrors} errors`,
               color: C.levels["1.4"],
             },
             {
-              icon: (
-                <Ionicons name="layers" size={22} color={C.white} />
-              ),
+              icon: <Ionicons name="layers" size={22} color={C.white} />,
               label: "Levels Done",
               value: `${completedCount}`,
               sub: `of ${LEVEL_CONFIGS.length}`,
@@ -252,17 +217,9 @@ export default function ProgressScreen() {
           ].map((stat, index) => (
             <View
               key={index}
-              style={[
-                styles.statCard,
-                { borderTopColor: stat.color, borderTopWidth: 3 },
-              ]}
+              style={[styles.statCard, { borderTopColor: stat.color, borderTopWidth: 3 }]}
             >
-              <View
-                style={[
-                  styles.statIconBadge,
-                  { backgroundColor: stat.color },
-                ]}
-              >
+              <View style={[styles.statIconBadge, { backgroundColor: stat.color }]}>
                 {stat.icon}
               </View>
               <Text style={styles.statValue}>{stat.value}</Text>
@@ -273,16 +230,10 @@ export default function ProgressScreen() {
         </Animated.View>
 
         {/* Per-level progress */}
-        <Animated.View
-          entering={FadeInDown.delay(250).duration(400)}
-          style={styles.sectionHeader}
-        >
+        <Animated.View entering={FadeInDown.delay(250).duration(400)} style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Level Progress</Text>
         </Animated.View>
-        <Animated.View
-          entering={FadeInDown.delay(300).duration(400)}
-          style={styles.topicCard}
-        >
+        <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.topicCard}>
           {LEVEL_CONFIGS.map((config, index) => {
             const color = LEVEL_COLORS[config.id] || C.primary;
             const stats = state?.levelStats[config.id];
@@ -296,10 +247,7 @@ export default function ProgressScreen() {
             return (
               <View
                 key={config.id}
-                style={[
-                  styles.topicRow,
-                  index < LEVEL_CONFIGS.length - 1 && styles.topicRowBorder,
-                ]}
+                style={[styles.topicRow, index < LEVEL_CONFIGS.length - 1 && styles.topicRowBorder]}
               >
                 <View style={styles.topicInfo}>
                   <View
@@ -310,9 +258,7 @@ export default function ProgressScreen() {
                       },
                     ]}
                   >
-                    {completed && (
-                      <Ionicons name="checkmark" size={8} color={C.white} />
-                    )}
+                    {completed && <Ionicons name="checkmark" size={8} color={C.white} />}
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.topicName}>
@@ -320,15 +266,16 @@ export default function ProgressScreen() {
                     </Text>
                     <View style={styles.topicMetaRow}>
                       <Text style={styles.topicMeta}>
-                        {solved} ✓ · {errors} ✗
-                        {bestStr > 0 ? ` · 🔥${bestStr}` : ""}
+                        {solved} ✓ · {errors} ✗{bestStr > 0 ? ` · 🔥${bestStr}` : ""}
                       </Text>
                     </View>
                   </View>
                 </View>
                 <View style={styles.topicRight}>
                   <ProgressBar
-                    progress={completed ? 100 : Math.min(100, (bestStr / config.requiredStreak) * 100)}
+                    progress={
+                      completed ? 100 : Math.min(100, (bestStr / config.requiredStreak) * 100)
+                    }
                     color={color}
                     delay={400 + index * 80}
                   />
@@ -342,20 +289,19 @@ export default function ProgressScreen() {
         </Animated.View>
 
         {/* Achievements */}
-        <Animated.View
-          entering={FadeInDown.delay(350).duration(400)}
-          style={styles.sectionHeader}
-        >
+        <Animated.View entering={FadeInDown.delay(350).duration(400)} style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Achievements</Text>
           <Text style={styles.sectionSub}>
-            {[
-              totalSolved >= 1,
-              totalSolved >= 10,
-              totalSolved >= 50,
-              completedCount >= 1,
-              completedCount >= 3,
-              completedCount >= 6,
-            ].filter(Boolean).length}
+            {
+              [
+                totalSolved >= 1,
+                totalSolved >= 10,
+                totalSolved >= 50,
+                completedCount >= 1,
+                completedCount >= 3,
+                completedCount >= 6,
+              ].filter(Boolean).length
+            }
             /6 earned
           </Text>
         </Animated.View>
@@ -415,10 +361,7 @@ export default function ProgressScreen() {
           ].map((badge) => (
             <View
               key={badge.id}
-              style={[
-                styles.achievementCard,
-                !badge.earned && styles.achievementCardLocked,
-              ]}
+              style={[styles.achievementCard, !badge.earned && styles.achievementCardLocked]}
             >
               <View
                 style={[
@@ -435,10 +378,7 @@ export default function ProgressScreen() {
                 )}
               </View>
               <Text
-                style={[
-                  styles.achievementTitle,
-                  !badge.earned && styles.achievementTitleLocked,
-                ]}
+                style={[styles.achievementTitle, !badge.earned && styles.achievementTitleLocked]}
                 numberOfLines={1}
               >
                 {badge.title}

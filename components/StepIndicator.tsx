@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Colors from "@/constants/colors";
 
 const C = Colors.light;
@@ -40,12 +40,7 @@ export function StepIndicator({ steps, onStepPress }: StepIndicatorProps) {
               {step.isCompleted ? (
                 <Text style={styles.dotCheckmark}>✓</Text>
               ) : (
-                <Text
-                  style={[
-                    styles.dotNumber,
-                    step.isActive && styles.dotNumberActive,
-                  ]}
-                >
+                <Text style={[styles.dotNumber, step.isActive && styles.dotNumberActive]}>
                   {index + 1}
                 </Text>
               )}

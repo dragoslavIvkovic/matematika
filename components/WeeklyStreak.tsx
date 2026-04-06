@@ -1,6 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
 
 const C = Colors.light;

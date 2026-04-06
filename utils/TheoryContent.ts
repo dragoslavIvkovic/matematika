@@ -56,14 +56,12 @@ const THEORY: Record<string, TheorySection> = {
       {
         equation: "x + 3 = 10",
         steps: ["x = 10 - 3", "x = 7"],
-        explanation:
-          "The +3 moves to the other side and becomes -3. So x = 10 - 3 = 7.",
+        explanation: "The +3 moves to the other side and becomes -3. So x = 10 - 3 = 7.",
       },
       {
         equation: "x - 5 = 8",
         steps: ["x = 8 + 5", "x = 13"],
-        explanation:
-          "The -5 moves to the other side and becomes +5. So x = 8 + 5 = 13.",
+        explanation: "The -5 moves to the other side and becomes +5. So x = 8 + 5 = 13.",
       },
     ],
     tip: "Think of the = sign as a mirror. When numbers cross it, they become their opposite!",
@@ -102,8 +100,7 @@ const THEORY: Record<string, TheorySection> = {
       {
         equation: "x ÷ 3 = 6",
         steps: ["x = 6 × 3", "x = 18"],
-        explanation:
-          "x is divided by 3, so multiply both sides by 3. x = 6 × 3 = 18.",
+        explanation: "x is divided by 3, so multiply both sides by 3. x = 6 × 3 = 18.",
       },
     ],
     tip: "If something multiplies x, divide to undo it. If something divides x, multiply to undo it!",
@@ -138,14 +135,12 @@ const THEORY: Record<string, TheorySection> = {
       {
         equation: "3x + 5 = 20",
         steps: ["3x = 20 - 5", "3x = 15", "x = 15 ÷ 3", "x = 5"],
-        explanation:
-          "First, move +5 → becomes -5. Then 20-5=15. Then divide 15 by 3. x = 5!",
+        explanation: "First, move +5 → becomes -5. Then 20-5=15. Then divide 15 by 3. x = 5!",
       },
       {
         equation: "2x - 4 = 10",
         steps: ["2x = 10 + 4", "2x = 14", "x = 14 ÷ 2", "x = 7"],
-        explanation:
-          "First, move -4 → becomes +4. Then 10+4=14. Then divide 14 by 2. x = 7!",
+        explanation: "First, move -4 → becomes +4. Then 10+4=14. Then divide 14 by 2. x = 7!",
       },
     ],
     tip: "Always handle + and - BEFORE × and ÷. Think: undo the last operation first!",
@@ -180,14 +175,12 @@ const THEORY: Record<string, TheorySection> = {
       {
         equation: "x ÷ 4 + 3 = 8",
         steps: ["x ÷ 4 = 8 - 3", "x ÷ 4 = 5", "x = 5 × 4", "x = 20"],
-        explanation:
-          "First, move +3 → becomes -3. Then 8-3=5. Then multiply 5 by 4. x = 20!",
+        explanation: "First, move +3 → becomes -3. Then 8-3=5. Then multiply 5 by 4. x = 20!",
       },
       {
         equation: "x ÷ 2 - 6 = 3",
         steps: ["x ÷ 2 = 3 + 6", "x ÷ 2 = 9", "x = 9 × 2", "x = 18"],
-        explanation:
-          "First, move -6 → becomes +6. Then 3+6=9. Then multiply 9 by 2. x = 18!",
+        explanation: "First, move -6 → becomes +6. Then 3+6=9. Then multiply 9 by 2. x = 18!",
       },
     ],
     tip: "Division is the opposite of multiplication. If x is divided, multiply to set it free!",

@@ -1,14 +1,14 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  withSequence,
-  Easing,
-} from "react-native-reanimated";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useEffect } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import Colors from "@/constants/colors";
 
 const C = Colors.light;
@@ -47,16 +47,16 @@ export function StreakCounter({
       duration: 600,
       easing: Easing.out(Easing.cubic),
     });
-  }, [percent]);
+  }, [percent, progressWidth]);
 
   useEffect(() => {
     if (current > 0) {
       pulseScale.value = withSequence(
         withSpring(1.08, { damping: 8 }),
-        withSpring(1, { damping: 10 })
+        withSpring(1, { damping: 10 }),
       );
     }
-  }, [current]);
+  }, [current, pulseScale]);
 
   const barStyle = useAnimatedStyle(() => ({
     width: `${progressWidth.value}%`,
@@ -88,8 +88,7 @@ export function StreakCounter({
             styles.barFill,
             barStyle,
             {
-              backgroundColor:
-                percent >= 100 ? C.accent : percent >= 60 ? C.primary : C.orange,
+              backgroundColor: percent >= 100 ? C.accent : percent >= 60 ? C.primary : C.orange,
             },
           ]}
         />
@@ -115,21 +114,11 @@ export function StreakCounter({
           const filled = count >= operationsPerType;
           return (
             <View key={op} style={styles.opItem}>
-              <View
-                style={[
-                  styles.opDot,
-                  { backgroundColor: filled ? C.accent : C.border },
-                ]}
-              >
-                {filled && (
-                  <Ionicons name="checkmark" size={8} color={C.white} />
-                )}
+              <View style={[styles.opDot, { backgroundColor: filled ? C.accent : C.border }]}>
+                {filled && <Ionicons name="checkmark" size={8} color={C.white} />}
               </View>
               <Text
-                style={[
-                  styles.opLabel,
-                  filled && { color: C.accent, fontFamily: "Inter_700Bold" },
-                ]}
+                style={[styles.opLabel, filled && { color: C.accent, fontFamily: "Inter_700Bold" }]}
               >
                 {OP_LABELS[op] || op} {count}/{operationsPerType}
               </Text>

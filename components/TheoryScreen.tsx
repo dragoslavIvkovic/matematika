@@ -1,18 +1,10 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 import Colors from "@/constants/colors";
-import { RobotMascot } from "@/components/RobotMascot";
-import { TheorySection } from "@/utils/TheoryContent";
+import type { TheorySection } from "@/utils/TheoryContent";
 
 const C = Colors.light;
 
@@ -25,10 +17,7 @@ interface TheoryScreenProps {
 export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) {
   return (
     <View style={styles.overlay}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
           <View style={styles.levelChip}>
@@ -48,13 +37,7 @@ export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) 
         <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.rulesCard}>
           <Text style={styles.sectionTitle}>📐 Key Rules</Text>
           {theory.rules.map((rule, i) => (
-            <View
-              key={i}
-              style={[
-                styles.ruleRow,
-                rule.highlight && styles.ruleRowHighlight,
-              ]}
-            >
+            <View key={i} style={[styles.ruleRow, rule.highlight && styles.ruleRowHighlight]}>
               <View
                 style={[
                   styles.ruleIcon,
@@ -67,12 +50,7 @@ export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) 
                   color={rule.highlight ? C.white : C.textSecondary}
                 />
               </View>
-              <Text
-                style={[
-                  styles.ruleText,
-                  rule.highlight && styles.ruleTextHighlight,
-                ]}
-              >
+              <Text style={[styles.ruleText, rule.highlight && styles.ruleTextHighlight]}>
                 {rule.text}
               </Text>
             </View>
@@ -80,7 +58,10 @@ export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) 
         </Animated.View>
 
         {/* Examples */}
-        <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.examplesSection}>
+        <Animated.View
+          entering={FadeInDown.delay(300).duration(400)}
+          style={styles.examplesSection}
+        >
           <Text style={styles.sectionTitle}>✏️ Examples</Text>
           {theory.examples.map((example, i) => (
             <View key={i} style={styles.exampleCard}>

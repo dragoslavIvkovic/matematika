@@ -1,6 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { reloadAppAsync } from "expo";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Modal,
   Platform,
@@ -8,8 +8,8 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View,
   useColorScheme,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
@@ -72,9 +72,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
       ) : null}
 
       <View style={styles.content}>
-        <Text style={[styles.title, { color: theme.text }]}>
-          Something went wrong
-        </Text>
+        <Text style={[styles.title, { color: theme.text }]}>Something went wrong</Text>
 
         <Text style={[styles.message, { color: theme.textSecondary }]}>
           Please reload the app to continue.
@@ -92,9 +90,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
             },
           ]}
         >
-          <Text style={[styles.buttonText, { color: theme.buttonText }]}>
-            Try Again
-          </Text>
+          <Text style={[styles.buttonText, { color: theme.buttonText }]}>Try Again</Text>
         </Pressable>
       </View>
 
@@ -106,12 +102,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
           onRequestClose={() => setIsModalVisible(false)}
         >
           <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
-            <View
-              style={[
-                styles.modalContainer,
-                { backgroundColor: theme.background },
-              ]}
-            >
+            <View style={[styles.modalContainer, { backgroundColor: theme.background }]}>
               <View
                 style={[
                   styles.modalHeader,
@@ -120,17 +111,12 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                   },
                 ]}
               >
-                <Text style={[styles.modalTitle, { color: theme.text }]}>
-                  Error Details
-                </Text>
+                <Text style={[styles.modalTitle, { color: theme.text }]}>Error Details</Text>
                 <Pressable
                   onPress={() => setIsModalVisible(false)}
                   accessibilityLabel="Close error details"
                   accessibilityRole="button"
-                  style={({ pressed }) => [
-                    styles.closeButton,
-                    { opacity: pressed ? 0.6 : 1 },
-                  ]}
+                  style={({ pressed }) => [styles.closeButton, { opacity: pressed ? 0.6 : 1 }]}
                 >
                   <Feather name="x" size={24} color={theme.text} />
                 </Pressable>
@@ -145,10 +131,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                 showsVerticalScrollIndicator
               >
                 <View
-                  style={[
-                    styles.errorContainer,
-                    { backgroundColor: theme.backgroundSecondary },
-                  ]}
+                  style={[styles.errorContainer, { backgroundColor: theme.backgroundSecondary }]}
                 >
                   <Text
                     style={[

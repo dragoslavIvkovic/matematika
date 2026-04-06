@@ -1,5 +1,5 @@
-import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 // Configure how notifications should be handled when the app is in the foreground

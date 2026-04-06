@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  withSequence,
-} from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import Colors from "@/constants/colors";
 
 const C = Colors.light;
@@ -44,10 +44,7 @@ function OptionButton({
   const scale = useSharedValue(1);
 
   const handlePress = () => {
-    scale.value = withSequence(
-      withTiming(0.95, { duration: 100 }),
-      withSpring(1, { damping: 10 })
-    );
+    scale.value = withSequence(withTiming(0.95, { duration: 100 }), withSpring(1, { damping: 10 }));
     onPress(index);
   };
 
@@ -77,26 +74,17 @@ function OptionButton({
   return (
     <Animated.View style={animStyle}>
       <TouchableOpacity
-        style={[
-          styles.optionButton,
-          { backgroundColor: bgColor, borderColor },
-        ]}
+        style={[styles.optionButton, { backgroundColor: bgColor, borderColor }]}
         onPress={handlePress}
         disabled={answered}
         activeOpacity={0.85}
       >
         <View style={[styles.optionBadge, { backgroundColor: borderColor }]}>
-          <Text style={[styles.optionLetter, { color: textColor }]}>
-            {optionLetters[index]}
-          </Text>
+          <Text style={[styles.optionLetter, { color: textColor }]}>{optionLetters[index]}</Text>
         </View>
         <Text style={[styles.optionText, { color: textColor }]}>{label}</Text>
-        {answered && isCorrect && (
-          <Text style={styles.resultIcon}>✓</Text>
-        )}
-        {answered && isSelected && !isCorrect && (
-          <Text style={styles.resultIcon}>✗</Text>
-        )}
+        {answered && isCorrect && <Text style={styles.resultIcon}>✓</Text>}
+        {answered && isSelected && !isCorrect && <Text style={styles.resultIcon}>✗</Text>}
       </TouchableOpacity>
     </Animated.View>
   );

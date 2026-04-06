@@ -1,31 +1,23 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Animated, {
-  FadeInDown,
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withDelay,
-  Easing,
-} from "react-native-reanimated";
-import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-
-import Colors from "@/constants/colors";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  Easing,
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WeeklyStreak } from "@/components/WeeklyStreak";
-import { LEVEL_CONFIGS, getLevelConfig, LevelId } from "@/utils/ProblemGenerator";
-import { LevelManager, LevelState } from "@/utils/LevelManager";
-import { getTheoryContent, hasTheory } from "@/utils/TheoryContent";
+import Colors from "@/constants/colors";
+import { LevelManager, type LevelState } from "@/utils/LevelManager";
+import { getLevelConfig, LEVEL_CONFIGS, type LevelId } from "@/utils/ProblemGenerator";
+import { hasTheory } from "@/utils/TheoryContent";
 
 const C = Colors.light;
 const ONBOARDING_KEY = "math_tutor_onboarding_v1";
@@ -43,17 +35,15 @@ function ProgressBar({
   useEffect(() => {
     width.value = withDelay(
       delay,
-      withTiming(progress, { duration: 800, easing: Easing.out(Easing.cubic) })
+      withTiming(progress, { duration: 800, easing: Easing.out(Easing.cubic) }),
     );
-  }, [progress, delay]);
+  }, [progress, delay, width]);
   const barStyle = useAnimatedStyle(() => ({
     width: `${width.value}%`,
   }));
   return (
     <View style={pbStyles.track}>
-      <Animated.View
-        style={[pbStyles.fill, barStyle, { backgroundColor: color }]}
-      />
+      <Animated.View style={[pbStyles.fill, barStyle, { backgroundColor: color }]} />
     </View>
   );
 }
@@ -104,51 +94,43 @@ export default function LearnScreen() {
   const completedCount = state?.completedLevels.length || 0;
   const currentLevel = state?.currentLevel || "1.1";
 
-
   return (
     <View
-      style={[
-        styles.container,
-        { paddingTop: Platform.OS === "web" ? webTopPadding : insets.top },
-      ]}
+      style={[styles.container, { paddingTop: Platform.OS === "web" ? webTopPadding : insets.top }]}
     >
       {/* Header with Weekly Streak */}
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-        <WeeklyStreak 
-          activeDays={state?.activeDays || []} 
-          currentStreak={state?.streak || 0} 
-        />
+        <WeeklyStreak activeDays={state?.activeDays || []} currentStreak={state?.streak || 0} />
       </Animated.View>
 
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingBottom:
-              Platform.OS === "web" ? 84 + 16 : insets.bottom + 90,
+            paddingBottom: Platform.OS === "web" ? 84 + 16 : insets.bottom + 90,
           },
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.dashboardWelcome}>
+        <Animated.View
+          entering={FadeInDown.delay(100).duration(400)}
+          style={styles.dashboardWelcome}
+        >
           <Text style={styles.dashboardTitle}>Your Path</Text>
           <View style={styles.progressSummary}>
-             <ProgressBar
-                progress={(completedCount / LEVEL_CONFIGS.length) * 100}
-                color={C.primary}
-                delay={300}
-              />
-              <Text style={styles.progressSummaryText}>
-                {completedCount}/{LEVEL_CONFIGS.length} levels
-              </Text>
+            <ProgressBar
+              progress={(completedCount / LEVEL_CONFIGS.length) * 100}
+              color={C.primary}
+              delay={300}
+            />
+            <Text style={styles.progressSummaryText}>
+              {completedCount}/{LEVEL_CONFIGS.length} levels
+            </Text>
           </View>
         </Animated.View>
 
         {/* Simplified stats */}
-        <Animated.View
-          entering={FadeInDown.delay(150).duration(400)}
-          style={styles.statsRow}
-        >
+        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.statsRow}>
           <View style={styles.miniStat}>
             <Ionicons name="checkmark-circle" size={14} color={C.accent} />
             <Text style={styles.miniStatValue}>{totalSolved}</Text>
@@ -160,9 +142,9 @@ export default function LearnScreen() {
             <Text style={styles.miniStatLabel}>Levels</Text>
           </View>
           <View style={styles.miniStat}>
-             <Ionicons name="flash" size={14} color={C.orange} />
-             <Text style={styles.miniStatValue}>Lv {currentLevel}</Text>
-             <Text style={styles.miniStatLabel}>Current</Text>
+            <Ionicons name="flash" size={14} color={C.orange} />
+            <Text style={styles.miniStatValue}>Lv {currentLevel}</Text>
+            <Text style={styles.miniStatLabel}>Current</Text>
           </View>
         </Animated.View>
 
@@ -178,18 +160,14 @@ export default function LearnScreen() {
           >
             <View style={styles.ctaLeft}>
               <View
-                style={[
-                  styles.ctaIcon,
-                  { backgroundColor: C.levels[currentLevel] || C.primary },
-                ]}
+                style={[styles.ctaIcon, { backgroundColor: C.levels[currentLevel] || C.primary }]}
               >
                 <Ionicons name="play" size={24} color={C.white} />
               </View>
               <View style={styles.ctaTextBlock}>
                 <Text style={styles.ctaTitle}>Continue Practice</Text>
                 <Text style={styles.ctaSub}>
-                  Level {currentLevel} —{" "}
-                  {getLevelConfig(currentLevel as LevelId).name}
+                  Level {currentLevel} — {getLevelConfig(currentLevel as LevelId).name}
                 </Text>
               </View>
             </View>
@@ -198,10 +176,7 @@ export default function LearnScreen() {
         </Animated.View>
 
         {/* Level roadmap */}
-        <Animated.View
-          entering={FadeInDown.delay(250).duration(400)}
-          style={styles.sectionHeader}
-        >
+        <Animated.View entering={FadeInDown.delay(250).duration(400)} style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Select Level</Text>
         </Animated.View>
 
@@ -217,8 +192,8 @@ export default function LearnScreen() {
           const progressPercent = completed
             ? 100
             : isCurrent
-            ? (state?.streak || 0) / config.requiredStreak * 100
-            : 0;
+              ? ((state?.streak || 0) / config.requiredStreak) * 100
+              : 0;
 
           return (
             <Animated.View
@@ -251,7 +226,7 @@ export default function LearnScreen() {
                     <Text style={styles.roadmapDotText}>{config.id}</Text>
                   )}
                 </View>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.roadmapContent}
                   activeOpacity={0.8}
                   onPress={async () => {
@@ -264,19 +239,10 @@ export default function LearnScreen() {
                   }}
                 >
                   <View style={styles.roadmapHeader}>
-                    <Text
-                      style={[
-                        styles.roadmapName,
-                        isCurrent && { color },
-                      ]}
-                    >
-                      {config.name}
-                    </Text>
+                    <Text style={[styles.roadmapName, isCurrent && { color }]}>{config.name}</Text>
                     {completed && (
-                      <View style={[styles.completedChip, { backgroundColor: color + "20" }]}>
-                        <Text style={[styles.completedChipText, { color }]}>
-                          ✓ Done
-                        </Text>
+                      <View style={[styles.completedChip, { backgroundColor: `${color}20` }]}>
+                        <Text style={[styles.completedChipText, { color }]}>✓ Done</Text>
                       </View>
                     )}
                     {isCurrent && !completed && (
@@ -287,7 +253,11 @@ export default function LearnScreen() {
                   </View>
                   <Text style={styles.roadmapDesc}>{config.description}</Text>
                   <View style={styles.roadmapMeta}>
-                    <ProgressBar progress={progressPercent} color={color} delay={400 + index * 80} />
+                    <ProgressBar
+                      progress={progressPercent}
+                      color={color}
+                      delay={400 + index * 80}
+                    />
                     <Text style={[styles.roadmapMetaText, { color }]}>
                       {solved > 0 && `${solved} solved`}
                       {bestStreak > 0 && ` · 🔥${bestStreak}`}
@@ -376,10 +346,10 @@ const styles = StyleSheet.create({
   },
 
   // Stats
-  statsRow: { 
-    flexDirection: "row", 
-    gap: 12, 
-    marginVertical: 4 
+  statsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginVertical: 4,
   },
   miniStat: {
     flex: 1,

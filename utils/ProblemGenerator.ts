@@ -353,7 +353,7 @@ export function generateProblem(level: LevelId, type: string): GeneratedProblem 
 
 export function generateNextProblem(
   level: LevelId,
-  operationCounts: Record<string, number>
+  operationCounts: Record<string, number>,
 ): GeneratedProblem {
   const config = getLevelConfig(level);
   const ops = config.operations;

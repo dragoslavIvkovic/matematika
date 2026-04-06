@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { useEffect } from "react";
+import { View } from "react-native";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
   Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from "react-native-reanimated";
 import Colors from "@/constants/colors";
 
@@ -27,36 +27,36 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
     scale.value = withRepeat(
       withSequence(
         withTiming(1.04, { duration: 800, easing: Easing.inOut(Easing.sin) }),
-        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.sin) })
+        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.sin) }),
       ),
-      -1
+      -1,
     );
 
     floatY.value = withRepeat(
       withSequence(
         withTiming(-4, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
-        withTiming(4, { duration: 1200, easing: Easing.inOut(Easing.sin) })
+        withTiming(4, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
       ),
-      -1
+      -1,
     );
 
     antennaRotate.value = withRepeat(
       withSequence(
         withTiming(-8, { duration: 600, easing: Easing.inOut(Easing.sin) }),
-        withTiming(8, { duration: 600, easing: Easing.inOut(Easing.sin) })
+        withTiming(8, { duration: 600, easing: Easing.inOut(Easing.sin) }),
       ),
-      -1
+      -1,
     );
 
     const blinkInterval = setInterval(() => {
       blinkOpacity.value = withSequence(
         withTiming(0, { duration: 80 }),
-        withTiming(1, { duration: 80 })
+        withTiming(1, { duration: 80 }),
       );
     }, 3000);
 
     return () => clearInterval(blinkInterval);
-  }, []);
+  }, [scale, floatY, blinkOpacity, antennaRotate]);
 
   const bodyStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }, { translateY: floatY.value }],
@@ -202,7 +202,17 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
           />
 
           {/* Cheeks */}
-          <View style={{ position: "absolute", flexDirection: "row", bottom: headH * 0.15, left: 0, right: 0, justifyContent: "space-between", paddingHorizontal: s * 0.06 }}>
+          <View
+            style={{
+              position: "absolute",
+              flexDirection: "row",
+              bottom: headH * 0.15,
+              left: 0,
+              right: 0,
+              justifyContent: "space-between",
+              paddingHorizontal: s * 0.06,
+            }}
+          >
             {[0, 1].map((i) => (
               <View
                 key={i}

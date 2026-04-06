@@ -1,16 +1,10 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
 
 import Colors from "@/constants/colors";
-import { ErrorAction } from "@/utils/LevelManager";
+import type { ErrorAction } from "@/utils/LevelManager";
 
 const C = Colors.light;
 
@@ -72,14 +66,8 @@ export function ErrorFeedbackModal({
   const actionColor = getActionColor();
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(200)}
-      style={styles.overlay}
-    >
-      <Animated.View
-        entering={SlideInDown.duration(350)}
-        style={styles.card}
-      >
+    <Animated.View entering={FadeIn.duration(200)} style={styles.overlay}>
+      <Animated.View entering={SlideInDown.duration(350)} style={styles.card}>
         {/* Error icon */}
         <View style={[styles.iconCircle, { backgroundColor: actionColor }]}>
           <Ionicons name={getActionIcon() as any} size={32} color={C.white} />
@@ -90,8 +78,8 @@ export function ErrorFeedbackModal({
           {errorAction?.type === "fallback_level"
             ? "Let's go back"
             : errorAction?.type === "show_theory"
-            ? "Let's review"
-            : "Not quite right"}
+              ? "Let's review"
+              : "Not quite right"}
         </Text>
         <Text style={styles.message}>{errorMessage}</Text>
 
@@ -143,11 +131,7 @@ export function ErrorFeedbackModal({
         {errorAction && errorAction.type !== "retry" && (
           <View style={[styles.actionInfo, { borderColor: actionColor }]}>
             <Ionicons
-              name={
-                errorAction.type === "fallback_level"
-                  ? "arrow-down-circle"
-                  : "book"
-              }
+              name={errorAction.type === "fallback_level" ? "arrow-down-circle" : "book"}
               size={18}
               color={actionColor}
             />

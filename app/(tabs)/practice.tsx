@@ -1,50 +1,48 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Platform,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  KeyboardAvoidingView,
   Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
+  Easing,
   FadeIn,
   FadeInDown,
   FadeOut,
   SlideInDown,
   SlideOutDown,
-  useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withTiming,
+  useSharedValue,
   withRepeat,
   withSequence,
-  Easing,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
-import { useFocusEffect, useLocalSearchParams, router } from "expo-router";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-
-import Colors from "@/constants/colors";
-import { RobotMascot } from "@/components/RobotMascot";
-import { TheoryScreen } from "@/components/TheoryScreen";
-import { LevelSelector } from "@/components/LevelSelector";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AssessmentMode } from "@/components/AssessmentMode";
 import { ErrorFeedbackModal } from "@/components/ErrorFeedbackModal";
+import { LevelSelector } from "@/components/LevelSelector";
 import { MathKeyboard } from "@/components/MathKeyboard";
+import { RobotMascot } from "@/components/RobotMascot";
+import { TheoryScreen } from "@/components/TheoryScreen";
+import Colors from "@/constants/colors";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
+import { type ErrorAction, LevelManager } from "@/utils/LevelManager";
 import {
+  type GeneratedProblem,
   generateProblem,
-  GeneratedProblem,
-  LevelId,
   getLevelConfig,
   LEVEL_CONFIGS,
+  type LevelId,
 } from "@/utils/ProblemGenerator";
-import { LevelManager, ErrorAction } from "@/utils/LevelManager";
 import { getTheoryContent } from "@/utils/TheoryContent";
 
 const C = Colors.light;
@@ -65,11 +63,11 @@ function BounceDot({ delay }: { delay: number }) {
       withSequence(
         withTiming(0, { duration: delay }),
         withTiming(-12, { duration: 300, easing: Easing.out(Easing.cubic) }),
-        withTiming(0, { duration: 300, easing: Easing.in(Easing.cubic) })
+        withTiming(0, { duration: 300, easing: Easing.in(Easing.cubic) }),
       ),
-      -1
+      -1,
     );
-  }, [delay]);
+  }, [delay, translateY]);
   const style = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
   }));
@@ -155,7 +153,7 @@ export default function PracticeScreen() {
       resultOpacity.value = 0;
       rerender();
     },
-    [rerender]
+    [rerender, resultOpacity, resultScale],
   );
 
   // ── Start practicing a level ──
@@ -168,7 +166,7 @@ export default function PracticeScreen() {
         setMode("practice");
       }
     },
-    [generateNew]
+    [generateNew],
   );
 
   // ── Load manager on focus ──
@@ -184,7 +182,7 @@ export default function PracticeScreen() {
           setMode((prev) => (prev === "loading" ? "level_select" : prev));
         }
       });
-    }, [rerender, action, startPractice])
+    }, [rerender, action, startPractice]),
   );
 
   // ── Handle level selection ──
@@ -197,7 +195,7 @@ export default function PracticeScreen() {
       rerender();
       startPractice(mgr);
     },
-    [startPractice, rerender]
+    [startPractice, rerender],
   );
 
   // ── Handle theory dismiss ──
@@ -233,10 +231,10 @@ export default function PracticeScreen() {
             style: "cancel",
             onPress: () => setMode("level_select"),
           },
-        ]
+        ],
       );
     },
-    [startPractice, rerender]
+    [startPractice, rerender],
   );
 
   // ── Check answer ──
@@ -257,7 +255,7 @@ export default function PracticeScreen() {
         problem.a,
         problem.b,
         problem.c,
-        problem.variable
+        problem.variable,
       );
 
       if (validation.isValid) {
@@ -286,7 +284,8 @@ export default function PracticeScreen() {
           setIsChecking(false);
           Alert.alert(
             "Keep going!",
-            validation.message || "Correct so far, but the solution isn't complete. Add more steps."
+            validation.message ||
+              "Correct so far, but the solution isn't complete. Add more steps.",
           );
         }
       } else {
@@ -301,15 +300,14 @@ export default function PracticeScreen() {
 
         setErrorModal({
           visible: true,
-          message:
-            validation.modalMessage || "That's not correct. Check your work.",
+          message: validation.modalMessage || "That's not correct. Check your work.",
           procedure: validation.expectedProcedure || [],
           failedAtStep: failedStep,
           action: errorAction,
         });
       }
     }, 800);
-  }, [typedAnswers, problem, rerender]);
+  }, [typedAnswers, problem, rerender, resultOpacity, resultScale]);
 
   const handleKeyboardKeyPress = (key: string) => {
     const newAns = [...typedAnswers];
@@ -389,7 +387,6 @@ export default function PracticeScreen() {
   }, [generateNew]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const botPad = Platform.OS === "web" ? 84 : insets.bottom;
 
   // ── Loading ──
   if (mode === "loading" || !managerRef.current) {
@@ -515,9 +512,7 @@ export default function PracticeScreen() {
   const currentConfig = getLevelConfig(state.currentLevel);
   const isAnswered = isCorrect !== null;
   const streakProgress = manager.getStreakProgress();
-  const requiredLines = problem
-    ? EquationStepValidator.getRequiredLines(problem.level)
-    : 1;
+  const requiredLines = problem ? EquationStepValidator.getRequiredLines(problem.level) : 1;
 
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
@@ -535,12 +530,7 @@ export default function PracticeScreen() {
             {state.currentLevel} · {currentConfig.name}
           </Text>
           <View style={styles.miniProgressBar}>
-            <View
-              style={[
-                styles.miniProgressFill,
-                { width: `${streakProgress.percent}%` },
-              ]}
-            />
+            <View style={[styles.miniProgressFill, { width: `${streakProgress.percent}%` }]} />
           </View>
           <Text style={styles.headerSub}>
             {streakProgress.current}/{streakProgress.required} correct
@@ -557,10 +547,7 @@ export default function PracticeScreen() {
       <ScrollView
         ref={notebookScrollViewRef}
         style={styles.scroll}
-        contentContainerStyle={[
-          styles.scrollContent,
-          isKeyboardVisible && { paddingBottom: 380 },
-        ]}
+        contentContainerStyle={[styles.scrollContent, isKeyboardVisible && { paddingBottom: 380 }]}
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
       >
@@ -589,10 +576,8 @@ export default function PracticeScreen() {
             {Array.from({
               length: Math.max(8, requiredLines + 1),
             }).map((_, i) => (
-              <View
-                key={`nb-line-${i}`}
-                style={[styles.notebookLine, { top: 40 + i * 46 }]}
-              />
+              // biome-ignore lint/suspicious/noArrayIndexKey: Static lines
+              <View key={`nb-line-${i}`} style={[styles.notebookLine, { top: 40 + i * 46 }]} />
             ))}
             {/* Red margin line */}
             <View style={styles.marginLine} />
@@ -604,6 +589,7 @@ export default function PracticeScreen() {
             </View>
             <View style={{ gap: 0, paddingTop: 10 }}>
               {typedAnswers.map((ans, idx) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: Rows correspond to index
                 <View key={`row-${idx}`} style={styles.notebookInputRow}>
                   {(typedAnswers.length > 1 || ans.length > 0) && (
                     <TouchableOpacity
@@ -619,21 +605,13 @@ export default function PracticeScreen() {
                       }}
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
-                      <Ionicons
-                        name="close-circle"
-                        size={18}
-                        color={C.errorLight}
-                      />
+                      <Ionicons name="close-circle" size={18} color={C.errorLight} />
                     </TouchableOpacity>
                   )}
                   <TextInput
                     ref={idx === typedAnswers.length - 1 ? inputRef : undefined}
                     style={styles.notebookTextInput}
-                    placeholder={
-                      requiredLines === 1
-                        ? "Type your answer..."
-                        : `Step ${idx + 1}...`
-                    }
+                    placeholder={requiredLines === 1 ? "Type your answer..." : `Step ${idx + 1}...`}
                     placeholderTextColor={C.textMuted}
                     value={ans}
                     onFocus={() => {
@@ -667,33 +645,25 @@ export default function PracticeScreen() {
                       }
                     }}
                     autoFocus={idx === typedAnswers.length - 1}
-                    returnKeyType={
-                      idx === typedAnswers.length - 1 ? "done" : "next"
-                    }
-                    keyboardType={
-                      requiredLines === 1 ? "number-pad" : "default"
-                    }
+                    returnKeyType={idx === typedAnswers.length - 1 ? "done" : "next"}
+                    keyboardType={requiredLines === 1 ? "number-pad" : "default"}
                     autoCapitalize="none"
                     autoCorrect={false}
                     editable={true}
                   />
-                  {idx === typedAnswers.length - 1 &&
-                    typedAnswers.length < requiredLines && (
-                      <TouchableOpacity
-                        style={[
-                          styles.notebookAddBtn,
-                          !ans.trim() && styles.notebookAddBtnDisabled,
-                        ]}
-                        onPress={() => {
-                          setTypedAnswers((prev) => [...prev, ""]);
-                          setTimeout(() => inputRef.current?.focus(), 100);
-                        }}
-                        disabled={!ans.trim()}
-                        activeOpacity={0.9}
-                      >
-                        <Ionicons name="arrow-down" size={18} color={C.white} />
-                      </TouchableOpacity>
-                    )}
+                  {idx === typedAnswers.length - 1 && typedAnswers.length < requiredLines && (
+                    <TouchableOpacity
+                      style={[styles.notebookAddBtn, !ans.trim() && styles.notebookAddBtnDisabled]}
+                      onPress={() => {
+                        setTypedAnswers((prev) => [...prev, ""]);
+                        setTimeout(() => inputRef.current?.focus(), 100);
+                      }}
+                      disabled={!ans.trim()}
+                      activeOpacity={0.9}
+                    >
+                      <Ionicons name="arrow-down" size={18} color={C.white} />
+                    </TouchableOpacity>
+                  )}
                 </View>
               ))}
             </View>
@@ -701,18 +671,11 @@ export default function PracticeScreen() {
             {/* Check Button */}
             <View style={styles.notebookActions}>
               <TouchableOpacity
-                style={[
-                  styles.checkAnswerBtn,
-                  { flex: 1, justifyContent: "center" },
-                ]}
+                style={[styles.checkAnswerBtn, { flex: 1, justifyContent: "center" }]}
                 onPress={handleCheck}
                 activeOpacity={0.9}
               >
-                <Ionicons
-                  name="checkmark-circle"
-                  size={20}
-                  color={C.white}
-                />
+                <Ionicons name="checkmark-circle" size={20} color={C.white} />
                 <Text style={styles.checkAnswerBtnText}>Check Answer</Text>
               </TouchableOpacity>
             </View>
@@ -748,19 +711,12 @@ export default function PracticeScreen() {
               ]}
             >
               <View style={styles.resultHeader}>
-                <View
-                  style={[
-                    styles.resultIconCircle,
-                    { backgroundColor: C.accent },
-                  ]}
-                >
+                <View style={[styles.resultIconCircle, { backgroundColor: C.accent }]}>
                   <Ionicons name="checkmark" size={24} color={C.white} />
                 </View>
                 <View style={styles.resultTextBlock}>
                   <Text style={styles.resultTitle}>Correct! 🎉</Text>
-                  <Text style={styles.resultMessage}>
-                    Great work — you solved it!
-                  </Text>
+                  <Text style={styles.resultMessage}>Great work — you solved it!</Text>
                 </View>
               </View>
 
@@ -790,7 +746,7 @@ export default function PracticeScreen() {
       />
 
       {/* ── Error Modal ── */}
-      {errorModal && errorModal.visible && (
+      {errorModal?.visible && (
         <ErrorFeedbackModal
           visible={errorModal.visible}
           errorMessage={errorModal.message}

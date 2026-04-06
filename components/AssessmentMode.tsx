@@ -1,28 +1,27 @@
-import React, { useState, useCallback, useRef } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { useCallback, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
   Platform,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, { FadeIn, FadeInDown, SlideInDown } from "react-native-reanimated";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-import Colors from "@/constants/colors";
-import { RobotMascot } from "@/components/RobotMascot";
 import { MathKeyboard } from "@/components/MathKeyboard";
-import {
-  generateProblem,
-  GeneratedProblem,
-  LEVEL_CONFIGS,
-  LevelId,
-} from "@/utils/ProblemGenerator";
+import { RobotMascot } from "@/components/RobotMascot";
+import Colors from "@/constants/colors";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
+import {
+  type GeneratedProblem,
+  generateProblem,
+  LEVEL_CONFIGS,
+  type LevelId,
+} from "@/utils/ProblemGenerator";
 
 const C = Colors.light;
 
@@ -126,7 +125,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
       setTypedAnswers([""]);
       setTimeout(() => inputRef.current?.focus(), 200);
     },
-    [problemNum, currentLevelIdx, currentLevelCorrect, results, onComplete]
+    [problemNum, currentLevelIdx, currentLevelCorrect, results, onComplete],
   );
 
   const handleCheck = useCallback(() => {
@@ -140,7 +139,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
       problem.a,
       problem.b,
       problem.c,
-      problem.variable
+      problem.variable,
     );
 
     if (validation.isValid && validation.isComplete) {
@@ -199,8 +198,8 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
           <RobotMascot size={90} />
           <Text style={styles.introTitle}>Assessment Test</Text>
           <Text style={styles.introSubtitle}>
-            I'll give you a few problems from each level to find out where you
-            should start. Don't worry — this is just to help you!
+            I'll give you a few problems from each level to find out where you should start. Don't
+            worry — this is just to help you!
           </Text>
 
           <View style={styles.infoBox}>
@@ -212,9 +211,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
             </View>
             <View style={styles.infoRow}>
               <Ionicons name="eye-off" size={16} color={C.primary} />
-              <Text style={styles.infoText}>
-                No hints or step-by-step help during the test
-              </Text>
+              <Text style={styles.infoText}>No hints or step-by-step help during the test</Text>
             </View>
             <View style={styles.infoRow}>
               <Ionicons name="bar-chart" size={16} color={C.primary} />
@@ -224,20 +221,12 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
             </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.startBtn}
-            onPress={startTest}
-            activeOpacity={0.9}
-          >
+          <TouchableOpacity style={styles.startBtn} onPress={startTest} activeOpacity={0.9}>
             <Text style={styles.startBtnText}>Start Assessment</Text>
             <Ionicons name="arrow-forward" size={18} color={C.white} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.cancelBtn}
-            onPress={onCancel}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity style={styles.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
             <Text style={styles.cancelBtnText}>Skip, let me choose</Text>
           </TouchableOpacity>
         </Animated.View>
@@ -268,17 +257,15 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
             >
               <View style={styles.resultCardLeft}>
                 <Text style={styles.resultLevel}>Level {r.level}</Text>
-                <Text style={styles.resultLevelName}>
-                  {LEVEL_CONFIGS[i]?.name || ""}
-                </Text>
+                <Text style={styles.resultLevelName}>{LEVEL_CONFIGS[i]?.name || ""}</Text>
               </View>
               <View style={styles.resultCardRight}>
                 <View
                   style={[
                     styles.resultBadge,
                     {
-                    backgroundColor: passed ? C.cardCorrect : C.errorLighter,
-                    borderColor: passed ? C.cardCorrectBorder : C.errorLight,
+                      backgroundColor: passed ? C.cardCorrect : C.errorLighter,
+                      borderColor: passed ? C.cardCorrectBorder : C.errorLight,
                     },
                   ]}
                 >
@@ -420,18 +407,10 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
 
           {/* Buttons */}
           <View style={styles.testActions}>
-            <TouchableOpacity
-              style={styles.skipBtn}
-              onPress={handleSkip}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity style={styles.skipBtn} onPress={handleSkip} activeOpacity={0.7}>
               <Text style={styles.skipBtnText}>Skip</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.checkBtn}
-              onPress={handleCheck}
-              activeOpacity={0.9}
-            >
+            <TouchableOpacity style={styles.checkBtn} onPress={handleCheck} activeOpacity={0.9}>
               <Ionicons name="checkmark" size={18} color={C.white} />
               <Text style={styles.checkBtnText}>Submit</Text>
             </TouchableOpacity>
