@@ -1,5 +1,5 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   Easing,
@@ -41,6 +41,14 @@ export function StreakCounter({
   const pulseScale = useSharedValue(1);
 
   const percent = Math.min(100, (current / required) * 100);
+
+  const milestones = useMemo(() => {
+    return Array.from({ length: required }, (_, i) => ({
+      id: `milestone-${i + 1}`,
+      position: ((i + 1) / required) * 100,
+      isReached: i < current,
+    }));
+  }, [required, current]);
 
   useEffect(() => {
     progressWidth.value = withTiming(percent, {
@@ -93,14 +101,14 @@ export function StreakCounter({
           ]}
         />
         {/* Tick marks for required streak */}
-        {Array.from({ length: required }).map((_, i) => (
+        {milestones.map((milestone) => (
           <View
-            key={i}
+            key={milestone.id}
             style={[
               styles.tick,
               {
-                left: `${((i + 1) / required) * 100}%`,
-                backgroundColor: i < current ? C.transparent : C.border,
+                left: `${milestone.position}%`,
+                backgroundColor: milestone.isReached ? C.transparent : C.border,
               },
             ]}
           />

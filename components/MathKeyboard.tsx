@@ -129,8 +129,8 @@ export function MathKeyboard({
 
         {/* Keys Grid */}
         <View style={styles.grid}>
-          {keys.map((row, i) => (
-            <View key={i} style={styles.row}>
+          {keys.map((row) => (
+            <View key={row.join("-")} style={styles.row}>
               {row.map((key) => renderKey(key))}
             </View>
           ))}

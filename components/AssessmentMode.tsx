@@ -39,13 +39,23 @@ interface AssessmentModeProps {
   onCancel: () => void;
 }
 
+interface AnswerStep {
+  id: string;
+  text: string;
+}
+
+const generateStep = (text = "") => ({
+  id: Math.random().toString(36).substring(7),
+  text,
+});
+
 export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
   const insets = useSafeAreaInsets();
   const [phase, setPhase] = useState<"intro" | "testing" | "results">("intro");
   const [currentLevelIdx, setCurrentLevelIdx] = useState(0);
   const [problemNum, setProblemNum] = useState(0);
   const [problem, setProblem] = useState<GeneratedProblem | null>(null);
-  const [typedAnswers, setTypedAnswers] = useState<string[]>([""]);
+  const [typedAnswers, setTypedAnswers] = useState<AnswerStep[]>([generateStep()]);
   const [results, setResults] = useState<AssessmentResult[]>([]);
   const [currentLevelCorrect, setCurrentLevelCorrect] = useState(0);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -64,7 +74,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
     setProblemNum(0);
     setCurrentLevelCorrect(0);
     setResults([]);
-    setTypedAnswers([""]);
+    setTypedAnswers([generateStep()]);
   }, []);
 
   const moveToNext = useCallback(
@@ -122,7 +132,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
         const nextOp = ops[nextProblemNum % ops.length];
         setProblem(generateProblem(levelConfig.id, nextOp));
       }
-      setTypedAnswers([""]);
+      setTypedAnswers([generateStep()]);
       setTimeout(() => inputRef.current?.focus(), 200);
     },
     [problemNum, currentLevelIdx, currentLevelCorrect, results, onComplete],
@@ -131,9 +141,10 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
   const handleCheck = useCallback(() => {
     if (!problem) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const answersText = typedAnswers.map((s) => s.text);
 
     const validation = EquationStepValidator.validate(
-      typedAnswers,
+      answersText,
       problem.level,
       problem.type,
       problem.a,
@@ -156,14 +167,22 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
     let char = key;
     if (key === "×") char = "*";
     if (key === "÷") char = "/";
-    newAns[activeInputIndex] = (newAns[activeInputIndex] || "") + char;
+    const currentStep = newAns[activeInputIndex];
+    newAns[activeInputIndex] = {
+      ...currentStep,
+      text: (currentStep.text || "") + char,
+    };
     setTypedAnswers(newAns);
   };
 
   const handleKeyboardDelete = () => {
     const newAns = [...typedAnswers];
-    if (newAns[activeInputIndex].length > 0) {
-      newAns[activeInputIndex] = newAns[activeInputIndex].slice(0, -1);
+    const currentStep = newAns[activeInputIndex];
+    if (currentStep.text.length > 0) {
+      newAns[activeInputIndex] = {
+        ...currentStep,
+        text: currentStep.text.slice(0, -1),
+      };
       setTypedAnswers(newAns);
     }
   };
@@ -174,9 +193,9 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
     if (
       activeInputIndex === typedAnswers.length - 1 &&
       typedAnswers.length < requiredLines &&
-      typedAnswers[activeInputIndex].trim()
+      typedAnswers[activeInputIndex].text.trim()
     ) {
-      setTypedAnswers((prev) => [...prev, ""]);
+      setTypedAnswers((prev) => [...prev, generateStep()]);
       setActiveInputIndex((prev) => prev + 1);
     } else {
       setIsKeyboardVisible(false);
@@ -348,14 +367,14 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
 
           {/* Input */}
           <Animated.View entering={SlideInDown.duration(300)} style={styles.testInputCard}>
-            {typedAnswers.map((ans, idx) => (
+            {typedAnswers.map((step, idx) => (
               <TextInput
-                key={`input-${idx}`}
+                key={step.id}
                 ref={idx === typedAnswers.length - 1 ? inputRef : undefined}
                 style={styles.testInput}
                 placeholder={`Step ${idx + 1}...`}
                 placeholderTextColor={C.textMuted}
-                value={ans}
+                value={step.text}
                 onFocus={() => {
                   setActiveInputIndex(idx);
                   setIsKeyboardVisible(true);
@@ -370,16 +389,16 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
                 caretHidden={false}
                 onChangeText={(text) => {
                   const newAns = [...typedAnswers];
-                  newAns[idx] = text;
+                  newAns[idx] = { ...newAns[idx], text };
                   setTypedAnswers(newAns);
                 }}
                 onSubmitEditing={() => {
                   if (
                     idx === typedAnswers.length - 1 &&
                     typedAnswers.length < requiredLines &&
-                    ans.trim()
+                    step.text.trim()
                   ) {
-                    setTypedAnswers((prev) => [...prev, ""]);
+                    setTypedAnswers((prev) => [...prev, generateStep()]);
                     setTimeout(() => inputRef.current?.focus(), 100);
                   }
                 }}
@@ -393,8 +412,8 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
               <TouchableOpacity
                 style={styles.addRowBtn}
                 onPress={() => {
-                  if (typedAnswers[typedAnswers.length - 1]?.trim()) {
-                    setTypedAnswers((prev) => [...prev, ""]);
+                  if (typedAnswers[typedAnswers.length - 1]?.text.trim()) {
+                    setTypedAnswers((prev) => [...prev, generateStep()]);
                     setTimeout(() => inputRef.current?.focus(), 100);
                   }
                 }}

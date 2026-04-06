@@ -64,8 +64,8 @@ export function HandwrittenEquation({ steps }: HandwrittenEquationProps) {
   return (
     <View style={styles.notebookPage}>
       {/* Notebook lines */}
-      {Array.from({ length: 8 }).map((_, i) => (
-        <View key={i} style={[styles.notebookLine, { top: 36 + i * 32 }]} />
+      {["l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8"].map((id, i) => (
+        <View key={id} style={[styles.notebookLine, { top: 36 + i * 32 }]} />
       ))}
 
       {/* Red margin line */}

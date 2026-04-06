@@ -97,7 +97,7 @@ export function ErrorFeedbackModal({
           <View style={styles.procedureBox}>
             <Text style={styles.procedureTitle}>Correct procedure:</Text>
             {expectedProcedure.map((step, idx) => (
-              <View key={idx} style={styles.procedureRow}>
+              <View key={step} style={styles.procedureRow}>
                 <View
                   style={[
                     styles.procedureNum,

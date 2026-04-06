@@ -17,7 +17,7 @@ interface RobotMascotProps {
   isThinking?: boolean;
 }
 
-export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps) {
+export function RobotMascot({ size = 80, isThinking: _isThinking = false }: RobotMascotProps) {
   const scale = useSharedValue(1);
   const antennaRotate = useSharedValue(0);
   const blinkOpacity = useSharedValue(1);
@@ -151,9 +151,9 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
               eyeStyle,
             ]}
           >
-            {[0, 1].map((i) => (
+            {(["left", "right"] as const).map((side) => (
               <View
-                key={i}
+                key={`${side}-eye`}
                 style={{
                   width: eyeSize,
                   height: eyeSize,
@@ -213,9 +213,9 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
               paddingHorizontal: s * 0.06,
             }}
           >
-            {[0, 1].map((i) => (
+            {(["left", "right"] as const).map((side) => (
               <View
-                key={i}
+                key={`${side}-cheek`}
                 style={{
                   width: s * 0.1,
                   height: s * 0.06,
@@ -274,7 +274,7 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
           >
             {[C.robot.antenna, C.success, C.orange].map((color, i) => (
               <View
-                key={i}
+                key={color}
                 style={{
                   width: s * 0.07,
                   height: s * 0.07,
@@ -291,14 +291,14 @@ export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps)
 
           {/* Arms hint */}
           {[
-            { left: -s * 0.1, top: s * 0.05 },
-            { right: -s * 0.1, top: s * 0.05 },
-          ].map((pos, i) => (
+            { side: "left", pos: { left: -s * 0.1, top: s * 0.05 } },
+            { side: "right", pos: { right: -s * 0.1, top: s * 0.05 } },
+          ].map((item) => (
             <View
-              key={i}
+              key={`${item.side}-arm`}
               style={{
                 position: "absolute",
-                ...pos,
+                ...item.pos,
                 width: s * 0.14,
                 height: bodyH * 0.5,
                 borderRadius: s * 0.07,

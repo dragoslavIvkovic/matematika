@@ -139,7 +139,7 @@ export function PracticeCard({ question, questionNumber, onAnswer }: PracticeCar
       <View style={styles.optionsContainer}>
         {question.options.map((option, index) => (
           <OptionButton
-            key={index}
+            key={option}
             label={option}
             index={index}
             selectedIndex={selectedIndex}

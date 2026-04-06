@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
+import { type Href, router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
@@ -15,6 +15,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WeeklyStreak } from "@/components/WeeklyStreak";
 import Colors from "@/constants/colors";
+import { ROUTE_ONBOARDING, ROUTE_PRACTICE } from "@/constants/routes";
 import { LevelManager, type LevelState } from "@/utils/LevelManager";
 import { getLevelConfig, LEVEL_CONFIGS, type LevelId } from "@/utils/ProblemGenerator";
 import { hasTheory } from "@/utils/TheoryContent";
@@ -67,7 +68,7 @@ export default function LearnScreen() {
     // Check onboarding
     AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
       if (!val) {
-        router.replace("/onboarding");
+        router.replace(ROUTE_ONBOARDING);
       }
     });
     // Load state
@@ -112,22 +113,6 @@ export default function LearnScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View
-          entering={FadeInDown.delay(100).duration(400)}
-          style={styles.dashboardWelcome}
-        >
-          <View style={styles.progressSummary}>
-            <ProgressBar
-              progress={(completedCount / LEVEL_CONFIGS.length) * 100}
-              color={C.primary}
-              delay={300}
-            />
-            <Text style={styles.progressSummaryText}>
-              {completedCount}/{LEVEL_CONFIGS.length} levels
-            </Text>
-          </View>
-        </Animated.View>
-
         {/* Simplified stats */}
         <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.statsRow}>
           <View style={styles.miniStat}>
@@ -154,7 +139,7 @@ export default function LearnScreen() {
             ]}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              router.push("/(tabs)/practice");
+              router.push(ROUTE_PRACTICE);
             }}
             activeOpacity={0.9}
           >
@@ -234,7 +219,7 @@ export default function LearnScreen() {
                     if (manager) {
                       manager.setCurrentLevel(config.id);
                       await manager.save();
-                      router.push("/(tabs)/practice?action=start");
+                      router.push(`${ROUTE_PRACTICE}?action=start` as Href);
                     }
                   }}
                 >

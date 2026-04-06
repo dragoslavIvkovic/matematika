@@ -75,15 +75,18 @@ function AccuracyGauge({ accuracy }: { accuracy: number }) {
   const center = radius + strokeWidth;
   const size = center * 2;
   const circumference = 2 * Math.PI * radius;
-  
+
   // Use a shared value for animation
   const progress = useSharedValue(0);
-  
+
   useEffect(() => {
-    progress.value = withDelay(300, withTiming(accuracy / 100, { 
-      duration: 1500, 
-      easing: Easing.out(Easing.cubic) 
-    }));
+    progress.value = withDelay(
+      300,
+      withTiming(accuracy / 100, {
+        duration: 1500,
+        easing: Easing.out(Easing.cubic),
+      }),
+    );
   }, [accuracy, progress]);
 
   const animatedProps = useAnimatedProps(() => {
@@ -254,9 +257,9 @@ export default function ProgressScreen() {
               value: `${totalErrors}`,
               colors: [C.error, "#dc2626"] as const,
             },
-          ].map((stat, index) => (
+          ].map((stat) => (
             <LinearGradient
-              key={index}
+              key={stat.label}
               colors={stat.colors}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -278,7 +281,13 @@ export default function ProgressScreen() {
               <Text
                 style={[
                   styles.statValue,
-                  { color: C.white, fontSize: 44, lineHeight: 52, textAlign: "center", fontFamily: "Inter_800ExtraBold" },
+                  {
+                    color: C.white,
+                    fontSize: 44,
+                    lineHeight: 52,
+                    textAlign: "center",
+                    fontFamily: "Inter_800ExtraBold",
+                  },
                 ]}
               >
                 {stat.value}
@@ -292,12 +301,13 @@ export default function ProgressScreen() {
                   marginTop: 8,
                 }}
               >
-                <Ionicons name={stat.icon as keyof typeof Ionicons.glyphMap} size={20} color={C.white} />
+                <Ionicons
+                  name={stat.icon as keyof typeof Ionicons.glyphMap}
+                  size={20}
+                  color={C.white}
+                />
                 <Text
-                  style={[
-                    styles.statLabel,
-                    { color: C.white, textAlign: "center", opacity: 0.95 },
-                  ]}
+                  style={[styles.statLabel, { color: C.white, textAlign: "center", opacity: 0.95 }]}
                 >
                   {stat.label}
                 </Text>

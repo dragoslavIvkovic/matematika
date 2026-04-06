@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HandwrittenEquation } from "@/components/HandwrittenEquation";
 import { RobotMascot } from "@/components/RobotMascot";
 import Colors from "@/constants/colors";
+import { ROUTE_PRACTICE } from "@/constants/routes";
 
 const C = Colors.light;
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -190,7 +191,7 @@ export default function OnboardingScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (isLast) {
       await AsyncStorage.setItem(ONBOARDING_KEY, "done");
-      router.replace("/(tabs)/practice");
+      router.replace(ROUTE_PRACTICE);
     } else {
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
     }
@@ -198,7 +199,7 @@ export default function OnboardingScreen() {
 
   const handleSkip = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, "done");
-    router.replace("/(tabs)/practice");
+    router.replace(ROUTE_PRACTICE);
   };
 
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {

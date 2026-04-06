@@ -36,8 +36,11 @@ export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) 
         {/* Rules */}
         <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.rulesCard}>
           <Text style={styles.sectionTitle}>📐 Key Rules</Text>
-          {theory.rules.map((rule, i) => (
-            <View key={i} style={[styles.ruleRow, rule.highlight && styles.ruleRowHighlight]}>
+          {theory.rules.map((rule) => (
+            <View
+              key={rule.text}
+              style={[styles.ruleRow, rule.highlight && styles.ruleRowHighlight]}
+            >
               <View
                 style={[
                   styles.ruleIcon,
@@ -63,12 +66,12 @@ export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) 
           style={styles.examplesSection}
         >
           <Text style={styles.sectionTitle}>✏️ Examples</Text>
-          {theory.examples.map((example, i) => (
-            <View key={i} style={styles.exampleCard}>
+          {theory.examples.map((example) => (
+            <View key={example.equation} style={styles.exampleCard}>
               <Text style={styles.exampleEquation}>{example.equation}</Text>
               <View style={styles.stepsContainer}>
                 {example.steps.map((step, j) => (
-                  <View key={j} style={styles.stepRow}>
+                  <View key={`${example.equation}-step-${step}`} style={styles.stepRow}>
                     <View
                       style={[
                         styles.stepNum,

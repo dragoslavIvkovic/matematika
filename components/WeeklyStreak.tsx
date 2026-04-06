@@ -31,14 +31,15 @@ export function WeeklyStreak({ activeDays, currentStreak }: WeeklyStreakProps) {
       label,
       isActive,
       isToday,
+      dateString,
     };
   });
 
   return (
     <View style={styles.container}>
       <View style={styles.daysRow}>
-        {days.map((day, index) => (
-          <View key={index} style={styles.dayContainer}>
+        {days.map((day) => (
+          <View key={day.dateString} style={styles.dayContainer}>
             <View
               style={[
                 styles.dayCircle,
