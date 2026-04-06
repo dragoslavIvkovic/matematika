@@ -13,13 +13,17 @@ import {
 import Animated, {
   Easing,
   FadeInDown,
+  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { RobotMascot } from "@/components/RobotMascot";
+import Svg, { Path, G } from "react-native-svg";
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+
 import Colors from "@/constants/colors";
 import { LevelManager, type LevelState } from "@/utils/LevelManager";
 import { LEVEL_CONFIGS } from "@/utils/ProblemGenerator";
@@ -62,6 +66,97 @@ const progressBarStyles = StyleSheet.create({
     flex: 1,
   },
   fill: { height: "100%", borderRadius: 4 },
+});
+
+function AccuracyGauge({ accuracy }: { accuracy: number }) {
+  const radius = 90;
+  const strokeWidth = 24;
+  const width = radius * 2 + strokeWidth * 2;
+  const height = radius + strokeWidth + 10;
+  const circumference = Math.PI * radius;
+  
+  // Use a shared value for animation
+  const progress = useSharedValue(0);
+  
+  useEffect(() => {
+    progress.value = withDelay(500, withTiming(accuracy / 100, { 
+      duration: 1500, 
+      easing: Easing.out(Easing.cubic) 
+    }));
+  }, [accuracy, progress]);
+
+  const animatedProps = useAnimatedProps(() => {
+    const strokeDashoffset = circumference - progress.value * circumference;
+    return {
+      strokeDashoffset,
+    };
+  });
+
+  return (
+    <View style={gaugeStyles.container}>
+      <View style={{ alignItems: "center", justifyContent: "center" }}>
+        <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+          <G rotation="0" origin={`${width / 2}, ${radius + strokeWidth}`}>
+            {/* Background Arc */}
+            <Path
+              d={`M ${strokeWidth},${radius + strokeWidth} A ${radius},${radius} 0 0 1 ${width - strokeWidth},${radius + strokeWidth}`}
+              fill="none"
+              stroke={C.borderLight}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+            />
+            {/* Foreground Arc */}
+            <AnimatedPath
+              d={`M ${strokeWidth},${radius + strokeWidth} A ${radius},${radius} 0 0 1 ${width - strokeWidth},${radius + strokeWidth}`}
+              fill="none"
+              stroke={accuracy > 80 ? C.success : accuracy > 50 ? C.warning : C.error}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${circumference} ${circumference}`}
+              animatedProps={animatedProps}
+              strokeLinecap="round"
+            />
+          </G>
+        </Svg>
+        <View
+          style={{
+            position: "absolute",
+            bottom: -8,
+            left: 0,
+            right: 0,
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Inter_800ExtraBold",
+              fontSize: 48,
+              color: C.text,
+              lineHeight: 56, // Prevents clipping and ensures precise height
+            }}
+          >
+            {accuracy}%
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const gaugeStyles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    backgroundColor: C.white,
+    borderRadius: 32,
+    paddingTop: 32,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    shadowColor: C.black,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+    marginBottom: 16,
+  },
 });
 
 export default function ProgressScreen() {
@@ -146,43 +241,9 @@ export default function ProgressScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Robot greeting */}
-        <Animated.View
-          entering={FadeInDown.delay(100).duration(400)}
-          style={styles.robotGreetingCard}
-        >
-          <View style={styles.robotGreetingInner}>
-            <RobotMascot size={70} />
-            <View style={styles.greetingText}>
-              <Text style={styles.greetingTitle}>
-                {completedCount === 0
-                  ? "Getting Started"
-                  : completedCount >= LEVEL_CONFIGS.length
-                    ? "🏆 Math Master!"
-                    : "Great Progress!"}
-              </Text>
-              <Text style={styles.greetingMessage}>
-                {completedCount === 0
-                  ? "Start solving problems to see your progress here!"
-                  : completedCount >= LEVEL_CONFIGS.length
-                    ? "You've completed all levels! Incredible work!"
-                    : `${completedCount}/${LEVEL_CONFIGS.length} levels complete. Keep it up!`}
-              </Text>
-              <View style={styles.xpBar}>
-                <View
-                  style={[
-                    styles.xpBarFill,
-                    {
-                      width: `${(completedCount / LEVEL_CONFIGS.length) * 100}%`,
-                    },
-                  ]}
-                />
-                <Text style={styles.xpText}>
-                  {completedCount}/{LEVEL_CONFIGS.length} levels
-                </Text>
-              </View>
-            </View>
-          </View>
+        {/* Accuracy Gauge Replacements Robot Greeting */}
+        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <AccuracyGauge accuracy={accuracy} />
         </Animated.View>
 
         {/* Stats grid */}
@@ -192,44 +253,31 @@ export default function ProgressScreen() {
         <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.statsGrid}>
           {[
             {
-              icon: <Ionicons name="checkmark-circle" size={22} color={C.white} />,
+              icon: <Ionicons name="checkmark-circle" size={20} color={C.white} />,
               label: "Problems Solved",
               value: `${totalSolved}`,
               sub: "Total correct",
-              color: C.accent,
+              color: C.success,
             },
             {
-              icon: <MaterialCommunityIcons name="fire" size={22} color={C.white} />,
-              label: "Current Streak",
-              value: `${state?.streak || 0}`,
-              sub: "In a row",
-              color: C.orange,
-            },
-            {
-              icon: <Ionicons name="trophy" size={22} color={C.white} />,
-              label: "Accuracy",
-              value: `${accuracy}%`,
-              sub: `${totalErrors} errors`,
-              color: C.levels["1.4"],
-            },
-            {
-              icon: <Ionicons name="layers" size={22} color={C.white} />,
-              label: "Levels Done",
-              value: `${completedCount}`,
-              sub: `of ${LEVEL_CONFIGS.length}`,
-              color: C.primary,
+              icon: <Ionicons name="close-circle" size={20} color={C.white} />,
+              label: "Errors Made",
+              value: `${totalErrors}`,
+              sub: "Total mistakes",
+              color: C.error,
             },
           ].map((stat, index) => (
             <View
               key={index}
-              style={[styles.statCard, { borderTopColor: stat.color, borderTopWidth: 3 }]}
+              style={[styles.statCard, { backgroundColor: stat.color }]}
             >
-              <View style={[styles.statIconBadge, { backgroundColor: stat.color }]}>
+              <Text style={[styles.statValue, { color: C.white, fontSize: 44, lineHeight: 52, textAlign: "center" }]}>
+                {stat.value}
+              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 8 }}>
                 {stat.icon}
+                <Text style={[styles.statLabel, { color: C.white, textAlign: "center" }]}>{stat.label}</Text>
               </View>
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-              <Text style={styles.statSub}>{stat.sub}</Text>
             </View>
           ))}
         </Animated.View>
@@ -442,58 +490,6 @@ const styles = StyleSheet.create({
     color: C.errorDark,
   },
   scrollContent: { padding: 16, gap: 12 },
-  robotGreetingCard: {
-    backgroundColor: C.white,
-    borderRadius: 20,
-    shadowColor: C.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  robotGreetingInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    gap: 14,
-    borderRadius: 20,
-    overflow: "hidden",
-  },
-  greetingText: { flex: 1, gap: 4 },
-  greetingTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 18,
-    color: C.text,
-  },
-  greetingMessage: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    color: C.textSecondary,
-    lineHeight: 18,
-  },
-  xpBar: {
-    height: 8,
-    backgroundColor: C.border,
-    borderRadius: 4,
-    overflow: "hidden",
-    marginTop: 6,
-  },
-  xpBarFill: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
-    borderRadius: 4,
-    backgroundColor: C.accent,
-  },
-  xpText: {
-    position: "absolute",
-    right: 0,
-    top: -16,
-    fontFamily: "Inter_500Medium",
-    fontSize: 10,
-    color: C.textMuted,
-  },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -512,18 +508,18 @@ const styles = StyleSheet.create({
   },
   statsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   statCard: {
-    backgroundColor: C.white,
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 24,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
     flex: 1,
     minWidth: "44%",
-    gap: 4,
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: C.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-    overflow: "hidden",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 3,
   },
   statIconBadge: {
     width: 38,

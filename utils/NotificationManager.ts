@@ -46,14 +46,12 @@ export async function scheduleDailyNotifications() {
   // Clear existing notifications to avoid duplicates
   await Notifications.cancelAllScheduledNotificationsAsync();
 
-  const title = "Math Practice 📚";
-  const body = "Want to be much better at math in just 3 minutes?";
-
-  // Schedule for 8:00 AM
+  // Schedule for 8:00 AM (Morning Exercise)
   await Notifications.scheduleNotificationAsync({
     content: {
-      title,
-      body,
+      title: "Morning Brain Exercise! 🧠",
+      body: "Ready to solve today's first equation? Just 3 minutes to stay sharp!",
+      sound: true,
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
@@ -63,11 +61,12 @@ export async function scheduleDailyNotifications() {
     },
   });
 
-  // Schedule for 2:00 PM (14:00)
+  // Schedule for 2:00 PM (Afternoon Boost)
   await Notifications.scheduleNotificationAsync({
     content: {
-      title,
-      body,
+      title: "Afternoon Boost! ⚡",
+      body: "Keep your streak alive! A quick practice session is waiting for you.",
+      sound: true,
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
@@ -77,7 +76,7 @@ export async function scheduleDailyNotifications() {
     },
   });
 
-  console.log("Daily notifications scheduled for 8:00 and 14:00");
+  console.log("✅ Daily notifications successfully scheduled for 08:00 and 14:00");
 }
 
 export async function initNotifications() {
