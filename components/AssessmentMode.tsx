@@ -139,7 +139,8 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
       problem.type,
       problem.a,
       problem.b,
-      problem.c
+      problem.c,
+      problem.variable
     );
 
     if (validation.isValid && validation.isComplete) {

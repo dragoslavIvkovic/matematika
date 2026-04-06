@@ -18,11 +18,18 @@ export interface GeneratedProblem {
   b: number;
   c: number | null;
   answer: number;
+  variable: string;
   requiredSteps: number;
 }
 
+export const ALLOWED_VARIABLES = ["x", "y", "a", "b", "c", "d", "z", "w", "m", "n", "p", "q"];
+
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomVariable(): string {
+  return ALLOWED_VARIABLES[Math.floor(Math.random() * ALLOWED_VARIABLES.length)];
 }
 
 // ─── Level 1.1: Addition & Subtraction ───────────────────────────
@@ -38,6 +45,7 @@ function generateLevel11(type: "+" | "-"): GeneratedProblem {
       b,
       c: null,
       answer: a + b,
+      variable: "",
       requiredSteps: 1,
     };
   } else {
@@ -52,6 +60,7 @@ function generateLevel11(type: "+" | "-"): GeneratedProblem {
       b: a, // displayed second
       c: null,
       answer: b - a,
+      variable: "",
       requiredSteps: 1,
     };
   }
@@ -70,6 +79,7 @@ function generateLevel12(type: "*" | "/"): GeneratedProblem {
       b,
       c: null,
       answer: a * b,
+      variable: "",
       requiredSteps: 1,
     };
   } else {
@@ -85,6 +95,7 @@ function generateLevel12(type: "*" | "/"): GeneratedProblem {
       b: divisor,
       c: null,
       answer: quotient,
+      variable: "",
       requiredSteps: 1,
     };
   }
@@ -92,19 +103,21 @@ function generateLevel12(type: "*" | "/"): GeneratedProblem {
 
 // ─── Level 1.3: Simple equations (x + a = b) or (x - a = b) ─────
 function generateLevel13(type: "+" | "-"): GeneratedProblem {
+  const variable = getRandomVariable();
   if (type === "+") {
     // x + a = b → x = b - a (must be positive)
     const x = randInt(1, 100);
     const a = randInt(1, 100);
     const b = x + a;
     return {
-      equation: `x + ${a} = ${b}`,
+      equation: `${variable} + ${a} = ${b}`,
       level: "1.3",
       type: "+",
       a,
       b,
       c: null,
       answer: x,
+      variable,
       requiredSteps: 2,
     };
   } else {
@@ -113,13 +126,14 @@ function generateLevel13(type: "+" | "-"): GeneratedProblem {
     const a = randInt(1, Math.min(x - 1, 100));
     const b = x - a;
     return {
-      equation: `x - ${a} = ${b}`,
+      equation: `${variable} - ${a} = ${b}`,
       level: "1.3",
       type: "-",
       a,
       b,
       c: null,
       answer: x,
+      variable,
       requiredSteps: 2,
     };
   }
@@ -127,19 +141,21 @@ function generateLevel13(type: "+" | "-"): GeneratedProblem {
 
 // ─── Level 1.4: Simple equations (a·x = b) or (x÷a = b) ─────────
 function generateLevel14(type: "*" | "/"): GeneratedProblem {
+  const variable = getRandomVariable();
   if (type === "*") {
     // a * x = b → x = b / a (clean division)
     const a = randInt(2, 20);
     const x = randInt(1, 10);
     const b = a * x;
     return {
-      equation: `${a} · x = ${b}`,
+      equation: `${a} · ${variable} = ${b}`,
       level: "1.4",
       type: "*",
       a,
       b,
       c: null,
       answer: x,
+      variable,
       requiredSteps: 2,
     };
   } else {
@@ -148,13 +164,14 @@ function generateLevel14(type: "*" | "/"): GeneratedProblem {
     const b = randInt(1, 10);
     const x = a * b;
     return {
-      equation: `x ÷ ${a} = ${b}`,
+      equation: `${variable} ÷ ${a} = ${b}`,
       level: "1.4",
       type: "/",
       a,
       b,
       c: null,
       answer: x,
+      variable,
       requiredSteps: 2,
     };
   }
@@ -162,39 +179,38 @@ function generateLevel14(type: "*" | "/"): GeneratedProblem {
 
 // ─── Level 1.5: ax + b = c or ax - b = c ────────────────────────
 function generateLevel15(type: "+" | "-"): GeneratedProblem {
-  // We want ax ± b = c with positive integer x and c
-  // Pick a, x first, then pick b so that c is positive
+  const variable = getRandomVariable();
   const a = randInt(2, 12);
   const x = randInt(1, 15);
   const ax = a * x;
 
   if (type === "+") {
-    // ax + b = c → c = ax + b
     const b = randInt(1, 50);
     const c = ax + b;
     return {
-      equation: `${a}x + ${b} = ${c}`,
+      equation: `${a}${variable} + ${b} = ${c}`,
       level: "1.5",
       type: "+",
       a,
       b,
       c,
       answer: x,
+      variable,
       requiredSteps: 4,
     };
   } else {
-    // ax - b = c → c = ax - b (must be positive)
     const maxB = ax - 1;
     const b = maxB > 0 ? randInt(1, Math.min(maxB, 50)) : 1;
     const c = ax - b;
     return {
-      equation: `${a}x - ${b} = ${c}`,
+      equation: `${a}${variable} - ${b} = ${c}`,
       level: "1.5",
       type: "-",
       a,
       b,
       c,
       answer: x,
+      variable,
       requiredSteps: 4,
     };
   }
@@ -202,38 +218,38 @@ function generateLevel15(type: "+" | "-"): GeneratedProblem {
 
 // ─── Level 1.6: x/a + b = c or x/a - b = c ─────────────────────
 function generateLevel16(type: "+" | "-"): GeneratedProblem {
-  // x/a ± b = c, where x is divisible by a, and x is positive
+  const variable = getRandomVariable();
   const a = randInt(2, 12);
   const xOverA = randInt(1, 20); // this is x/a
   const x = a * xOverA;
 
   if (type === "+") {
-    // x/a + b = c → c = xOverA + b
     const b = randInt(1, 50);
     const c = xOverA + b;
     return {
-      equation: `x ÷ ${a} + ${b} = ${c}`,
+      equation: `${variable} ÷ ${a} + ${b} = ${c}`,
       level: "1.6",
       type: "+",
       a,
       b,
       c,
       answer: x,
+      variable,
       requiredSteps: 4,
     };
   } else {
-    // x/a - b = c → c = xOverA - b (must be positive)
     const maxB = xOverA - 1;
     const b = maxB > 0 ? randInt(1, Math.min(maxB, 50)) : 1;
     const c = xOverA - b;
     return {
-      equation: `x ÷ ${a} - ${b} = ${c}`,
+      equation: `${variable} ÷ ${a} - ${b} = ${c}`,
       level: "1.6",
       type: "-",
       a,
       b,
       c,
       answer: x,
+      variable,
       requiredSteps: 4,
     };
   }
@@ -316,9 +332,6 @@ export function getLevelConfig(levelId: string): LevelConfig {
   return config;
 }
 
-/**
- * Generate a problem for the given level and operation type.
- */
 export function generateProblem(level: LevelId, type: string): GeneratedProblem {
   switch (level) {
     case "1.1":
@@ -338,10 +351,6 @@ export function generateProblem(level: LevelId, type: string): GeneratedProblem 
   }
 }
 
-/**
- * Generate the next problem for a level, choosing the operation
- * type that is most needed to balance the distribution.
- */
 export function generateNextProblem(
   level: LevelId,
   operationCounts: Record<string, number>
@@ -349,7 +358,6 @@ export function generateNextProblem(
   const config = getLevelConfig(level);
   const ops = config.operations;
 
-  // Pick the operation with the fewest completed problems
   let minCount = Infinity;
   let chosenOp = ops[0];
   for (const op of ops) {

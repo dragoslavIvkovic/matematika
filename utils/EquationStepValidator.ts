@@ -58,7 +58,7 @@ export class EquationStepValidator {
   /**
    * 2. Dynamic Expected Steps Generation
    */
-  static getExpectedSteps(level: string, type: string, a: number, b: number, c: number | null = null): ExpectedStep[] {
+  static getExpectedSteps(level: string, type: string, a: number, b: number, c: number | null = null, variable: string = "x"): ExpectedStep[] {
     const steps: ExpectedStep[] = [];
     let val1: number;
 
@@ -77,24 +77,24 @@ export class EquationStepValidator {
       case '1.3':
         if (type === '+') {
           val1 = b - a;
-          steps.push({ display: `x = ${b} - ${a}`, variations: [`x=${b}-${a}`] });
-          steps.push({ display: `x = ${val1}`,     variations: [`x=${val1}`] });
+          steps.push({ display: `${variable} = ${b} - ${a}`, variations: [`${variable}=${b}-${a}`] });
+          steps.push({ display: `${variable} = ${val1}`,     variations: [`${variable}=${val1}`] });
         } else if (type === '-') {
           val1 = b + a;
-          steps.push({ display: `x = ${b} + ${a}`, variations: [`x=${b}+${a}`, `x=${a}+${b}`] });
-          steps.push({ display: `x = ${val1}`,     variations: [`x=${val1}`] });
+          steps.push({ display: `${variable} = ${b} + ${a}`, variations: [`${variable}=${b}+${a}`, `${variable}=${a}+${b}`] });
+          steps.push({ display: `${variable} = ${val1}`,     variations: [`${variable}=${val1}`] });
         }
         break;
 
       case '1.4':
         if (type === '*') {
           val1 = b / a;
-          steps.push({ display: `x = ${b} / ${a}`, variations: [`x=${b}/${a}`] });
-          steps.push({ display: `x = ${val1}`,     variations: [`x=${val1}`] });
+          steps.push({ display: `${variable} = ${b} / ${a}`, variations: [`${variable}=${b}/${a}`] });
+          steps.push({ display: `${variable} = ${val1}`,     variations: [`${variable}=${val1}`] });
         } else if (type === '/') {
           val1 = b * a;
-          steps.push({ display: `x = ${b} * ${a}`, variations: [`x=${b}*${a}`, `x=${a}*${b}`] });
-          steps.push({ display: `x = ${val1}`,     variations: [`x=${val1}`] });
+          steps.push({ display: `${variable} = ${b} * ${a}`, variations: [`${variable}=${b}*${a}`, `${variable}=${a}*${b}`] });
+          steps.push({ display: `${variable} = ${val1}`,     variations: [`${variable}=${val1}`] });
         }
         break;
 
@@ -102,16 +102,16 @@ export class EquationStepValidator {
         if (c === null) throw new Error("Missing 'c' parameter for level 1.5");
         if (type === '+') {
           val1 = c - b;
-          steps.push({ display: `${a}x = ${c} - ${b}`, variations: [`${a}x=${c}-${b}`] });
-          steps.push({ display: `${a}x = ${val1}`,     variations: [`${a}x=${val1}`] });
-          steps.push({ display: `x = ${val1} / ${a}`,  variations: [`x=${val1}/${a}`] });
-          steps.push({ display: `x = ${val1 / a}`,     variations: [`x=${val1 / a}`] });
+          steps.push({ display: `${a}${variable} = ${c} - ${b}`, variations: [`${a}${variable}=${c}-${b}`] });
+          steps.push({ display: `${a}${variable} = ${val1}`,     variations: [`${a}${variable}=${val1}`] });
+          steps.push({ display: `${variable} = ${val1} / ${a}`,  variations: [`${variable}=${val1}/${a}`] });
+          steps.push({ display: `${variable} = ${val1 / a}`,     variations: [`${variable}=${val1 / a}`] });
         } else if (type === '-') {
           val1 = c + b;
-          steps.push({ display: `${a}x = ${c} + ${b}`, variations: [`${a}x=${c}+${b}`, `${a}x=${b}+${c}`] });
-          steps.push({ display: `${a}x = ${val1}`,     variations: [`${a}x=${val1}`] });
-          steps.push({ display: `x = ${val1} / ${a}`,  variations: [`x=${val1}/${a}`] });
-          steps.push({ display: `x = ${val1 / a}`,     variations: [`x=${val1 / a}`] });
+          steps.push({ display: `${a}${variable} = ${c} + ${b}`, variations: [`${a}${variable}=${c}+${b}`, `${a}${variable}=${b}+${c}`] });
+          steps.push({ display: `${a}${variable} = ${val1}`,     variations: [`${a}${variable}=${val1}`] });
+          steps.push({ display: `${variable} = ${val1} / ${a}`,  variations: [`${variable}=${val1}/${a}`] });
+          steps.push({ display: `${variable} = ${val1 / a}`,     variations: [`${variable}=${val1 / a}`] });
         }
         break;
 
@@ -119,16 +119,16 @@ export class EquationStepValidator {
         if (c === null) throw new Error("Missing 'c' parameter for level 1.6");
         if (type === '+') {
           val1 = c - b;
-          steps.push({ display: `x/${a} = ${c} - ${b}`, variations: [`x/${a}=${c}-${b}`] });
-          steps.push({ display: `x/${a} = ${val1}`,     variations: [`x/${a}=${val1}`] });
-          steps.push({ display: `x = ${val1} * ${a}`,   variations: [`x=${val1}*${a}`, `x=${a}*${val1}`] });
-          steps.push({ display: `x = ${val1 * a}`,      variations: [`x=${val1 * a}`] });
+          steps.push({ display: `${variable}/${a} = ${c} - ${b}`, variations: [`${variable}/${a}=${c}-${b}`] });
+          steps.push({ display: `${variable}/${a} = ${val1}`,     variations: [`${variable}/${a}=${val1}`] });
+          steps.push({ display: `${variable} = ${val1} * ${a}`,   variations: [`${variable}=${val1}*${a}`, `${variable}=${a}*${val1}`] });
+          steps.push({ display: `${variable} = ${val1 * a}`,      variations: [`${variable}=${val1 * a}`] });
         } else if (type === '-') {
           val1 = c + b;
-          steps.push({ display: `x/${a} = ${c} + ${b}`, variations: [`x/${a}=${c}+${b}`, `x/${a}=${b}+${c}`] });
-          steps.push({ display: `x/${a} = ${val1}`,     variations: [`x/${a}=${val1}`] });
-          steps.push({ display: `x = ${val1} * ${a}`,   variations: [`x=${val1}*${a}`, `x=${a}*${val1}`] });
-          steps.push({ display: `x = ${val1 * a}`,      variations: [`x=${val1 * a}`] });
+          steps.push({ display: `${variable}/${a} = ${c} + ${b}`, variations: [`${variable}/${a}=${c}+${b}`, `${variable}/${a}=${b}+${c}`] });
+          steps.push({ display: `${variable}/${a} = ${val1}`,     variations: [`${variable}/${a}=${val1}`] });
+          steps.push({ display: `${variable} = ${val1} * ${a}`,   variations: [`${variable}=${val1}*${a}`, `${variable}=${a}*${val1}`] });
+          steps.push({ display: `${variable} = ${val1 * a}`,      variations: [`${variable}=${val1 * a}`] });
         }
         break;
 
@@ -148,9 +148,10 @@ export class EquationStepValidator {
     type: string, 
     a: number, 
     b: number, 
-    c: number | null = null
+    c: number | null = null,
+    variable: string = "x"
   ): ValidationResult {
-    const expectedSteps = this.getExpectedSteps(level, type, a, b, c);
+    const expectedSteps = this.getExpectedSteps(level, type, a, b, c, variable);
     const expectedProcedure = expectedSteps.map(step => step.display);
 
     // Filter out blank rows that user didn't fill yet
