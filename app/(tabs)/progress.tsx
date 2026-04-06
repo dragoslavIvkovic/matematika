@@ -1,5 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -20,9 +21,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Path, G } from "react-native-svg";
+import Svg, { Circle } from "react-native-svg";
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 import Colors from "@/constants/colors";
 import { LevelManager, type LevelState } from "@/utils/LevelManager";
@@ -69,17 +70,17 @@ const progressBarStyles = StyleSheet.create({
 });
 
 function AccuracyGauge({ accuracy }: { accuracy: number }) {
-  const radius = 90;
-  const strokeWidth = 24;
-  const width = radius * 2 + strokeWidth * 2;
-  const height = radius + strokeWidth + 10;
-  const circumference = Math.PI * radius;
+  const radius = 64;
+  const strokeWidth = 14;
+  const center = radius + strokeWidth;
+  const size = center * 2;
+  const circumference = 2 * Math.PI * radius;
   
   // Use a shared value for animation
   const progress = useSharedValue(0);
   
   useEffect(() => {
-    progress.value = withDelay(500, withTiming(accuracy / 100, { 
+    progress.value = withDelay(300, withTiming(accuracy / 100, { 
       duration: 1500, 
       easing: Easing.out(Easing.cubic) 
     }));
@@ -94,47 +95,58 @@ function AccuracyGauge({ accuracy }: { accuracy: number }) {
 
   return (
     <View style={gaugeStyles.container}>
-      <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-          <G rotation="0" origin={`${width / 2}, ${radius + strokeWidth}`}>
-            {/* Background Arc */}
-            <Path
-              d={`M ${strokeWidth},${radius + strokeWidth} A ${radius},${radius} 0 0 1 ${width - strokeWidth},${radius + strokeWidth}`}
-              fill="none"
-              stroke={C.borderLight}
-              strokeWidth={strokeWidth}
-              strokeLinecap="round"
-            />
-            {/* Foreground Arc */}
-            <AnimatedPath
-              d={`M ${strokeWidth},${radius + strokeWidth} A ${radius},${radius} 0 0 1 ${width - strokeWidth},${radius + strokeWidth}`}
-              fill="none"
-              stroke={accuracy > 80 ? C.success : accuracy > 50 ? C.warning : C.error}
-              strokeWidth={strokeWidth}
-              strokeDasharray={`${circumference} ${circumference}`}
-              animatedProps={animatedProps}
-              strokeLinecap="round"
-            />
-          </G>
+      <View style={{ alignItems: "center", justifyContent: "center", width: size, height: size }}>
+        <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
+          {/* Background Track */}
+          <Circle
+            cx={center}
+            cy={center}
+            r={radius}
+            stroke={C.borderLight}
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+          {/* Foreground Track */}
+          <AnimatedCircle
+            cx={center}
+            cy={center}
+            r={radius}
+            stroke={accuracy > 80 ? C.success : accuracy > 50 ? C.warning : C.error}
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            animatedProps={animatedProps}
+            strokeLinecap="round"
+            fill="none"
+          />
         </Svg>
         <View
           style={{
             position: "absolute",
-            bottom: -8,
-            left: 0,
-            right: 0,
             alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <Text
             style={{
               fontFamily: "Inter_800ExtraBold",
-              fontSize: 48,
+              fontSize: 38,
               color: C.text,
-              lineHeight: 56, // Prevents clipping and ensures precise height
+              marginTop: 6, // tweak vertical center visually
             }}
           >
-            {accuracy}%
+            {Math.round(accuracy)}%
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Inter_600SemiBold",
+              fontSize: 10,
+              color: C.textMuted,
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+              marginTop: -2,
+            }}
+          >
+            Accuracy
           </Text>
         </View>
       </View>
@@ -145,17 +157,9 @@ function AccuracyGauge({ accuracy }: { accuracy: number }) {
 const gaugeStyles = StyleSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: C.white,
-    borderRadius: 32,
-    paddingTop: 32,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    shadowColor: C.black,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
-    marginBottom: 16,
+    justifyContent: "center",
+    paddingVertical: 32,
+    marginBottom: 8,
   },
 });
 
@@ -216,21 +220,7 @@ export default function ProgressScreen() {
     <View
       style={[styles.container, { paddingTop: Platform.OS === "web" ? webTopPadding : insets.top }]}
     >
-      {/* Header */}
-      <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.headerBadge}>
-            <Ionicons name="bar-chart" size={16} color={C.primary} />
-          </View>
-          <Text style={styles.headerTitle}>My Progress</Text>
-        </View>
-        <TouchableOpacity onPress={handleReset} activeOpacity={0.7}>
-          <View style={styles.resetBtn}>
-            <Ionicons name="refresh" size={14} color={C.errorDark} />
-            <Text style={styles.resetBtnText}>Reset</Text>
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
+      {/* Header removed as requested */}
 
       <ScrollView
         contentContainerStyle={[
@@ -253,32 +243,66 @@ export default function ProgressScreen() {
         <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.statsGrid}>
           {[
             {
-              icon: <Ionicons name="checkmark-circle" size={20} color={C.white} />,
+              icon: "checkmark-circle",
               label: "Problems Solved",
               value: `${totalSolved}`,
-              sub: "Total correct",
-              color: C.success,
+              colors: [C.success, "#059669"] as const,
             },
             {
-              icon: <Ionicons name="close-circle" size={20} color={C.white} />,
+              icon: "close-circle",
               label: "Errors Made",
               value: `${totalErrors}`,
-              sub: "Total mistakes",
-              color: C.error,
+              colors: [C.error, "#dc2626"] as const,
             },
           ].map((stat, index) => (
-            <View
+            <LinearGradient
               key={index}
-              style={[styles.statCard, { backgroundColor: stat.color }]}
+              colors={stat.colors}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.statCard}
             >
-              <Text style={[styles.statValue, { color: C.white, fontSize: 44, lineHeight: 52, textAlign: "center" }]}>
+              {/* Massive Watermark Icon */}
+              <Ionicons
+                name={stat.icon as keyof typeof Ionicons.glyphMap}
+                size={120}
+                color="white"
+                style={{
+                  position: "absolute",
+                  right: -30,
+                  bottom: -30,
+                  opacity: 0.15,
+                  transform: [{ rotate: "-15deg" }],
+                }}
+              />
+              <Text
+                style={[
+                  styles.statValue,
+                  { color: C.white, fontSize: 44, lineHeight: 52, textAlign: "center", fontFamily: "Inter_800ExtraBold" },
+                ]}
+              >
                 {stat.value}
               </Text>
-              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 8 }}>
-                {stat.icon}
-                <Text style={[styles.statLabel, { color: C.white, textAlign: "center" }]}>{stat.label}</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  marginTop: 8,
+                }}
+              >
+                <Ionicons name={stat.icon as keyof typeof Ionicons.glyphMap} size={20} color={C.white} />
+                <Text
+                  style={[
+                    styles.statLabel,
+                    { color: C.white, textAlign: "center", opacity: 0.95 },
+                  ]}
+                >
+                  {stat.label}
+                </Text>
               </View>
-            </View>
+            </LinearGradient>
           ))}
         </Animated.View>
 
@@ -442,6 +466,16 @@ export default function ProgressScreen() {
             </View>
           ))}
         </Animated.View>
+
+        {/* Reset Progress at the bottom */}
+        <Animated.View entering={FadeInDown.delay(500).duration(400)}>
+          <TouchableOpacity onPress={handleReset} activeOpacity={0.6}>
+            <View style={styles.resetBtn}>
+              <Ionicons name="refresh" size={18} color={C.error} />
+              <Text style={styles.resetBtnText}>Reset All Progress</Text>
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -450,16 +484,9 @@ export default function ProgressScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.background },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: C.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: C.borderLight,
+    display: "none",
   },
-  headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
+  headerLeft: { display: "none" },
   headerBadge: {
     width: 36,
     height: 36,
@@ -476,18 +503,20 @@ const styles = StyleSheet.create({
   resetBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    backgroundColor: C.errorLighter,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 100,
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 16,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: C.errorLight,
+    borderStyle: "dashed",
+    marginTop: 10,
+    marginBottom: 20,
   },
   resetBtnText: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    color: C.errorDark,
+    fontSize: 15,
+    color: C.error,
   },
   scrollContent: { padding: 16, gap: 12 },
   sectionHeader: {
@@ -516,10 +545,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     shadowColor: C.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 6,
+    overflow: "hidden", // Crucial for clipping the watermark icon
   },
   statIconBadge: {
     width: 38,
