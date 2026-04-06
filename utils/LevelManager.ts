@@ -27,6 +27,7 @@ export interface LevelState {
   levelStats: Record<string, { solved: number; errors: number; bestStreak: number }>;
   theoryShownForLevel: string[];
   needsTheory: boolean;
+  activeDays: string[]; // ISO date strings (YYYY-MM-DD)
 }
 
 const DEFAULT_STATE: LevelState = {
@@ -41,6 +42,7 @@ const DEFAULT_STATE: LevelState = {
   levelStats: {},
   theoryShownForLevel: [],
   needsTheory: false,
+  activeDays: [],
 };
 
 /**
@@ -77,6 +79,7 @@ export class LevelManager {
         // Migration: add new fields if missing
         if (parsed.consecutiveErrors === undefined) parsed.consecutiveErrors = 0;
         if (parsed.levelErrorCount === undefined) parsed.levelErrorCount = 0;
+        if (parsed.activeDays === undefined) parsed.activeDays = [];
         return new LevelManager(parsed);
       }
     } catch (e) {
@@ -137,6 +140,12 @@ export class LevelManager {
       (this.state.operationCounts[operationType] || 0) + 1;
     this.state.totalSolved++;
     this.state.consecutiveErrors = 0; // Reset consecutive errors on correct
+
+    // Track active day
+    const today = new Date().toISOString().split("T")[0];
+    if (!this.state.activeDays.includes(today)) {
+      this.state.activeDays.push(today);
+    }
 
     // Update stats
     const levelKey = this.state.currentLevel;

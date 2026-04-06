@@ -1,0 +1,9 @@
+node_modules/
+ios/
+android/
+.expo/
+
+# Build artifacts
+*.apk
+*.aab
+*.ipa

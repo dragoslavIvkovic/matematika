@@ -22,7 +22,7 @@ import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
 import Colors from "@/constants/colors";
-import { RobotMascot } from "@/components/RobotMascot";
+import { WeeklyStreak } from "@/components/WeeklyStreak";
 import { LEVEL_CONFIGS, getLevelConfig, LevelId } from "@/utils/ProblemGenerator";
 import { LevelManager, LevelState } from "@/utils/LevelManager";
 import { getTheoryContent, hasTheory } from "@/utils/TheoryContent";
@@ -113,15 +113,6 @@ export default function LearnScreen() {
   const completedCount = state?.completedLevels.length || 0;
   const currentLevel = state?.currentLevel || "1.1";
 
-  const getGreeting = () => {
-    if (completedCount === 0)
-      return "Let's begin your math journey!";
-    if (completedCount < 3)
-      return "Great progress! Keep going!";
-    if (completedCount < 6)
-      return "You're doing amazing! Almost there!";
-    return "Math master! All levels complete!";
-  };
 
   return (
     <View
@@ -130,25 +121,12 @@ export default function LearnScreen() {
         { paddingTop: Platform.OS === "web" ? webTopPadding : insets.top },
       ]}
     >
-      {/* Header */}
+      {/* Header with Weekly Streak */}
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.headerBadge}>
-            <MaterialCommunityIcons
-              name="pencil-ruler"
-              size={16}
-              color={C.primary}
-            />
-          </View>
-          <View>
-            <Text style={styles.headerTitle}>Math Tutor</Text>
-            <Text style={styles.headerSub}>Your learning dashboard</Text>
-          </View>
-        </View>
-        <View style={styles.levelPill}>
-          <Feather name="award" size={14} color={C.orange} />
-          <Text style={styles.levelPillText}>Lv {currentLevel}</Text>
-        </View>
+        <WeeklyStreak 
+          activeDays={state?.activeDays || []} 
+          currentStreak={state?.streak || 0} 
+        />
       </Animated.View>
 
       <ScrollView
@@ -161,49 +139,39 @@ export default function LearnScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Robot greeting */}
-        <Animated.View
-          entering={FadeInDown.delay(100).duration(400)}
-          style={styles.greetingCard}
-        >
-          <RobotMascot size={70} />
-          <View style={styles.greetingText}>
-            <Text style={styles.greetingTitle}>Hi there! 👋</Text>
-            <Text style={styles.greetingMessage}>{getGreeting()}</Text>
-            <View style={styles.overallProgress}>
-              <ProgressBar
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.dashboardWelcome}>
+          <Text style={styles.dashboardTitle}>Your Path</Text>
+          <View style={styles.progressSummary}>
+             <ProgressBar
                 progress={(completedCount / LEVEL_CONFIGS.length) * 100}
                 color={C.primary}
                 delay={300}
               />
-              <Text style={styles.overallProgressText}>
+              <Text style={styles.progressSummaryText}>
                 {completedCount}/{LEVEL_CONFIGS.length} levels
               </Text>
-            </View>
           </View>
         </Animated.View>
 
-        {/* Quick stats */}
+        {/* Simplified stats */}
         <Animated.View
           entering={FadeInDown.delay(150).duration(400)}
           style={styles.statsRow}
         >
-          <View style={[styles.statCard, { borderTopColor: C.accent }]}>
-            <Ionicons name="checkmark-circle" size={20} color={C.accent} />
-            <Text style={styles.statValue}>{totalSolved}</Text>
-            <Text style={styles.statLabel}>Solved</Text>
+          <View style={styles.miniStat}>
+            <Ionicons name="checkmark-circle" size={14} color={C.accent} />
+            <Text style={styles.miniStatValue}>{totalSolved}</Text>
+            <Text style={styles.miniStatLabel}>Solved</Text>
           </View>
-          <View style={[styles.statCard, { borderTopColor: C.orange }]}>
-            <MaterialCommunityIcons name="fire" size={20} color={C.orange} />
-            <Text style={styles.statValue}>
-              {state?.streak || 0}
-            </Text>
-            <Text style={styles.statLabel}>Streak</Text>
+          <View style={styles.miniStat}>
+            <Ionicons name="trophy" size={14} color={C.primary} />
+            <Text style={styles.miniStatValue}>{completedCount}</Text>
+            <Text style={styles.miniStatLabel}>Levels</Text>
           </View>
-          <View style={[styles.statCard, { borderTopColor: "#8B5CF6" }]}>
-            <Ionicons name="trophy" size={20} color="#8B5CF6" />
-            <Text style={styles.statValue}>{completedCount}</Text>
-            <Text style={styles.statLabel}>Levels</Text>
+          <View style={styles.miniStat}>
+             <Ionicons name="flash" size={14} color={C.orange} />
+             <Text style={styles.miniStatValue}>Lv {currentLevel}</Text>
+             <Text style={styles.miniStatLabel}>Current</Text>
           </View>
         </Animated.View>
 
@@ -243,7 +211,7 @@ export default function LearnScreen() {
           entering={FadeInDown.delay(250).duration(400)}
           style={styles.sectionHeader}
         >
-          <Text style={styles.sectionTitle}>Level Roadmap</Text>
+          <Text style={styles.sectionTitle}>Select Level</Text>
         </Animated.View>
 
         {LEVEL_CONFIGS.map((config, index) => {
@@ -354,14 +322,10 @@ export default function LearnScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.background },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: C.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: C.borderLight,
+    paddingTop: 12,
+    paddingBottom: 16,
+    backgroundColor: C.background,
   },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
   headerBadge: {
@@ -402,67 +366,48 @@ const styles = StyleSheet.create({
   },
   scrollContent: { padding: 16, gap: 14 },
 
-  // Greeting card
-  greetingCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFF",
-    borderRadius: 20,
-    padding: 16,
-    gap: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  greetingText: { flex: 1, gap: 4 },
-  greetingTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 18,
+  dashboardWelcome: { gap: 8, marginTop: 4 },
+  dashboardTitle: {
+    fontFamily: "Inter_800ExtraBold",
+    fontSize: 28,
     color: C.text,
+    letterSpacing: -1,
   },
-  greetingMessage: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    color: C.textSecondary,
-    lineHeight: 18,
-  },
-  overallProgress: {
+  progressSummary: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginTop: 6,
+    gap: 12,
   },
-  overallProgressText: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 11,
-    color: C.textMuted,
-    width: 60,
+  progressSummaryText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12,
+    color: C.textSecondary,
   },
 
   // Stats
-  statsRow: { flexDirection: "row", gap: 10 },
-  statCard: {
-    flex: 1,
-    backgroundColor: "#FFF",
-    borderRadius: 16,
-    padding: 14,
-    alignItems: "center",
-    gap: 4,
-    borderTopWidth: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+  statsRow: { 
+    flexDirection: "row", 
+    gap: 12, 
+    marginVertical: 4 
   },
-  statValue: {
+  miniStat: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: C.borderLight,
+  },
+  miniStatValue: {
     fontFamily: "Inter_700Bold",
-    fontSize: 24,
+    fontSize: 14,
     color: C.text,
   },
-  statLabel: {
+  miniStatLabel: {
     fontFamily: "Inter_500Medium",
     fontSize: 11,
     color: C.textMuted,
@@ -505,11 +450,12 @@ const styles = StyleSheet.create({
   },
 
   // Section header
-  sectionHeader: { marginTop: 4 },
+  sectionHeader: { marginTop: 10, marginBottom: 4 },
   sectionTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 17,
+    fontFamily: "Inter_800ExtraBold",
+    fontSize: 20,
     color: C.text,
+    letterSpacing: -0.5,
   },
 
   // Roadmap

@@ -14,6 +14,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { initNotifications } from "@/utils/NotificationManager";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -46,6 +47,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
+      initNotifications().catch(console.error);
     }
   }, [fontsLoaded, fontError]);
 
