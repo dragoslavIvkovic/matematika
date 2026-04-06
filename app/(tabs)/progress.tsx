@@ -147,35 +147,40 @@ export default function ProgressScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Robot greeting */}
-        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.robotGreeting}>
-          <RobotMascot size={70} />
-          <View style={styles.greetingText}>
-            <Text style={styles.greetingTitle}>
-              {completedCount === 0
-                ? "Getting Started"
-                : completedCount >= LEVEL_CONFIGS.length
-                  ? "🏆 Math Master!"
-                  : "Great Progress!"}
-            </Text>
-            <Text style={styles.greetingMessage}>
-              {completedCount === 0
-                ? "Start solving problems to see your progress here!"
-                : completedCount >= LEVEL_CONFIGS.length
-                  ? "You've completed all levels! Incredible work!"
-                  : `${completedCount}/${LEVEL_CONFIGS.length} levels complete. Keep it up!`}
-            </Text>
-            <View style={styles.xpBar}>
-              <View
-                style={[
-                  styles.xpBarFill,
-                  {
-                    width: `${(completedCount / LEVEL_CONFIGS.length) * 100}%`,
-                  },
-                ]}
-              />
-              <Text style={styles.xpText}>
-                {completedCount}/{LEVEL_CONFIGS.length} levels
+        <Animated.View
+          entering={FadeInDown.delay(100).duration(400)}
+          style={styles.robotGreetingCard}
+        >
+          <View style={styles.robotGreetingInner}>
+            <RobotMascot size={70} />
+            <View style={styles.greetingText}>
+              <Text style={styles.greetingTitle}>
+                {completedCount === 0
+                  ? "Getting Started"
+                  : completedCount >= LEVEL_CONFIGS.length
+                    ? "🏆 Math Master!"
+                    : "Great Progress!"}
               </Text>
+              <Text style={styles.greetingMessage}>
+                {completedCount === 0
+                  ? "Start solving problems to see your progress here!"
+                  : completedCount >= LEVEL_CONFIGS.length
+                    ? "You've completed all levels! Incredible work!"
+                    : `${completedCount}/${LEVEL_CONFIGS.length} levels complete. Keep it up!`}
+              </Text>
+              <View style={styles.xpBar}>
+                <View
+                  style={[
+                    styles.xpBarFill,
+                    {
+                      width: `${(completedCount / LEVEL_CONFIGS.length) * 100}%`,
+                    },
+                  ]}
+                />
+                <Text style={styles.xpText}>
+                  {completedCount}/{LEVEL_CONFIGS.length} levels
+                </Text>
+              </View>
             </View>
           </View>
         </Animated.View>
@@ -437,18 +442,22 @@ const styles = StyleSheet.create({
     color: C.errorDark,
   },
   scrollContent: { padding: 16, gap: 12 },
-  robotGreeting: {
-    flexDirection: "row",
-    alignItems: "center",
+  robotGreetingCard: {
     backgroundColor: C.white,
     borderRadius: 20,
-    padding: 16,
-    gap: 14,
     shadowColor: C.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 3,
+  },
+  robotGreetingInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    gap: 14,
+    borderRadius: 20,
+    overflow: "hidden",
   },
   greetingText: { flex: 1, gap: 4 },
   greetingTitle: {
