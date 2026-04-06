@@ -6,6 +6,7 @@ import {
   Platform,
   TouchableOpacity,
   TextInput,
+  ScrollView,
   KeyboardAvoidingView,
   Alert,
 } from "react-native";
@@ -34,6 +35,7 @@ import { TheoryScreen } from "@/components/TheoryScreen";
 import { LevelSelector } from "@/components/LevelSelector";
 import { AssessmentMode } from "@/components/AssessmentMode";
 import { ErrorFeedbackModal } from "@/components/ErrorFeedbackModal";
+import { MathKeyboard } from "@/components/MathKeyboard";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import {
   generateProblem,
@@ -128,6 +130,11 @@ export default function PracticeScreen() {
   const inputRef = useRef<TextInput>(null);
   const resultScale = useSharedValue(0);
   const resultOpacity = useSharedValue(0);
+
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [activeInputIndex, setActiveInputIndex] = useState(0);
+
+  const notebookScrollViewRef = useRef<ScrollView>(null);
 
   const resultCardStyle = useAnimatedStyle(() => ({
     transform: [{ scale: resultScale.value }],
@@ -303,6 +310,43 @@ export default function PracticeScreen() {
     }, 800);
   }, [typedAnswers, problem, rerender]);
 
+  const handleKeyboardKeyPress = (key: string) => {
+    const newAns = [...typedAnswers];
+    let char = key;
+    if (key === "×") char = "*";
+    if (key === "÷") char = "/";
+
+    newAns[activeInputIndex] = (newAns[activeInputIndex] || "") + char;
+    setTypedAnswers(newAns);
+  };
+
+  const handleKeyboardDelete = () => {
+    const newAns = [...typedAnswers];
+    if (newAns[activeInputIndex].length > 0) {
+      newAns[activeInputIndex] = newAns[activeInputIndex].slice(0, -1);
+      setTypedAnswers(newAns);
+    }
+  };
+
+  const handleKeyboardSubmit = () => {
+    const problem_ = problem;
+    if (!problem_) return;
+
+    const requiredSteps = problem_.requiredSteps;
+
+    if (
+      activeInputIndex === typedAnswers.length - 1 &&
+      typedAnswers.length < requiredSteps &&
+      typedAnswers[activeInputIndex].trim()
+    ) {
+      setTypedAnswers((prev) => [...prev, ""]);
+      setActiveInputIndex((prev) => prev + 1);
+    } else {
+      setIsKeyboardVisible(false);
+      handleCheck();
+    }
+  };
+
   // ── Handle error modal dismiss ──
   const handleErrorDismiss = useCallback(() => {
     const mgr = managerRef.current;
@@ -475,44 +519,50 @@ export default function PracticeScreen() {
     : 1;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <View style={[styles.inner, { paddingTop: topPad }]}>
-        {/* ── Compact Header ── */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backToLevelsBtn}
-            onPress={() => setMode("level_select")}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="grid" size={16} color={C.primary} />
-          </TouchableOpacity>
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>
-              {state.currentLevel} · {currentConfig.name}
-            </Text>
-            <View style={styles.miniProgressBar}>
-              <View
-                style={[
-                  styles.miniProgressFill,
-                  { width: `${streakProgress.percent}%` },
-                ]}
-              />
-            </View>
-            <Text style={styles.headerSub}>
-              {streakProgress.current}/{streakProgress.required} correct
-            </Text>
+    <View style={[styles.container, { paddingTop: topPad }]}>
+      {/* ── Compact Header ── */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backToLevelsBtn}
+          onPress={() => setMode("level_select")}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="grid" size={16} color={C.primary} />
+        </TouchableOpacity>
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle}>
+            {state.currentLevel} · {currentConfig.name}
+          </Text>
+          <View style={styles.miniProgressBar}>
+            <View
+              style={[
+                styles.miniProgressFill,
+                { width: `${streakProgress.percent}%` },
+              ]}
+            />
           </View>
-          {state.consecutiveErrors > 0 && (
-            <View style={styles.errorBadge}>
-              <Ionicons name="alert-circle" size={12} color={C.errorDark} />
-              <Text style={styles.errorBadgeText}>{state.consecutiveErrors}</Text>
-            </View>
-          )}
+          <Text style={styles.headerSub}>
+            {streakProgress.current}/{streakProgress.required} correct
+          </Text>
         </View>
+        {state.consecutiveErrors > 0 && (
+          <View style={styles.errorBadge}>
+            <Ionicons name="alert-circle" size={12} color={C.errorDark} />
+            <Text style={styles.errorBadgeText}>{state.consecutiveErrors}</Text>
+          </View>
+        )}
+      </View>
 
+      <ScrollView
+        ref={notebookScrollViewRef}
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isKeyboardVisible && { paddingBottom: 380 },
+        ]}
+        keyboardShouldPersistTaps="always"
+        showsVerticalScrollIndicator={false}
+      >
         {/* ── Problem ── */}
         {problem && (
           <Animated.View
@@ -576,9 +626,7 @@ export default function PracticeScreen() {
                     </TouchableOpacity>
                   )}
                   <TextInput
-                    ref={
-                      idx === typedAnswers.length - 1 ? inputRef : undefined
-                    }
+                    ref={idx === typedAnswers.length - 1 ? inputRef : undefined}
                     style={styles.notebookTextInput}
                     placeholder={
                       requiredLines === 1
@@ -587,6 +635,19 @@ export default function PracticeScreen() {
                     }
                     placeholderTextColor={C.textMuted}
                     value={ans}
+                    onFocus={() => {
+                      setActiveInputIndex(idx);
+                      setIsKeyboardVisible(true);
+                      // Scroll to ensure the input is visible above keyboard
+                      setTimeout(() => {
+                        notebookScrollViewRef.current?.scrollTo({
+                          y: 200 + idx * 46,
+                          animated: true,
+                        });
+                      }, 100);
+                    }}
+                    showSoftInputOnFocus={false}
+                    caretHidden={false}
                     onChangeText={(text) => {
                       const newAns = [...typedAnswers];
                       newAns[idx] = text;
@@ -713,20 +774,32 @@ export default function PracticeScreen() {
             </Animated.View>
           </View>
         )}
+      </ScrollView>
 
-        {/* ── Error Modal ── */}
-        {errorModal && errorModal.visible && (
-          <ErrorFeedbackModal
-            visible={errorModal.visible}
-            errorMessage={errorModal.message}
-            failedAtStep={errorModal.failedAtStep}
-            expectedProcedure={errorModal.procedure}
-            errorAction={errorModal.action}
-            onDismiss={handleErrorDismiss}
-          />
-        )}
-      </View>
-    </KeyboardAvoidingView>
+      <MathKeyboard
+        isVisible={isKeyboardVisible}
+        onKeyPress={handleKeyboardKeyPress}
+        onDelete={handleKeyboardDelete}
+        onSubmit={handleKeyboardSubmit}
+        onClose={() => {
+          setIsKeyboardVisible(false);
+          inputRef.current?.blur();
+        }}
+        bottomOffset={Platform.OS === "ios" ? 49 + insets.bottom : 60}
+      />
+
+      {/* ── Error Modal ── */}
+      {errorModal && errorModal.visible && (
+        <ErrorFeedbackModal
+          visible={errorModal.visible}
+          errorMessage={errorModal.message}
+          failedAtStep={errorModal.failedAtStep}
+          expectedProcedure={errorModal.procedure}
+          errorAction={errorModal.action}
+          onDismiss={handleErrorDismiss}
+        />
+      )}
+    </View>
   );
 }
 
@@ -1106,6 +1179,12 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     fontSize: 12,
     color: C.textMuted,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   lcContinueBtn: {
     flexDirection: "row",

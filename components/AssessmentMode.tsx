@@ -5,16 +5,17 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from "react-native";
 import Animated, { FadeIn, FadeInDown, SlideInDown } from "react-native-reanimated";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { RobotMascot } from "@/components/RobotMascot";
+import { MathKeyboard } from "@/components/MathKeyboard";
 import {
   generateProblem,
   GeneratedProblem,
@@ -40,6 +41,7 @@ interface AssessmentModeProps {
 }
 
 export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
+  const insets = useSafeAreaInsets();
   const [phase, setPhase] = useState<"intro" | "testing" | "results">("intro");
   const [currentLevelIdx, setCurrentLevelIdx] = useState(0);
   const [problemNum, setProblemNum] = useState(0);
@@ -47,7 +49,11 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
   const [typedAnswers, setTypedAnswers] = useState<string[]>([""]);
   const [results, setResults] = useState<AssessmentResult[]>([]);
   const [currentLevelCorrect, setCurrentLevelCorrect] = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [activeInputIndex, setActiveInputIndex] = useState(0);
+
   const inputRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const startTest = useCallback(() => {
     setPhase("testing");
@@ -144,6 +150,40 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
       moveToNext(false);
     }
   }, [typedAnswers, problem, moveToNext]);
+
+  const handleKeyboardKeyPress = (key: string) => {
+    const newAns = [...typedAnswers];
+    let char = key;
+    if (key === "×") char = "*";
+    if (key === "÷") char = "/";
+    newAns[activeInputIndex] = (newAns[activeInputIndex] || "") + char;
+    setTypedAnswers(newAns);
+  };
+
+  const handleKeyboardDelete = () => {
+    const newAns = [...typedAnswers];
+    if (newAns[activeInputIndex].length > 0) {
+      newAns[activeInputIndex] = newAns[activeInputIndex].slice(0, -1);
+      setTypedAnswers(newAns);
+    }
+  };
+
+  const requiredLines = problem ? EquationStepValidator.getRequiredLines(problem.level) : 1;
+
+  const handleKeyboardSubmit = () => {
+    if (
+      activeInputIndex === typedAnswers.length - 1 &&
+      typedAnswers.length < requiredLines &&
+      typedAnswers[activeInputIndex].trim()
+    ) {
+      setTypedAnswers((prev) => [...prev, ""]);
+      setActiveInputIndex((prev) => prev + 1);
+    } else {
+      setIsKeyboardVisible(false);
+      inputRef.current?.blur();
+      handleCheck();
+    }
+  };
 
   const handleSkip = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -267,13 +307,9 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
   const currentLevel = LEVEL_CONFIGS[currentLevelIdx];
   const totalProblems = LEVEL_CONFIGS.length * PROBLEMS_PER_LEVEL;
   const currentProblemGlobal = currentLevelIdx * PROBLEMS_PER_LEVEL + problemNum + 1;
-  const requiredLines = problem ? EquationStepValidator.getRequiredLines(problem.level) : 1;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <View style={styles.container}>
       <View style={styles.testContent}>
         {/* Progress header */}
         <View style={styles.testHeader}>
@@ -300,85 +336,120 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
           />
         </View>
 
-        {/* Problem */}
-        {problem && (
-          <Animated.View
-            key={`${problem.equation}-${currentProblemGlobal}`}
-            entering={FadeIn.duration(300)}
-            style={styles.testEquationCard}
-          >
-            <Text style={styles.testEquationLabel}>Solve</Text>
-            <Text style={styles.testEquation}>{problem.equation}</Text>
-          </Animated.View>
-        )}
-
-        {/* Input */}
-        <Animated.View entering={SlideInDown.duration(300)} style={styles.testInputCard}>
-          {typedAnswers.map((ans, idx) => (
-            <TextInput
-              key={`input-${idx}`}
-              ref={idx === typedAnswers.length - 1 ? inputRef : undefined}
-              style={styles.testInput}
-              placeholder={`Step ${idx + 1}...`}
-              placeholderTextColor={C.textMuted}
-              value={ans}
-              onChangeText={(text) => {
-                const newAns = [...typedAnswers];
-                newAns[idx] = text;
-                setTypedAnswers(newAns);
-              }}
-              onSubmitEditing={() => {
-                if (
-                  idx === typedAnswers.length - 1 &&
-                  typedAnswers.length < requiredLines &&
-                  ans.trim()
-                ) {
-                  setTypedAnswers((prev) => [...prev, ""]);
-                  setTimeout(() => inputRef.current?.focus(), 100);
-                }
-              }}
-              autoFocus={idx === typedAnswers.length - 1}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          ))}
-
-          {typedAnswers.length < requiredLines && (
-            <TouchableOpacity
-              style={styles.addRowBtn}
-              onPress={() => {
-                if (typedAnswers[typedAnswers.length - 1]?.trim()) {
-                  setTypedAnswers((prev) => [...prev, ""]);
-                  setTimeout(() => inputRef.current?.focus(), 100);
-                }
-              }}
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.scroll}
+          contentContainerStyle={[
+            styles.scrollContent,
+            isKeyboardVisible && { paddingBottom: 380 },
+          ]}
+          keyboardShouldPersistTaps="always"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Problem */}
+          {problem && (
+            <Animated.View
+              key={`${problem.equation}-${currentProblemGlobal}`}
+              entering={FadeIn.duration(300)}
+              style={styles.testEquationCard}
             >
-              <Ionicons name="add" size={16} color={C.primary} />
-              <Text style={styles.addRowText}>Add step</Text>
-            </TouchableOpacity>
+              <Text style={styles.testEquationLabel}>Solve</Text>
+              <Text style={styles.testEquation}>{problem.equation}</Text>
+            </Animated.View>
           )}
-        </Animated.View>
 
-        {/* Buttons */}
-        <View style={styles.testActions}>
-          <TouchableOpacity
-            style={styles.skipBtn}
-            onPress={handleSkip}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.skipBtnText}>Skip</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.checkBtn}
-            onPress={handleCheck}
-            activeOpacity={0.9}
-          >
-            <Ionicons name="checkmark" size={18} color={C.white} />
-            <Text style={styles.checkBtnText}>Submit</Text>
-          </TouchableOpacity>
-        </View>
+          {/* Input */}
+          <Animated.View entering={SlideInDown.duration(300)} style={styles.testInputCard}>
+            {typedAnswers.map((ans, idx) => (
+              <TextInput
+                key={`input-${idx}`}
+                ref={idx === typedAnswers.length - 1 ? inputRef : undefined}
+                style={styles.testInput}
+                placeholder={`Step ${idx + 1}...`}
+                placeholderTextColor={C.textMuted}
+                value={ans}
+                onFocus={() => {
+                  setActiveInputIndex(idx);
+                  setIsKeyboardVisible(true);
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollTo({
+                      y: idx * 40,
+                      animated: true,
+                    });
+                  }, 100);
+                }}
+                showSoftInputOnFocus={false}
+                caretHidden={false}
+                onChangeText={(text) => {
+                  const newAns = [...typedAnswers];
+                  newAns[idx] = text;
+                  setTypedAnswers(newAns);
+                }}
+                onSubmitEditing={() => {
+                  if (
+                    idx === typedAnswers.length - 1 &&
+                    typedAnswers.length < requiredLines &&
+                    ans.trim()
+                  ) {
+                    setTypedAnswers((prev) => [...prev, ""]);
+                    setTimeout(() => inputRef.current?.focus(), 100);
+                  }
+                }}
+                autoFocus={idx === typedAnswers.length - 1}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            ))}
+
+            {typedAnswers.length < requiredLines && (
+              <TouchableOpacity
+                style={styles.addRowBtn}
+                onPress={() => {
+                  if (typedAnswers[typedAnswers.length - 1]?.trim()) {
+                    setTypedAnswers((prev) => [...prev, ""]);
+                    setTimeout(() => inputRef.current?.focus(), 100);
+                  }
+                }}
+              >
+                <Ionicons name="add" size={16} color={C.primary} />
+                <Text style={styles.addRowText}>Add step</Text>
+              </TouchableOpacity>
+            )}
+          </Animated.View>
+
+          {/* Buttons */}
+          <View style={styles.testActions}>
+            <TouchableOpacity
+              style={styles.skipBtn}
+              onPress={handleSkip}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.skipBtnText}>Skip</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.checkBtn}
+              onPress={handleCheck}
+              activeOpacity={0.9}
+            >
+              <Ionicons name="checkmark" size={18} color={C.white} />
+              <Text style={styles.checkBtnText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </View>
-    </KeyboardAvoidingView>
+
+      <MathKeyboard
+        isVisible={isKeyboardVisible}
+        onKeyPress={handleKeyboardKeyPress}
+        onDelete={handleKeyboardDelete}
+        onSubmit={handleKeyboardSubmit}
+        onClose={() => {
+          setIsKeyboardVisible(false);
+          inputRef.current?.blur();
+        }}
+        bottomOffset={Platform.OS === "ios" ? 49 + insets.bottom : 60}
+      />
+    </View>
   );
 }
 
@@ -386,6 +457,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: C.background,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingVertical: 12,
   },
   introContent: {
     flex: 1,
