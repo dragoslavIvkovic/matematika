@@ -1,33 +1,24 @@
-import React, { useState, useRef } from "react";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import type React from "react";
+import { useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
   Dimensions,
-  TouchableOpacity,
   FlatList,
   Platform,
-  ViewToken,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  type ViewToken,
 } from "react-native";
-import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  interpolate,
-  Extrapolation,
-} from "react-native-reanimated";
+import Animated, { FadeIn, FadeInDown, FadeInUp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-
-import Colors from "@/constants/colors";
-import { RobotMascot } from "@/components/RobotMascot";
 import { HandwrittenEquation } from "@/components/HandwrittenEquation";
+import { RobotMascot } from "@/components/RobotMascot";
+import Colors from "@/constants/colors";
 
 const C = Colors.light;
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -51,7 +42,8 @@ function Slide1() {
         </View>
         <Text style={slideStyles.title}>Your Personal{"\n"}Math Tutor</Text>
         <Text style={slideStyles.subtitle}>
-          I'll guide you through math step-by-step. We'll solve real equations together — and I'll check your work!
+          I'll guide you through math step-by-step. We'll solve real equations together — and I'll
+          check your work!
         </Text>
       </Animated.View>
     </View>
@@ -61,7 +53,10 @@ function Slide1() {
 function Slide2() {
   return (
     <View style={slideStyles.container}>
-      <Animated.View entering={FadeInDown.delay(200).duration(500)} style={slideStyles.textBlockTop}>
+      <Animated.View
+        entering={FadeInDown.delay(200).duration(500)}
+        style={slideStyles.textBlockTop}
+      >
         <Text style={slideStyles.stepLabel}>Step 1</Text>
         <Text style={slideStyles.title}>Read the Problem</Text>
         <Text style={slideStyles.subtitle}>
@@ -74,17 +69,11 @@ function Slide2() {
           <View style={[slideStyles.dot, { backgroundColor: C.orange }]} />
           <Text style={slideStyles.demoLabel}>Problem</Text>
         </View>
-        <HandwrittenEquation
-          steps={[
-            { id: "e1", text: "2x + 1 = 5", isHighlighted: true },
-          ]}
-        />
+        <HandwrittenEquation steps={[{ id: "e1", text: "2x + 1 = 5", isHighlighted: true }]} />
         <View style={slideStyles.robotSmallRow}>
           <RobotMascot size={50} />
           <View style={slideStyles.tipBubble}>
-            <Text style={slideStyles.tipText}>
-              Solve for x — then show me your work!
-            </Text>
+            <Text style={slideStyles.tipText}>Solve for x — then show me your work!</Text>
           </View>
         </View>
       </Animated.View>
@@ -95,7 +84,10 @@ function Slide2() {
 function Slide3() {
   return (
     <View style={slideStyles.container}>
-      <Animated.View entering={FadeInDown.delay(200).duration(500)} style={slideStyles.textBlockTop}>
+      <Animated.View
+        entering={FadeInDown.delay(200).duration(500)}
+        style={slideStyles.textBlockTop}
+      >
         <Text style={slideStyles.stepLabel}>Step 2</Text>
         <Text style={slideStyles.title}>Submit Your Work</Text>
         <Text style={slideStyles.subtitle}>
@@ -125,7 +117,12 @@ function Slide3() {
           <Text style={slideStyles.methodDesc}>
             Tap the keyboard and type your answer directly. Fast and simple!
           </Text>
-          <View style={[slideStyles.methodBadge, { backgroundColor: C.cardCorrect, borderColor: C.accentLight }]}>
+          <View
+            style={[
+              slideStyles.methodBadge,
+              { backgroundColor: C.cardCorrect, borderColor: C.accentLight },
+            ]}
+          >
             <Text style={[slideStyles.methodBadgeText, { color: C.successDark }]}>Option B</Text>
           </View>
         </View>
@@ -141,7 +138,12 @@ function Slide4() {
         <RobotMascot size={100} />
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(400).duration(500)} style={slideStyles.textBlock}>
-        <View style={[slideStyles.badge, { backgroundColor: C.cardCorrect, borderColor: C.accentLight }]}>
+        <View
+          style={[
+            slideStyles.badge,
+            { backgroundColor: C.cardCorrect, borderColor: C.accentLight },
+          ]}
+        >
           <Text style={[slideStyles.badgeText, { color: C.successDark }]}>All Set!</Text>
         </View>
         <Text style={slideStyles.title}>Let's Start{"\n"}Solving!</Text>
@@ -154,9 +156,13 @@ function Slide4() {
             { icon: "checkmark-circle", label: "Step-by-step guidance" },
             { icon: "camera", label: "Snap or type answers" },
             { icon: "star", label: "Earn achievements" },
-          ].map((item, i) => (
-            <View key={i} style={slideStyles.reminderItem}>
-              <Ionicons name={item.icon as any} size={18} color={C.primary} />
+          ].map((item) => (
+            <View key={item.label} style={slideStyles.reminderItem}>
+              <Ionicons
+                name={item.icon as keyof typeof Ionicons.glyphMap}
+                size={18}
+                color={C.primary}
+              />
               <Text style={slideStyles.reminderText}>{item.label}</Text>
             </View>
           ))}
@@ -195,13 +201,11 @@ export default function OnboardingScreen() {
     router.replace("/(tabs)/practice");
   };
 
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems.length > 0 && viewableItems[0].index !== null) {
-        setCurrentIndex(viewableItems[0].index);
-      }
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
+    if (viewableItems.length > 0 && viewableItems[0].index !== null) {
+      setCurrentIndex(viewableItems[0].index);
     }
-  );
+  });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const botPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -241,18 +245,15 @@ export default function OnboardingScreen() {
       <View style={[styles.bottomBar, { paddingBottom: botPad + 16 }]}>
         {/* Dots */}
         <View style={styles.dotsRow}>
-          {SLIDES.map((_, i) => (
+          {SLIDES.map((slide, i) => (
             <TouchableOpacity
-              key={i}
+              key={slide.id}
               onPress={() => {
                 flatListRef.current?.scrollToIndex({ index: i, animated: true });
               }}
             >
               <View
-                style={[
-                  styles.dot,
-                  i === currentIndex ? styles.dotActive : styles.dotInactive,
-                ]}
+                style={[styles.dot, i === currentIndex ? styles.dotActive : styles.dotInactive]}
               />
             </TouchableOpacity>
           ))}
@@ -265,11 +266,7 @@ export default function OnboardingScreen() {
           activeOpacity={0.9}
         >
           <Text style={styles.ctaBtnText}>{isLast ? "Start Practicing!" : "Next"}</Text>
-          <Ionicons
-            name={isLast ? "rocket" : "arrow-forward"}
-            size={18}
-            color={C.white}
-          />
+          <Ionicons name={isLast ? "rocket" : "arrow-forward"} size={18} color={C.white} />
         </TouchableOpacity>
       </View>
     </View>
