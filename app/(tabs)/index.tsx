@@ -150,7 +150,7 @@ export default function LearnScreen() {
               <View style={styles.ctaTextBlock}>
                 <Text style={styles.ctaTitle}>Continue Practice</Text>
                 <Text style={styles.ctaSub}>
-                  Level {currentLevel} — {getLevelConfig(currentLevel as LevelId).name}
+                  Level {currentLevel} – {getLevelConfig(currentLevel as LevelId).name}
                 </Text>
               </View>
             </View>
@@ -162,7 +162,7 @@ export default function LearnScreen() {
 
         {/* Level roadmap */}
         <Animated.View entering={FadeInDown.delay(250).duration(400)} style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Select Level</Text>
+          <Text style={styles.sectionTitle}>Level 1 – Whole positive numbers</Text>
         </Animated.View>
 
         {LEVEL_CONFIGS.map((config, index) => {

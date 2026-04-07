@@ -32,7 +32,7 @@ function getRandomVariable(): string {
   return ALLOWED_VARIABLES[Math.floor(Math.random() * ALLOWED_VARIABLES.length)];
 }
 
-// ─── Level 1.1: Addition & Subtraction ───────────────────────────
+// ─── Level 1.1: Add/subtract ───────────────────────────
 function generateLevel11(type: "+" | "-"): GeneratedProblem {
   if (type === "+") {
     const a = randInt(1, 100);
@@ -66,7 +66,7 @@ function generateLevel11(type: "+" | "-"): GeneratedProblem {
   }
 }
 
-// ─── Level 1.2: Multiplication & Division ────────────────────────
+// ─── Level 1.2: Multiply/divide ────────────────────────
 function generateLevel12(type: "*" | "/"): GeneratedProblem {
   if (type === "*") {
     const a = randInt(2, 20);
@@ -101,7 +101,7 @@ function generateLevel12(type: "*" | "/"): GeneratedProblem {
   }
 }
 
-// ─── Level 1.3: Simple equations (x + a = b) or (x - a = b) ─────
+// ─── Level 1.3: x ± a = b ─────
 function generateLevel13(type: "+" | "-"): GeneratedProblem {
   const variable = getRandomVariable();
   if (type === "+") {
@@ -139,7 +139,7 @@ function generateLevel13(type: "+" | "-"): GeneratedProblem {
   }
 }
 
-// ─── Level 1.4: Simple equations (a·x = b) or (x÷a = b) ─────────
+// ─── Level 1.4: ax = b ─────────
 function generateLevel14(type: "*" | "/"): GeneratedProblem {
   const variable = getRandomVariable();
   if (type === "*") {
@@ -177,7 +177,7 @@ function generateLevel14(type: "*" | "/"): GeneratedProblem {
   }
 }
 
-// ─── Level 1.5: ax + b = c or ax - b = c ────────────────────────
+// ─── Level 1.5: ax ± b = c ────────────────────────
 function generateLevel15(type: "+" | "-"): GeneratedProblem {
   const variable = getRandomVariable();
   const a = randInt(2, 12);
@@ -216,7 +216,7 @@ function generateLevel15(type: "+" | "-"): GeneratedProblem {
   }
 }
 
-// ─── Level 1.6: x/a + b = c or x/a - b = c ─────────────────────
+// ─── Level 1.6: ± b = c (x ÷ a ± b = c) ─────────────────────
 function generateLevel16(type: "+" | "-"): GeneratedProblem {
   const variable = getRandomVariable();
   const a = randInt(2, 12);
@@ -272,7 +272,7 @@ export interface LevelConfig {
 export const LEVEL_CONFIGS: LevelConfig[] = [
   {
     id: "1.1",
-    name: "Addition & Subtraction",
+    name: "Add/subtract",
     description: "Basic arithmetic with whole numbers up to 100",
     requiredStreak: 10,
     operations: ["+", "-"],
@@ -281,7 +281,7 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
   },
   {
     id: "1.2",
-    name: "Multiplication & Division",
+    name: "Multiply/divide",
     description: "Basic arithmetic with whole numbers up to 200",
     requiredStreak: 10,
     operations: ["*", "/"],
@@ -290,7 +290,7 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
   },
   {
     id: "1.3",
-    name: "Simple Equations (+/-)",
+    name: "x ± a = b",
     description: "Solve x + a = b and x - a = b step by step",
     requiredStreak: 6,
     operations: ["+", "-"],
@@ -299,7 +299,7 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
   },
   {
     id: "1.4",
-    name: "Simple Equations (×/÷)",
+    name: "ax = b",
     description: "Solve a·x = b and x÷a = b step by step",
     requiredStreak: 6,
     operations: ["*", "/"],
@@ -308,7 +308,7 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
   },
   {
     id: "1.5",
-    name: "Two-Step Equations (×)",
+    name: "ax ± b = c",
     description: "Solve ax + b = c and ax - b = c",
     requiredStreak: 6,
     operations: ["+", "-"],
@@ -317,7 +317,7 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
   },
   {
     id: "1.6",
-    name: "Two-Step Equations (÷)",
+    name: "± b = c (x ÷ a ± b = c)",
     description: "Solve x÷a + b = c and x÷a - b = c",
     requiredStreak: 6,
     operations: ["+", "-"],

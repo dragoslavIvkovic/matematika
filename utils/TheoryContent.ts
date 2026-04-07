@@ -30,7 +30,7 @@ export interface TheoryExample {
 const THEORY: Record<string, TheorySection> = {
   "1.3": {
     title: "Solving Simple Equations",
-    subtitle: "Addition & Subtraction",
+    subtitle: "x ± a = b",
     concept:
       "When you move a number to the other side of the = sign, its operation flips! Addition becomes subtraction, and subtraction becomes addition.",
     rules: [
@@ -69,7 +69,7 @@ const THEORY: Record<string, TheorySection> = {
 
   "1.4": {
     title: "Solving Simple Equations",
-    subtitle: "Multiplication & Division",
+    subtitle: "ax = b",
     concept:
       "When you move a multiplication to the other side, it becomes division. When you move division, it becomes multiplication.",
     rules: [
@@ -108,7 +108,7 @@ const THEORY: Record<string, TheorySection> = {
 
   "1.5": {
     title: "Two-Step Equations",
-    subtitle: "With Multiplication",
+    subtitle: "ax ± b = c",
     concept:
       "These equations have TWO operations. First, move the addition/subtraction. Then, handle the multiplication. Work from outside in!",
     rules: [
@@ -148,7 +148,7 @@ const THEORY: Record<string, TheorySection> = {
 
   "1.6": {
     title: "Two-Step Equations",
-    subtitle: "With Division",
+    subtitle: "± b = c (x ÷ a ± b = c)",
     concept:
       "Like Level 1.5, but now x is divided by a number. First move the constant, then multiply to undo the division.",
     rules: [
