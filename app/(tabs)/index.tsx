@@ -249,10 +249,21 @@ export default function LearnScreen() {
                     </Text>
                   </View>
                   {hasTheory(config.id) && (
-                    <View style={styles.theoryTag}>
-                      <Ionicons name="book-outline" size={10} color={C.textMuted} />
-                      <Text style={theoryTagStyles.theoryTagText}>Includes theory lesson</Text>
-                    </View>
+                    <TouchableOpacity
+                      style={styles.theoryTag}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        if (manager) {
+                          manager.setCurrentLevel(config.id);
+                          manager.save();
+                          router.push(`${ROUTE_PRACTICE}?action=theory&level=${config.id}` as Href);
+                        }
+                      }}
+                    >
+                      <Ionicons name="book-outline" size={10} color={C.primary} />
+                      <Text style={styles.theoryTagText}>Read theory lesson</Text>
+                    </TouchableOpacity>
                   )}
                 </TouchableOpacity>
               </View>
@@ -263,14 +274,6 @@ export default function LearnScreen() {
     </View>
   );
 }
-
-const theoryTagStyles = StyleSheet.create({
-  theoryTagText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 10,
-    color: C.textMuted,
-  },
-});
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.background },
@@ -510,12 +513,17 @@ const styles = StyleSheet.create({
   theoryTag: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 6,
     alignSelf: "flex-start",
+    marginTop: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    backgroundColor: `${C.primary}10`,
   },
   theoryTagText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 10,
-    color: C.textMuted,
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 11,
+    color: C.primary,
   },
 });

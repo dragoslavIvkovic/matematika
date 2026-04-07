@@ -102,8 +102,9 @@ const checkStyles = StyleSheet.create({
 
 export default function PracticeScreen() {
   const insets = useSafeAreaInsets();
-  const { action } = useLocalSearchParams();
+  const { action, level } = useLocalSearchParams();
   const [mode, setMode] = useState<ScreenMode>("loading");
+  const [isTheoryOnly, setIsTheoryOnly] = useState(false);
   // Use ref for manager (mutable class) + counter to force re-renders
   const managerRef = useRef<LevelManager | null>(null);
   const [, forceUpdate] = useState(0);
@@ -178,10 +179,16 @@ export default function PracticeScreen() {
       if (action === "start") {
         router.setParams({ action: "" }); // Consume the action so we don't loop
         startPractice(mgr);
+      } else if (action === "theory" && level) {
+        mgr.setCurrentLevel(level as LevelId);
+        mgr.save();
+        setIsTheoryOnly(true);
+        setMode("theory");
+        router.setParams({ action: "", level: "" });
       } else {
         setMode((prev) => (prev === "loading" ? "level_select" : prev));
       }
-    }, [rerender, action, startPractice]),
+    }, [rerender, action, level, startPractice]),
   );
 
   // ── Handle level selection ──
@@ -201,11 +208,18 @@ export default function PracticeScreen() {
   const handleTheoryDismiss = useCallback(() => {
     const mgr = managerRef.current;
     if (!mgr) return;
+
+    if (isTheoryOnly) {
+      setIsTheoryOnly(false);
+      router.back();
+      return;
+    }
+
     mgr.markTheoryShown();
     mgr.save();
     generateNew(mgr);
     setMode("practice");
-  }, [generateNew]);
+  }, [generateNew, isTheoryOnly]);
 
   // ── Handle assessment complete ──
   const handleAssessmentComplete = useCallback(

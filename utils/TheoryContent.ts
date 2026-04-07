@@ -29,161 +29,145 @@ export interface TheoryExample {
 
 const THEORY: Record<string, TheorySection> = {
   "1.3": {
-    title: "Solving Simple Equations",
-    subtitle: "x ± a = b",
+    title: "Solving Equations x ± a = b",
+    subtitle: "Moving terms and changing operations",
     concept:
-      "When you move a number to the other side of the = sign, its operation flips! Addition becomes subtraction, and subtraction becomes addition.",
+      "When solving equations of the form x ± a = b, we can move terms from one side of the equation to the other side.",
     rules: [
       {
         icon: "swap-horizontal",
-        text: "When a number crosses the = sign, its sign flips",
+        text: "When a term moves to the opposite side, we change the operation.",
         highlight: true,
       },
       {
         icon: "add-circle",
-        text: "+ becomes − when moved to the other side",
+        text: "Addition (+) becomes subtraction (-)",
       },
       {
         icon: "remove-circle",
-        text: "− becomes + when moved to the other side",
-      },
-      {
-        icon: "checkmark-circle",
-        text: "Always check: plug your answer back in!",
+        text: "Subtraction (-) becomes addition (+)",
       },
     ],
     examples: [
       {
-        equation: "x + 3 = 10",
-        steps: ["x = 10 - 3", "x = 7"],
-        explanation: "The +3 moves to the other side and becomes -3. So x = 10 - 3 = 7.",
+        equation: "x + 7 = 19",
+        steps: ["x = 19 - 7", "x = 12"],
+        explanation:
+          "Move 7 to the right side. It was addition, so we change it to subtraction: x = 19 - 7 = 12.",
       },
       {
-        equation: "x - 5 = 8",
-        steps: ["x = 8 + 5", "x = 13"],
-        explanation: "The -5 moves to the other side and becomes +5. So x = 8 + 5 = 13.",
+        equation: "x - 5 = 23",
+        steps: ["x = 23 + 5", "x = 28"],
+        explanation:
+          "Move 5 to the right side. It was subtraction, so we change it to addition: x = 23 + 5 = 28.",
       },
     ],
-    tip: "Think of the = sign as a mirror. When numbers cross it, they become their opposite!",
+    tip: "Think of the = sign as a gate. When numbers pass through it, their operation flips to its opposite!",
   },
 
   "1.4": {
-    title: "Solving Simple Equations",
-    subtitle: "ax = b",
+    title: "Solving Equations ax = b and x ÷ a = b",
+    subtitle: "Moving multiplication and division",
     concept:
-      "When you move a multiplication to the other side, it becomes division. When you move division, it becomes multiplication.",
+      "When solving equations of the form ax = b and x ÷ a = b, we can move terms from one side of the equation to the other side.",
     rules: [
       {
         icon: "swap-horizontal",
-        text: "Multiplication and division are inverses of each other",
+        text: "When a term moves to the opposite side, we use the opposite operation.",
         highlight: true,
       },
       {
         icon: "close-circle",
-        text: "× becomes ÷ when moved to the other side",
+        text: "Multiplication (·) becomes division (÷)",
       },
       {
         icon: "ellipse",
-        text: "÷ becomes × when moved to the other side",
-      },
-      {
-        icon: "checkmark-circle",
-        text: "The answer should always divide evenly — no decimals!",
+        text: "Division (÷) becomes multiplication (·)",
       },
     ],
     examples: [
       {
-        equation: "4 · x = 20",
-        steps: ["x = 20 ÷ 4", "x = 5"],
-        explanation: "4 multiplies x, so divide both sides by 4. x = 20 ÷ 4 = 5.",
+        equation: "3x = 18",
+        steps: ["x = 18 ÷ 3", "x = 6"],
+        explanation:
+          "Move 3 (multiplication) to the right side. It was multiplication, so we change it to division: x = 18 ÷ 3 = 6.",
       },
       {
-        equation: "x ÷ 3 = 6",
-        steps: ["x = 6 × 3", "x = 18"],
-        explanation: "x is divided by 3, so multiply both sides by 3. x = 6 × 3 = 18.",
+        equation: "x ÷ 4 = 7",
+        steps: ["x = 7 · 4", "x = 28"],
+        explanation:
+          "Move 4 (division) to the right side. It was division, so we change it to multiplication: x = 7 · 4 = 28.",
       },
     ],
     tip: "If something multiplies x, divide to undo it. If something divides x, multiply to undo it!",
   },
 
   "1.5": {
-    title: "Two-Step Equations",
-    subtitle: "ax ± b = c",
+    title: "Two-Step Equations ax ± b = c",
+    subtitle: "Move constant first, then coefficient",
     concept:
-      "These equations have TWO operations. First, move the addition/subtraction. Then, handle the multiplication. Work from outside in!",
+      "When solving equations of the form ax ± b = c, we first move the constant term b, then the coefficient a, using the opposite operations.",
     rules: [
       {
         icon: "layers",
-        text: "Step 1: Move the constant (+ or -) to the other side",
+        text: "Step 1: Move the constant b to the opposite side using the opposite operation.",
         highlight: true,
-      },
-      {
-        icon: "calculator",
-        text: "Step 2: Calculate the result of the right side",
       },
       {
         icon: "git-branch",
-        text: "Step 3: Divide both sides by the coefficient of x",
+        text: "Step 2: Move the coefficient a to the opposite side (multiplication becomes division).",
         highlight: true,
-      },
-      {
-        icon: "checkmark-done",
-        text: "Step 4: Calculate the final answer",
       },
     ],
     examples: [
       {
-        equation: "3x + 5 = 20",
-        steps: ["3x = 20 - 5", "3x = 15", "x = 15 ÷ 3", "x = 5"],
-        explanation: "First, move +5 → becomes -5. Then 20-5=15. Then divide 15 by 3. x = 5!",
+        equation: "3x + 5 = 17",
+        steps: ["3x = 17 - 5", "3x = 12", "x = 12 ÷ 3", "x = 4"],
+        explanation:
+          "First, move 5 to the right side (+5 becomes -5). Then move 3 (multiplies x) to the right side (becomes division). x = 12 ÷ 3 = 4.",
       },
       {
-        equation: "2x - 4 = 10",
-        steps: ["2x = 10 + 4", "2x = 14", "x = 14 ÷ 2", "x = 7"],
-        explanation: "First, move -4 → becomes +4. Then 10+4=14. Then divide 14 by 2. x = 7!",
+        equation: "4x - 6 = 14",
+        steps: ["4x = 14 + 6", "4x = 20", "x = 20 ÷ 4", "x = 5"],
+        explanation:
+          "First, move 6 to the right side (-6 becomes +6). Then move 4 (multiplies x) to the right side (becomes division). x = 20 ÷ 4 = 5.",
       },
     ],
-    tip: "Always handle + and - BEFORE × and ÷. Think: undo the last operation first!",
+    tip: "Always handle addition/subtraction BEFORE handling multiplication/division.",
   },
 
   "1.6": {
-    title: "Two-Step Equations",
-    subtitle: "± b = c (x ÷ a ± b = c)",
+    title: "Two-Step Equations x ÷ a ± b = c",
+    subtitle: "Move constant first, then divisor",
     concept:
-      "Like Level 1.5, but now x is divided by a number. First move the constant, then multiply to undo the division.",
+      "When solving equations of the form x ÷ a ± b = c, we first move the constant term b, then the coefficient a, using the opposite operations.",
     rules: [
       {
         icon: "layers",
-        text: "Step 1: Move the constant (+ or -) to the other side",
+        text: "Step 1: Move the constant b to the opposite side using the opposite operation.",
         highlight: true,
-      },
-      {
-        icon: "calculator",
-        text: "Step 2: Calculate the result of the right side",
       },
       {
         icon: "git-branch",
-        text: "Step 3: Multiply both sides by the divisor",
+        text: "Step 2: Move the coefficient a to the opposite side (division becomes multiplication).",
         highlight: true,
-      },
-      {
-        icon: "checkmark-done",
-        text: "Step 4: Calculate the final answer",
       },
     ],
     examples: [
       {
-        equation: "x ÷ 4 + 3 = 8",
-        steps: ["x ÷ 4 = 8 - 3", "x ÷ 4 = 5", "x = 5 × 4", "x = 20"],
-        explanation: "First, move +3 → becomes -3. Then 8-3=5. Then multiply 5 by 4. x = 20!",
+        equation: "x ÷ 3 + 4 = 10",
+        steps: ["x ÷ 3 = 10 - 4", "x ÷ 3 = 6", "x = 6 · 3", "x = 18"],
+        explanation:
+          "Move 4 to the right side (+4 becomes -4). Then move 3 (divides x) to the right side (becomes multiplication). x = 6 · 3 = 18.",
       },
       {
-        equation: "x ÷ 2 - 6 = 3",
-        steps: ["x ÷ 2 = 3 + 6", "x ÷ 2 = 9", "x = 9 × 2", "x = 18"],
-        explanation: "First, move -6 → becomes +6. Then 3+6=9. Then multiply 9 by 2. x = 18!",
+        equation: "x ÷ 5 - 2 = 7",
+        steps: ["x ÷ 5 = 7 + 2", "x ÷ 5 = 9", "x = 9 · 5", "x = 45"],
+        explanation:
+          "Move 2 to the right side (-2 becomes +2). Then move 5 (divides x) to the right side (becomes multiplication). x = 9 · 5 = 45.",
       },
     ],
-    tip: "Division is the opposite of multiplication. If x is divided, multiply to set it free!",
+    tip: "Follow the reverse order of operations when solving: move what's furthest from x first!",
   },
 };
 
