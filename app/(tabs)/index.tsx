@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { type Href, router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -18,6 +17,7 @@ import Colors from "@/constants/colors";
 import { ROUTE_ONBOARDING, ROUTE_PRACTICE } from "@/constants/routes";
 import { LevelManager, type LevelState } from "@/utils/LevelManager";
 import { getLevelConfig, LEVEL_CONFIGS, type LevelId } from "@/utils/ProblemGenerator";
+import { AppStorage } from "@/utils/storage";
 import { hasTheory } from "@/utils/TheoryContent";
 
 const C = Colors.light;
@@ -66,25 +66,24 @@ export default function LearnScreen() {
 
   useEffect(() => {
     // Check onboarding
-    AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
-      if (!val) {
-        router.replace(ROUTE_ONBOARDING);
-      }
-    });
+    const isDone = AppStorage.getString(ONBOARDING_KEY) === "done";
+
+    if (!isDone) {
+      router.replace(ROUTE_ONBOARDING);
+    }
+
     // Load state
-    LevelManager.load().then((mgr) => {
-      setManager(mgr);
-      setState(mgr.getState());
-    });
+    const mgr = LevelManager.load();
+    setManager(mgr);
+    setState(mgr.getState());
   }, []);
 
   // Refresh when screen comes into focus
   useEffect(() => {
     const interval = setInterval(() => {
-      LevelManager.load().then((mgr) => {
-        setManager(mgr);
-        setState(mgr.getState());
-      });
+      const mgr = LevelManager.load();
+      setManager(mgr);
+      setState(mgr.getState());
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -218,7 +217,7 @@ export default function LearnScreen() {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     if (manager) {
                       manager.setCurrentLevel(config.id);
-                      await manager.save();
+                      manager.save();
                       router.push(`${ROUTE_PRACTICE}?action=start` as Href);
                     }
                   }}
@@ -252,7 +251,7 @@ export default function LearnScreen() {
                   {hasTheory(config.id) && (
                     <View style={styles.theoryTag}>
                       <Ionicons name="book-outline" size={10} color={C.textMuted} />
-                      <Text style={styles.theoryTagText}>Includes theory lesson</Text>
+                      <Text style={theoryTagStyles.theoryTagText}>Includes theory lesson</Text>
                     </View>
                   )}
                 </TouchableOpacity>
@@ -264,6 +263,14 @@ export default function LearnScreen() {
     </View>
   );
 }
+
+const theoryTagStyles = StyleSheet.create({
+  theoryTagText: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 10,
+    color: C.textMuted,
+  },
+});
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: C.background },

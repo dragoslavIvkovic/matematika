@@ -172,19 +172,17 @@ export default function ProgressScreen() {
   const [manager, setManager] = useState<LevelManager | null>(null);
 
   useEffect(() => {
-    LevelManager.load().then((mgr) => {
-      setManager(mgr);
-      setState(mgr.getState());
-    });
+    const mgr = LevelManager.load();
+    setManager(mgr);
+    setState(mgr.getState());
   }, []);
 
   // Refresh periodically
   useEffect(() => {
     const interval = setInterval(() => {
-      LevelManager.load().then((mgr) => {
-        setManager(mgr);
-        setState(mgr.getState());
-      });
+      const mgr = LevelManager.load();
+      setManager(mgr);
+      setState(mgr.getState());
     }, 3000);
     return () => clearInterval(interval);
   }, []);

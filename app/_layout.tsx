@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initNotifications } from "@/utils/NotificationManager";
+import { AppStorage } from "@/utils/storage";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -45,6 +46,11 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    if (__DEV__) {
+      // Korisnikov zahtev: Uvek forsiraj onboarding pri podizanju u dev modu
+      AppStorage.remove("math_tutor_onboarding_v1");
+    }
+
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
       initNotifications().catch(console.error);

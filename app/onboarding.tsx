@@ -1,8 +1,6 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import type React from "react";
 import { useRef, useState } from "react";
 import {
   Dimensions,
@@ -14,38 +12,49 @@ import {
   View,
   type ViewToken,
 } from "react-native";
-import Animated, { FadeIn, FadeInDown, FadeInUp } from "react-native-reanimated";
+import Animated, { FadeInDown, FadeInUp, ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { HandwrittenEquation } from "@/components/HandwrittenEquation";
 import { RobotMascot } from "@/components/RobotMascot";
 import Colors from "@/constants/colors";
-import { ROUTE_PRACTICE } from "@/constants/routes";
+import { ROUTE_HOME } from "@/constants/routes";
+import { AppStorage } from "@/utils/storage";
 
 const C = Colors.light;
 const { width: SCREEN_W } = Dimensions.get("window");
 
 const ONBOARDING_KEY = "math_tutor_onboarding_v1";
 
-interface Slide {
-  id: string;
-  Component: React.FC;
-}
-
 function Slide1() {
   return (
     <View style={slideStyles.container}>
-      <Animated.View entering={FadeIn.delay(200).duration(600)} style={slideStyles.robotWrap}>
-        <RobotMascot size={110} />
+      <Animated.View entering={ZoomIn.delay(200).duration(600)} style={slideStyles.robotWrap}>
+        <RobotMascot size={120} />
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(400).duration(500)} style={slideStyles.textBlock}>
         <View style={slideStyles.badge}>
-          <Text style={slideStyles.badgeText}>Welcome!</Text>
+          <Text style={slideStyles.badgeText}>SMART TUTOR</Text>
         </View>
-        <Text style={slideStyles.title}>Your Personal{"\n"}Math Tutor</Text>
+        <Text style={slideStyles.title}>The Future of{"\n"}Learning Math</Text>
         <Text style={slideStyles.subtitle}>
-          I'll guide you through math step-by-step. We'll solve real equations together — and I'll
-          check your work!
+          I don't just give answers. I analyze your steps, find exactly where you're struggling, and
+          guide you back to core basics.
         </Text>
+        <View style={slideStyles.featureGrid}>
+          {[
+            { icon: "analytics", detail: "Step Diagnostics", color: C.primary },
+            { icon: "trending-up", detail: "Adaptive Levels", color: C.accent },
+            { icon: "book", detail: "Theory on Demand", color: C.orange },
+          ].map((f, i) => (
+            <Animated.View
+              key={f.detail}
+              entering={FadeInUp.delay(600 + i * 100)}
+              style={slideStyles.featureItem}
+            >
+              <Ionicons name={f.icon as keyof typeof Ionicons.glyphMap} size={20} color={f.color} />
+              <Text style={slideStyles.featureText}>{f.detail}</Text>
+            </Animated.View>
+          ))}
+        </View>
       </Animated.View>
     </View>
   );
@@ -54,27 +63,37 @@ function Slide1() {
 function Slide2() {
   return (
     <View style={slideStyles.container}>
-      <Animated.View
-        entering={FadeInDown.delay(200).duration(500)}
-        style={slideStyles.textBlockTop}
-      >
-        <Text style={slideStyles.stepLabel}>Step 1</Text>
-        <Text style={slideStyles.title}>Read the Problem</Text>
+      <Animated.View entering={FadeInDown.delay(200)} style={slideStyles.textBlockTop}>
+        <Text style={slideStyles.stepLabel}>METHODOLOGY</Text>
+        <Text style={slideStyles.title}>Step-by-Step Solving</Text>
         <Text style={slideStyles.subtitle}>
-          Each problem appears clearly on screen. Take your time — the steps are shown to guide you.
+          Just like a real notebook, we encourage you to solve math problems step-by-step instead of
+          just guessing the final answer.
         </Text>
       </Animated.View>
 
-      <Animated.View entering={FadeInUp.delay(350).duration(500)} style={slideStyles.demoCard}>
-        <View style={slideStyles.demoLabelRow}>
-          <View style={[slideStyles.dot, { backgroundColor: C.orange }]} />
-          <Text style={slideStyles.demoLabel}>Problem</Text>
-        </View>
-        <HandwrittenEquation steps={[{ id: "e1", text: "2x + 1 = 5", isHighlighted: true }]} />
-        <View style={slideStyles.robotSmallRow}>
-          <RobotMascot size={50} />
-          <View style={slideStyles.tipBubble}>
-            <Text style={slideStyles.tipText}>Solve for x — then show me your work!</Text>
+      <Animated.View entering={FadeInUp.delay(400)} style={slideStyles.interactiveMockWrap}>
+        <View style={slideStyles.mockNotebook}>
+          <View style={slideStyles.mockHeader}>
+            <Text style={slideStyles.mockEquationText}>2x + 4 = 10</Text>
+          </View>
+
+          {/* Notebook lines */}
+          {["nb1", "nb2", "nb3"].map((k, i) => (
+            <View key={k} style={[slideStyles.mockNotebookLine, { top: 68 + i * 46 }]} />
+          ))}
+          <View style={slideStyles.mockMarginLine} />
+
+          <View style={slideStyles.mockRow}>
+            <Text style={slideStyles.mockRowText}>2x = 10 - 4</Text>
+            <Ionicons name="checkmark-circle" size={18} color={C.success} />
+          </View>
+          <View style={slideStyles.mockRow}>
+            <Text style={slideStyles.mockRowText}>2x = 6</Text>
+            <Ionicons name="checkmark-circle" size={18} color={C.success} />
+          </View>
+          <View style={[slideStyles.mockRow, slideStyles.mockRowActive]}>
+            <Text style={slideStyles.mockRowTextActive}>x = 3</Text>
           </View>
         </View>
       </Animated.View>
@@ -85,121 +104,56 @@ function Slide2() {
 function Slide3() {
   return (
     <View style={slideStyles.container}>
+      <Animated.View entering={FadeInDown.delay(200)} style={slideStyles.textBlockTop}>
+        <Text style={slideStyles.stepLabel}>SMART FEEDBACK</Text>
+        <Text style={slideStyles.title}>We Find Exact Mistakes</Text>
+        <Text style={slideStyles.subtitle}>
+          If you make a mathematical error, I'll pinpoint exactly which step went wrong and explain
+          why.
+        </Text>
+      </Animated.View>
+
       <Animated.View
-        entering={FadeInDown.delay(200).duration(500)}
-        style={slideStyles.textBlockTop}
+        entering={FadeInUp.delay(400)}
+        style={[slideStyles.interactiveMockWrap, { justifyContent: "center", marginBottom: 20 }]}
       >
-        <Text style={slideStyles.stepLabel}>Step 2</Text>
-        <Text style={slideStyles.title}>Submit Your Work</Text>
-        <Text style={slideStyles.subtitle}>
-          You have two ways to answer. Pick whichever feels most natural!
-        </Text>
-      </Animated.View>
-
-      <Animated.View entering={FadeInUp.delay(350).duration(500)} style={slideStyles.methodsGrid}>
-        <View style={[slideStyles.methodCard, { borderColor: C.primary }]}>
-          <View style={[slideStyles.methodIcon, { backgroundColor: C.primary }]}>
-            <Ionicons name="camera" size={28} color={C.white} />
+        <View style={slideStyles.mockNotebook}>
+          <View style={slideStyles.mockErrorToast}>
+            <RobotMascot size={32} />
+            <Text style={slideStyles.mockErrorText}>
+              Wait, when moving +4 to the other side, it should become -4!
+            </Text>
           </View>
-          <Text style={slideStyles.methodTitle}>Snap a Photo</Text>
-          <Text style={slideStyles.methodDesc}>
-            Write your solution on paper and photograph it. I'll read and check your work!
-          </Text>
-          <View style={slideStyles.methodBadge}>
-            <Text style={slideStyles.methodBadgeText}>Option A</Text>
-          </View>
-        </View>
 
-        <View style={[slideStyles.methodCard, { borderColor: C.accent }]}>
-          <View style={[slideStyles.methodIcon, { backgroundColor: C.accent }]}>
-            <Feather name="edit-3" size={26} color={C.white} />
+          <View style={slideStyles.mockHeader}>
+            <Text style={slideStyles.mockEquationText}>2x + 4 = 10</Text>
           </View>
-          <Text style={slideStyles.methodTitle}>Type It In</Text>
-          <Text style={slideStyles.methodDesc}>
-            Tap the keyboard and type your answer directly. Fast and simple!
-          </Text>
-          <View
-            style={[
-              slideStyles.methodBadge,
-              { backgroundColor: C.cardCorrect, borderColor: C.accentLight },
-            ]}
-          >
-            <Text style={[slideStyles.methodBadgeText, { color: C.successDark }]}>Option B</Text>
-          </View>
-        </View>
-      </Animated.View>
-    </View>
-  );
-}
 
-function Slide4() {
-  return (
-    <View style={slideStyles.container}>
-      <Animated.View entering={FadeIn.delay(200).duration(600)} style={slideStyles.robotWrap}>
-        <RobotMascot size={100} />
-      </Animated.View>
-      <Animated.View entering={FadeInDown.delay(400).duration(500)} style={slideStyles.textBlock}>
-        <View
-          style={[
-            slideStyles.badge,
-            { backgroundColor: C.cardCorrect, borderColor: C.accentLight },
-          ]}
-        >
-          <Text style={[slideStyles.badgeText, { color: C.successDark }]}>All Set!</Text>
-        </View>
-        <Text style={slideStyles.title}>Let's Start{"\n"}Solving!</Text>
-        <Text style={slideStyles.subtitle}>
-          Your first problem is ready. Remember — I'm here to help every step of the way.
-        </Text>
-
-        <View style={slideStyles.reminderRow}>
-          {[
-            { icon: "checkmark-circle", label: "Step-by-step guidance" },
-            { icon: "camera", label: "Snap or type answers" },
-            { icon: "star", label: "Earn achievements" },
-          ].map((item) => (
-            <View key={item.label} style={slideStyles.reminderItem}>
-              <Ionicons
-                name={item.icon as keyof typeof Ionicons.glyphMap}
-                size={18}
-                color={C.primary}
-              />
-              <Text style={slideStyles.reminderText}>{item.label}</Text>
-            </View>
+          {["nbe1", "nbe2"].map((k, i) => (
+            <View key={k} style={[slideStyles.mockNotebookLine, { top: 155 + i * 46 }]} />
           ))}
+          <View style={[slideStyles.mockMarginLine, { top: 75 }]} />
+
+          <View style={[slideStyles.mockRow, slideStyles.mockRowError]}>
+            <Text style={slideStyles.mockRowTextError}>2x = 10 + 4</Text>
+            <Ionicons name="close-circle" size={18} color={C.error} />
+          </View>
         </View>
       </Animated.View>
     </View>
   );
 }
-
-const SLIDES: Slide[] = [
-  { id: "s1", Component: Slide1 },
-  { id: "s2", Component: Slide2 },
-  { id: "s3", Component: Slide3 },
-  { id: "s4", Component: Slide4 },
-];
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
-  const isLast = currentIndex === SLIDES.length - 1;
-
-  const handleNext = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (isLast) {
-      await AsyncStorage.setItem(ONBOARDING_KEY, "done");
-      router.replace(ROUTE_PRACTICE);
-    } else {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
-    }
-  };
-
-  const handleSkip = async () => {
-    await AsyncStorage.setItem(ONBOARDING_KEY, "done");
-    router.replace(ROUTE_PRACTICE);
+  const handleFinish = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    // Persist onboarding status
+    AppStorage.setString(ONBOARDING_KEY, "done");
+    router.replace(ROUTE_HOME);
   };
 
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -211,23 +165,33 @@ export default function OnboardingScreen() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const botPad = Platform.OS === "web" ? 34 : insets.bottom;
 
+  const SLIDES_CONTENT = [
+    { id: "s1", render: () => <Slide1 /> },
+    {
+      id: "s2",
+      render: () => <Slide2 />,
+    },
+    {
+      id: "s3",
+      render: () => <Slide3 />,
+    },
+  ];
+
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
-      {/* Skip button */}
-      {!isLast && (
+      {currentIndex < 2 && (
         <TouchableOpacity
           style={[styles.skipBtn, { top: topPad + 12 }]}
-          onPress={handleSkip}
+          onPress={handleFinish}
           activeOpacity={0.7}
         >
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       )}
 
-      {/* Slides */}
       <FlatList
         ref={flatListRef}
-        data={SLIDES}
+        data={SLIDES_CONTENT}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -235,40 +199,38 @@ export default function OnboardingScreen() {
         onViewableItemsChanged={onViewableItemsChanged.current}
         viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
         renderItem={({ item }) => (
-          <View style={{ width: SCREEN_W }}>
-            <item.Component />
-          </View>
+          <View style={{ width: SCREEN_W, height: "100%" }}>{item.render()}</View>
         )}
         scrollEventThrottle={16}
       />
 
-      {/* Bottom controls */}
       <View style={[styles.bottomBar, { paddingBottom: botPad + 16 }]}>
-        {/* Dots */}
         <View style={styles.dotsRow}>
-          {SLIDES.map((slide, i) => (
-            <TouchableOpacity
-              key={slide.id}
-              onPress={() => {
-                flatListRef.current?.scrollToIndex({ index: i, animated: true });
-              }}
-            >
-              <View
-                style={[styles.dot, i === currentIndex ? styles.dotActive : styles.dotInactive]}
-              />
-            </TouchableOpacity>
+          {[0, 1, 2].map((i) => (
+            <View
+              key={i}
+              style={[styles.dot, i === currentIndex ? styles.dotActive : styles.dotInactive]}
+            />
           ))}
         </View>
 
-        {/* CTA button */}
-        <TouchableOpacity
-          style={[styles.ctaBtn, isLast && styles.ctaBtnGreen]}
-          onPress={handleNext}
-          activeOpacity={0.9}
-        >
-          <Text style={styles.ctaBtnText}>{isLast ? "Start Practicing!" : "Next"}</Text>
-          <Ionicons name={isLast ? "rocket" : "arrow-forward"} size={18} color={C.white} />
-        </TouchableOpacity>
+        {currentIndex < 2 ? (
+          <TouchableOpacity
+            style={styles.ctaBtn}
+            onPress={() =>
+              flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true })
+            }
+            activeOpacity={0.9}
+          >
+            <Text style={styles.ctaBtnText}>Next</Text>
+            <Ionicons name="arrow-forward" size={18} color={C.white} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.ctaBtn} onPress={handleFinish} activeOpacity={0.9}>
+            <Text style={styles.ctaBtnText}>Start Learning</Text>
+            <Ionicons name="checkmark-circle" size={18} color={C.white} />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -278,14 +240,13 @@ const slideStyles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 10,
     paddingBottom: 8,
-    justifyContent: "center",
-    gap: 24,
+    gap: 20,
   },
   robotWrap: {
     alignItems: "center",
-    paddingTop: 8,
+    paddingTop: 20,
   },
   textBlock: {
     gap: 12,
@@ -293,6 +254,7 @@ const slideStyles = StyleSheet.create({
   },
   textBlockTop: {
     gap: 8,
+    alignItems: "center",
   },
   badge: {
     backgroundColor: C.cardNeutral,
@@ -304,149 +266,187 @@ const slideStyles = StyleSheet.create({
   },
   badgeText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 13,
+    fontSize: 12,
     color: C.primaryDark,
-    letterSpacing: 0.3,
+    letterSpacing: 1,
   },
   title: {
     fontFamily: "Inter_700Bold",
-    fontSize: 32,
+    fontSize: 28,
     color: C.text,
     textAlign: "center",
-    lineHeight: 40,
+    lineHeight: 36,
   },
   subtitle: {
     fontFamily: "Inter_400Regular",
-    fontSize: 16,
+    fontSize: 15,
     color: C.textSecondary,
     textAlign: "center",
-    lineHeight: 24,
+    lineHeight: 22,
     maxWidth: 320,
+  },
+  featureGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 10,
+  },
+  featureItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: C.white,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.borderLight,
+  },
+  featureText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    color: C.text,
   },
   stepLabel: {
     fontFamily: "Inter_700Bold",
-    fontSize: 12,
+    fontSize: 11,
     color: C.primary,
     textTransform: "uppercase",
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
   },
-  demoCard: {
-    backgroundColor: C.white,
+  interactiveMockWrap: {
+    flex: 1,
+    paddingTop: 10,
+    width: "100%",
+  },
+  mockNotebook: {
+    backgroundColor: C.paper,
     borderRadius: 24,
-    padding: 18,
-    shadowColor: C.black,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 6,
-    gap: 12,
-  },
-  demoLabelRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  demoLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    color: C.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  robotSmallRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginTop: 4,
-  },
-  tipBubble: {
-    flex: 1,
-    backgroundColor: C.backgroundAlt,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderWidth: 1.5,
-    borderColor: C.primaryLight,
-  },
-  tipText: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 13,
-    color: C.primaryDark,
-    lineHeight: 18,
-  },
-  methodsGrid: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  methodCard: {
-    flex: 1,
-    backgroundColor: C.white,
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 2,
-    gap: 8,
+    paddingRight: 16,
+    paddingLeft: 40,
+    paddingBottom: 24,
+    minHeight: 280,
     shadowColor: C.black,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.07,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 4,
+    elevation: 6,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: C.borderLight,
+    position: "relative",
   },
-  methodIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
+  mockNotebookLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: C.infoLight,
   },
-  methodTitle: {
+  mockMarginLine: {
+    position: "absolute",
+    left: 32,
+    top: 0,
+    bottom: 0,
+    width: 1.5,
+    backgroundColor: C.errorLight,
+    opacity: 0.6,
+  },
+  mockHeader: {
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: C.infoLight,
+    marginBottom: 8,
+  },
+  mockEquationText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 16,
+    fontSize: 24,
     color: C.text,
   },
-  methodDesc: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-    color: C.textSecondary,
-    lineHeight: 17,
-    flex: 1,
+  mockRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: 46,
+    paddingRight: 8,
   },
-  methodBadge: {
-    backgroundColor: C.cardNeutral,
-    borderWidth: 1,
-    borderColor: C.primaryLight,
-    alignSelf: "flex-start",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 100,
+  mockRowActive: {
+    backgroundColor: "rgba(37, 99, 235, 0.05)", // C.primary with opacity
+    borderRadius: 8,
+    marginRight: -10,
+    paddingLeft: 5,
   },
-  methodBadgeText: {
+  mockRowError: {
+    backgroundColor: "rgba(220, 38, 38, 0.05)", // C.error with opacity
+    borderRadius: 8,
+    marginRight: -10,
+    paddingLeft: 5,
+  },
+  mockRowText: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 20,
+    color: C.text,
+  },
+  mockRowTextActive: {
     fontFamily: "Inter_700Bold",
-    fontSize: 11,
-    color: C.primaryDark,
+    fontSize: 20,
+    color: C.primary,
   },
-  reminderRow: {
-    gap: 10,
-    marginTop: 4,
-    alignSelf: "stretch",
+  mockRowTextError: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 20,
+    color: C.error,
+    textDecorationLine: "line-through",
   },
-  reminderItem: {
+  mockErrorToast: {
+    backgroundColor: C.white,
+    borderRadius: 16,
+    padding: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: C.surfaceAlt,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    marginTop: 16,
+    marginBottom: 8,
+    marginLeft: -28,
+    marginRight: 0,
+    zIndex: 10,
+    shadowColor: C.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: C.errorLight,
   },
-  reminderText: {
+  mockErrorText: {
     fontFamily: "Inter_500Medium",
-    fontSize: 14,
+    fontSize: 12,
+    lineHeight: 18,
     color: C.text,
+    flex: 1,
+  },
+  startBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: C.primary,
+    paddingVertical: 18,
+    paddingHorizontal: 30,
+    borderRadius: 22,
+    width: "100%",
+    justifyContent: "center",
+    marginTop: 20,
+    shadowColor: C.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  startBtnText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 18,
+    color: C.white,
   },
 });
 
@@ -481,17 +481,16 @@ const styles = StyleSheet.create({
     gap: 8,
     alignItems: "center",
   },
-  dot: {},
-  dotActive: {
-    width: 24,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: C.primary,
-  },
-  dotInactive: {
+  dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  dotActive: {
+    width: 24,
+    backgroundColor: C.primary,
+  },
+  dotInactive: {
     backgroundColor: C.border,
   },
   ctaBtn: {
@@ -501,7 +500,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.primary,
     paddingVertical: 16,
     paddingHorizontal: 32,
-    borderRadius: 18,
+    borderRadius: 20,
     alignSelf: "stretch",
     justifyContent: "center",
     shadowColor: C.primary,
@@ -509,10 +508,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 12,
     elevation: 6,
-  },
-  ctaBtnGreen: {
-    backgroundColor: C.accent,
-    shadowColor: C.accent,
   },
   ctaBtnText: {
     fontFamily: "Inter_700Bold",

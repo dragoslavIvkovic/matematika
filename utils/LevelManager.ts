@@ -9,9 +9,9 @@
  * All thresholds are in utils/AppConfig.ts — change there, applies everywhere.
  */
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { APP_CONFIG } from "./AppConfig";
 import { getLevelConfig, LEVEL_CONFIGS, type LevelId } from "./ProblemGenerator";
+import { AppStorage } from "./storage";
 
 const STORAGE_KEY = "math_tutor_level_state_v3";
 
@@ -65,7 +65,7 @@ export interface ErrorAction {
 }
 
 export type LevelManager = {
-  save(): Promise<void>;
+  save(): void;
   getState(): Readonly<LevelState>;
   getCurrentLevel(): LevelId;
   setCurrentLevel(level: LevelId): void;
@@ -76,7 +76,7 @@ export type LevelManager = {
   getNextOperationType(): string;
   isLevelUnlocked(_levelId: string): boolean;
   isLevelCompleted(levelId: string): boolean;
-  reset(): Promise<void>;
+  reset(): void;
   getStreakProgress(): { current: number; required: number; percent: number };
 };
 
@@ -84,9 +84,9 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
   let state: LevelState = initialState ? { ...initialState } : { ...DEFAULT_STATE };
 
   const manager: LevelManager = {
-    async save() {
+    save() {
       try {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        AppStorage.setObject(STORAGE_KEY, state);
       } catch (e) {
         console.warn("Failed to save level state:", e);
       }
@@ -264,9 +264,9 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
     isLevelCompleted(levelId: string): boolean {
       return state.completedLevels.includes(levelId);
     },
-    async reset(): Promise<void> {
+    reset(): void {
       state = { ...DEFAULT_STATE };
-      await manager.save();
+      manager.save();
     },
     getStreakProgress() {
       const config = getLevelConfig(state.currentLevel);
@@ -282,11 +282,10 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
 };
 
 export const LevelManager = {
-  async load(): Promise<LevelManager> {
+  load(): LevelManager {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as LevelState;
+      const parsed = AppStorage.getObject<LevelState>(STORAGE_KEY);
+      if (parsed) {
         if (parsed.consecutiveErrors === undefined) parsed.consecutiveErrors = 0;
         if (parsed.levelErrorCount === undefined) parsed.levelErrorCount = 0;
         if (parsed.activeDays === undefined) parsed.activeDays = [];

@@ -172,16 +172,15 @@ export default function PracticeScreen() {
   // ── Load manager on focus ──
   useFocusEffect(
     useCallback(() => {
-      LevelManager.load().then((mgr) => {
-        managerRef.current = mgr;
-        rerender();
-        if (action === "start") {
-          router.setParams({ action: "" }); // Consume the action so we don't loop
-          startPractice(mgr);
-        } else {
-          setMode((prev) => (prev === "loading" ? "level_select" : prev));
-        }
-      });
+      const mgr = LevelManager.load();
+      managerRef.current = mgr;
+      rerender();
+      if (action === "start") {
+        router.setParams({ action: "" }); // Consume the action so we don't loop
+        startPractice(mgr);
+      } else {
+        setMode((prev) => (prev === "loading" ? "level_select" : prev));
+      }
     }, [rerender, action, startPractice]),
   );
 
