@@ -10,6 +10,7 @@
  */
 
 import { APP_CONFIG } from "./AppConfig";
+import { getLocalDateString } from "./dateUtils";
 import { getLevelConfig, LEVEL_CONFIGS, type LevelId } from "./ProblemGenerator";
 import { AppStorage } from "./storage";
 
@@ -27,7 +28,7 @@ export interface LevelState {
   levelStats: Record<string, { solved: number; errors: number; bestStreak: number }>;
   theoryShownForLevel: string[];
   needsTheory: boolean;
-  activeDays: string[]; // ISO date strings (YYYY-MM-DD)
+  activeDays: string[]; // Local calendar days (YYYY-MM-DD)
 }
 
 const DEFAULT_STATE: LevelState = {
@@ -126,7 +127,7 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
       state.totalSolved++;
       state.consecutiveErrors = 0;
 
-      const today = new Date().toISOString().split("T")[0];
+      const today = getLocalDateString();
       if (!state.activeDays.includes(today)) {
         state.activeDays.push(today);
       }

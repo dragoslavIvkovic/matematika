@@ -118,13 +118,13 @@ export function MathKeyboard({
       >
         {/* Top Control Bar */}
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-            <Ionicons name="chevron-down" size={24} color={C.textMuted} />
-          </TouchableOpacity>
+          <View style={styles.topBarSide}>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <Ionicons name="chevron-down" size={24} color={C.textMuted} />
+            </TouchableOpacity>
+          </View>
           <View style={styles.handle} />
-          <TouchableOpacity onPress={onSubmit} style={styles.submitBtn}>
-            <Text style={styles.submitBtnText}>Done</Text>
-          </TouchableOpacity>
+          <View style={styles.topBarSide} />
         </View>
 
         {/* Keys Grid */}
@@ -164,10 +164,15 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     paddingHorizontal: 12,
     marginBottom: 4,
     height: 24,
+  },
+  topBarSide: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
   },
   handle: {
     width: 36,
@@ -177,17 +182,6 @@ const styles = StyleSheet.create({
   },
   closeBtn: {
     padding: 4,
-  },
-  submitBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: C.primaryLight,
-  },
-  submitBtnText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 14,
-    color: "#FFFFFF",
   },
   grid: {
     gap: 4,

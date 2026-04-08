@@ -164,7 +164,9 @@ const styles = StyleSheet.create({
     backgroundColor: C.overlay,
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 200,
+    // Above MathKeyboard (zIndex 1000) so feedback is never hidden behind it
+    zIndex: 5000,
+    elevation: 50,
     padding: 24,
   },
   card: {

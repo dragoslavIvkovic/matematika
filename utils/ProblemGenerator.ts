@@ -22,14 +22,35 @@ export interface GeneratedProblem {
   requiredSteps: number;
 }
 
-export const ALLOWED_VARIABLES = ["x", "y", "a", "b", "c", "d", "z", "w", "m", "n", "p", "q"];
+/** x i y — prve na math tastaturi (red sa ABC); lako za unos. */
+export const PRIMARY_VARIABLES = ["x", "y"] as const;
+/** Ostala slova tek kada treba više od dve nepoznate. */
+export const EXTRA_VARIABLES = ["a", "b", "c", "d", "z", "w", "m", "n", "p", "q"] as const;
+export const ALLOWED_VARIABLES = [...PRIMARY_VARIABLES, ...EXTRA_VARIABLES];
 
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * Bira `count` različitih oznaka za nepoznate: uvek prvo iscrpljuje x i y,
+ * tek onda redom iz EXTRA (a, b, c, …).
+ */
+export function pickVariables(count: number): string[] {
+  const max = PRIMARY_VARIABLES.length + EXTRA_VARIABLES.length;
+  const n = Math.min(Math.max(0, count), max);
+  if (n === 0) return [];
+  if (n === 1) {
+    return [PRIMARY_VARIABLES[Math.floor(Math.random() * PRIMARY_VARIABLES.length)]];
+  }
+  if (n === 2) {
+    return [...PRIMARY_VARIABLES];
+  }
+  return [...PRIMARY_VARIABLES, ...EXTRA_VARIABLES.slice(0, n - 2)];
+}
+
 function getRandomVariable(): string {
-  return ALLOWED_VARIABLES[Math.floor(Math.random() * ALLOWED_VARIABLES.length)];
+  return pickVariables(1)[0];
 }
 
 // ─── Level 1.1: Add/subtract ───────────────────────────

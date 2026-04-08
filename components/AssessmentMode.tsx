@@ -8,6 +8,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import Animated, { FadeIn, FadeInDown, SlideInDown } from "react-native-reanimated";
@@ -15,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MathKeyboard } from "@/components/MathKeyboard";
 import { RobotMascot } from "@/components/RobotMascot";
 import Colors from "@/constants/colors";
+import { useUsageStore } from "@/store/usageStore";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import {
   type GeneratedProblem,
@@ -51,6 +53,8 @@ const generateStep = (text = "") => ({
 
 export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
   const insets = useSafeAreaInsets();
+  const { height: windowH } = useWindowDimensions();
+  const incrementTasksCompleted = useUsageStore((state) => state.incrementTasksCompleted);
   const [phase, setPhase] = useState<"intro" | "testing" | "results">("intro");
   const [currentLevelIdx, setCurrentLevelIdx] = useState(0);
   const [problemNum, setProblemNum] = useState(0);
@@ -156,11 +160,12 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
     if (validation.isValid && validation.isComplete) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       moveToNext(true);
+      incrementTasksCompleted();
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       moveToNext(false);
     }
-  }, [typedAnswers, problem, moveToNext]);
+  }, [typedAnswers, problem, moveToNext, incrementTasksCompleted]);
 
   const handleKeyboardKeyPress = (key: string) => {
     const newAns = [...typedAnswers];
@@ -211,15 +216,41 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
 
   // ── Intro Phase ──
   if (phase === "intro") {
+    const robotSize = Math.round(Math.min(102, Math.max(64, windowH * 0.13)));
+    const robotSectionMinH = robotSize * 1.32;
+    const titleGap = Math.max(20, Math.min(32, Math.round(windowH * 0.028)));
+    const titleSize = windowH < 640 ? 24 : windowH < 780 ? 26 : 28;
+    const titleLineHeight = Math.round(titleSize * 1.25);
+    const subSize = windowH < 640 ? 14 : 15;
+    const subLineHeight = Math.round(subSize * 1.45);
+
     return (
-      <View style={styles.container}>
-        <Animated.View entering={FadeInDown.duration(400)} style={styles.introContent}>
-          <RobotMascot size={90} />
-          <Text style={styles.introTitle}>Assessment Test</Text>
-          <Text style={styles.introSubtitle}>
-            I'll give you a few problems from each level to find out where you should start. Don't
-            worry — this is just to help you!
-          </Text>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.introScrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        bounces
+      >
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.introColumn}>
+          <View
+            style={[
+              styles.robotIntroSection,
+              { minHeight: robotSectionMinH, marginBottom: titleGap },
+            ]}
+          >
+            <RobotMascot size={robotSize} />
+          </View>
+
+          <View style={styles.introHeadingBlock}>
+            <Text style={[styles.introTitle, { fontSize: titleSize, lineHeight: titleLineHeight }]}>
+              Assessment Test
+            </Text>
+            <Text style={[styles.introSubtitle, { fontSize: subSize, lineHeight: subLineHeight }]}>
+              I'll give you a few problems from each level to find out where you should start. Don't
+              worry — this is just to help you!
+            </Text>
+          </View>
 
           <View style={styles.infoBox}>
             <View style={styles.infoRow}>
@@ -249,7 +280,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
             <Text style={styles.cancelBtnText}>Skip, let me choose</Text>
           </TouchableOpacity>
         </Animated.View>
-      </View>
+      </ScrollView>
     );
   }
 
@@ -271,7 +302,10 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
               entering={FadeInDown.delay(100 + i * 60).duration(400)}
               style={[
                 styles.resultCard,
-                { borderLeftColor: passed ? C.accent : C.errorLight, borderLeftWidth: 4 },
+                {
+                  borderLeftColor: passed ? C.accent : C.errorLight,
+                  borderLeftWidth: 4,
+                },
               ]}
             >
               <View style={styles.resultCardLeft}>
@@ -463,26 +497,41 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingVertical: 12,
   },
-  introContent: {
-    flex: 1,
+  introScrollContent: {
+    flexGrow: 1,
+    width: "100%",
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 28,
+  },
+  introColumn: {
+    width: "100%",
+    alignItems: "center",
+    gap: 18,
+  },
+  /** Reserves vertical space for mascot + float animation — keeps title below robot */
+  robotIntroSection: {
+    width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 24,
-    gap: 16,
+    paddingVertical: 8,
+  },
+  introHeadingBlock: {
+    width: "100%",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 4,
   },
   introTitle: {
     fontFamily: "Inter_700Bold",
-    fontSize: 28,
     color: C.text,
     textAlign: "center",
   },
   introSubtitle: {
     fontFamily: "Inter_400Regular",
-    fontSize: 15,
     color: C.textSecondary,
     textAlign: "center",
-    lineHeight: 22,
-    maxWidth: 300,
+    maxWidth: 320,
   },
   infoBox: {
     backgroundColor: C.white,

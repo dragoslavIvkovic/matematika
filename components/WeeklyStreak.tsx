@@ -1,12 +1,13 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 import Colors from "@/constants/colors";
+import { getLocalDateString } from "@/utils/dateUtils";
 
 const C = Colors.light;
 
 interface WeeklyStreakProps {
-  activeDays: string[]; // ISO date strings
-  currentStreak: number;
+  activeDays: string[]; // Local calendar YYYY-MM-DD
+  currentStreak: number; // Consecutive days practiced (see computeDailyStreak)
 }
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -23,7 +24,7 @@ export function WeeklyStreak({ activeDays, currentStreak }: WeeklyStreakProps) {
   const days = WEEKDAYS.map((label, index) => {
     const date = new Date(startOfWeek);
     date.setDate(startOfWeek.getDate() + index);
-    const dateString = date.toISOString().split("T")[0];
+    const dateString = getLocalDateString(date);
     const isActive = activeDays.includes(dateString);
     const isToday = index === currentDayOfWeek;
 

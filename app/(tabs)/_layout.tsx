@@ -16,7 +16,7 @@ function NativeTabLayout() {
         <Label>Learn</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="practice">
-        <Icon sf={{ default: "brain.head.profile", selected: "brain.head.profile.fill" }} />
+        <Icon sf={{ default: "house", selected: "house.fill" }} />
         <Label>Practice</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="progress">
@@ -72,9 +72,9 @@ function ClassicTabLayout() {
           title: "Practice",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="brain.head.profile" tintColor={color} size={24} />
+              <SymbolView name="house.fill" tintColor={color} size={24} />
             ) : (
-              <Ionicons name="school" size={22} color={color} />
+              <Ionicons name="home" size={22} color={color} />
             ),
         }}
       />

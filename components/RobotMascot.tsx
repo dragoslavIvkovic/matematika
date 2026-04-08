@@ -17,36 +17,55 @@ interface RobotMascotProps {
   isThinking?: boolean;
 }
 
-export function RobotMascot({ size = 80, isThinking: _isThinking = false }: RobotMascotProps) {
+export function RobotMascot({ size = 80, isThinking = false }: RobotMascotProps) {
   const scale = useSharedValue(1);
   const antennaRotate = useSharedValue(0);
   const blinkOpacity = useSharedValue(1);
   const floatY = useSharedValue(0);
 
   useEffect(() => {
-    scale.value = withRepeat(
-      withSequence(
-        withTiming(1.04, { duration: 800, easing: Easing.inOut(Easing.sin) }),
-        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.sin) }),
-      ),
-      -1,
-    );
+    // In tight layouts (e.g. “Checking…”), pulse + float + scale draws outside the layout box and overlaps text below
+    if (isThinking) {
+      scale.value = 1;
+      floatY.value = withRepeat(
+        withSequence(
+          withTiming(-2, { duration: 1400, easing: Easing.inOut(Easing.sin) }),
+          withTiming(2, { duration: 1400, easing: Easing.inOut(Easing.sin) }),
+        ),
+        -1,
+      );
+      antennaRotate.value = withRepeat(
+        withSequence(
+          withTiming(-4, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+          withTiming(4, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        ),
+        -1,
+      );
+    } else {
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.04, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+          withTiming(1, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+        ),
+        -1,
+      );
 
-    floatY.value = withRepeat(
-      withSequence(
-        withTiming(-4, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
-        withTiming(4, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
-      ),
-      -1,
-    );
+      floatY.value = withRepeat(
+        withSequence(
+          withTiming(-4, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
+          withTiming(4, { duration: 1200, easing: Easing.inOut(Easing.sin) }),
+        ),
+        -1,
+      );
 
-    antennaRotate.value = withRepeat(
-      withSequence(
-        withTiming(-8, { duration: 600, easing: Easing.inOut(Easing.sin) }),
-        withTiming(8, { duration: 600, easing: Easing.inOut(Easing.sin) }),
-      ),
-      -1,
-    );
+      antennaRotate.value = withRepeat(
+        withSequence(
+          withTiming(-8, { duration: 600, easing: Easing.inOut(Easing.sin) }),
+          withTiming(8, { duration: 600, easing: Easing.inOut(Easing.sin) }),
+        ),
+        -1,
+      );
+    }
 
     const blinkInterval = setInterval(() => {
       blinkOpacity.value = withSequence(
@@ -56,7 +75,7 @@ export function RobotMascot({ size = 80, isThinking: _isThinking = false }: Robo
     }, 3000);
 
     return () => clearInterval(blinkInterval);
-  }, [scale, floatY, blinkOpacity, antennaRotate]);
+  }, [scale, floatY, blinkOpacity, antennaRotate, isThinking]);
 
   const bodyStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }, { translateY: floatY.value }],
@@ -81,8 +100,14 @@ export function RobotMascot({ size = 80, isThinking: _isThinking = false }: Robo
   const antW = s * 0.06;
   const ballR = s * 0.08;
 
+  const outerH = s * 1.1;
+  /** Keep paint inside bounds so parents (ScrollView rows) don’t get overlapped by transforms */
+  const outerStyle = isThinking
+    ? { width: s, height: outerH, alignItems: "center" as const, overflow: "hidden" as const }
+    : { width: s, height: outerH, alignItems: "center" as const };
+
   return (
-    <View style={{ width: s, height: s * 1.1, alignItems: "center" }}>
+    <View style={outerStyle}>
       <Animated.View style={[{ alignItems: "center" }, bodyStyle]}>
         {/* Antenna */}
         <Animated.View style={[{ alignItems: "center", marginBottom: 2 }, antennaStyle]}>

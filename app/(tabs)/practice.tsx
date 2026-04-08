@@ -23,7 +23,6 @@ import Animated, {
   useSharedValue,
   withRepeat,
   withSequence,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -34,6 +33,7 @@ import { MathKeyboard } from "@/components/MathKeyboard";
 import { RobotMascot } from "@/components/RobotMascot";
 import { TheoryScreen } from "@/components/TheoryScreen";
 import Colors from "@/constants/colors";
+import { useUsageStore } from "@/store/usageStore";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import { type ErrorAction, LevelManager } from "@/utils/LevelManager";
 import {
@@ -102,6 +102,7 @@ const checkStyles = StyleSheet.create({
 
 export default function PracticeScreen() {
   const insets = useSafeAreaInsets();
+  const incrementTasksCompleted = useUsageStore((state) => state.incrementTasksCompleted);
   const { action, level } = useLocalSearchParams();
   const [mode, setMode] = useState<ScreenMode>("loading");
   const [isTheoryOnly, setIsTheoryOnly] = useState(false);
@@ -136,7 +137,8 @@ export default function PracticeScreen() {
   const notebookScrollViewRef = useRef<ScrollView>(null);
 
   const resultCardStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: resultScale.value }],
+    // Clamp so easing/back never scales past 100% width (avoids clipping / “off screen”)
+    transform: [{ scale: Math.min(resultScale.value, 1) }],
     opacity: resultOpacity.value,
   }));
 
@@ -281,6 +283,7 @@ export default function PracticeScreen() {
           const result = mgr.recordCorrect(problem.type);
           mgr.save();
           rerender();
+          incrementTasksCompleted();
 
           if (result.levelComplete) {
             setLevelCompleteInfo({
@@ -290,8 +293,17 @@ export default function PracticeScreen() {
             setTimeout(() => setMode("level_complete"), 1500);
           }
 
-          resultScale.value = withSpring(1, { damping: 12, stiffness: 180 });
-          resultOpacity.value = withTiming(1, { duration: 250 });
+          setIsKeyboardVisible(false);
+          inputRef.current?.blur();
+
+          // No spring overshoot — scale must stay ≤1 or the card jumps off-screen
+          resultScale.value = 0.92;
+          resultOpacity.value = 0;
+          resultScale.value = withTiming(1, {
+            duration: 300,
+            easing: Easing.out(Easing.cubic),
+          });
+          resultOpacity.value = withTiming(1, { duration: 280, easing: Easing.out(Easing.cubic) });
         } else {
           // Partially correct, need more steps
           setIsChecking(false);
@@ -311,6 +323,10 @@ export default function PracticeScreen() {
         mgr.save();
         rerender();
 
+        // Hide custom keyboard so the feedback modal is never covered by it
+        setIsKeyboardVisible(false);
+        inputRef.current?.blur();
+
         setErrorModal({
           visible: true,
           message: validation.modalMessage || "That's not correct. Check your work.",
@@ -320,7 +336,7 @@ export default function PracticeScreen() {
         });
       }
     }, 800);
-  }, [typedAnswers, problem, rerender, resultOpacity, resultScale]);
+  }, [typedAnswers, problem, rerender, resultOpacity, resultScale, incrementTasksCompleted]);
 
   const handleKeyboardKeyPress = (key: string) => {
     const newAns = [...typedAnswers];
@@ -536,7 +552,7 @@ export default function PracticeScreen() {
           onPress={() => setMode("level_select")}
           activeOpacity={0.7}
         >
-          <Ionicons name="grid" size={16} color={C.primary} />
+          <Ionicons name="home" size={18} color={C.primary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>
@@ -703,8 +719,12 @@ export default function PracticeScreen() {
               exiting={FadeOut.duration(200)}
               style={styles.checkingArea}
             >
-              <RobotMascot size={70} isThinking />
-              <Text style={styles.checkingLabel}>Checking your answer...</Text>
+              <View style={styles.robotCheckingSlot}>
+                <RobotMascot size={70} isThinking />
+              </View>
+              <Text style={[styles.checkingLabel, styles.checkingLabelBelowRobot]}>
+                Checking your answer...
+              </Text>
               <CheckingAnimation />
             </Animated.View>
           </View>
@@ -1001,22 +1021,37 @@ const styles = StyleSheet.create({
     color: C.white,
   },
 
-  // Middle area
+  // Middle area (no flex:1 — avoids odd stretching inside ScrollView vs keyboard)
   middleArea: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 16,
+    minHeight: 200,
   },
   checkingArea: {
     alignItems: "center",
-    gap: 16,
+    gap: 12,
+    width: "100%",
+    paddingHorizontal: 4,
+  },
+  /** Slot for thinking robot — extra room + spacing so label never sits under the paint bounds */
+  robotCheckingSlot: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 96,
+    paddingVertical: 4,
+    marginBottom: 4,
   },
   checkingLabel: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
     color: C.textSecondary,
+  },
+  checkingLabelBelowRobot: {
+    marginTop: 8,
+    textAlign: "center",
   },
 
   // Result card

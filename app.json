@@ -15,10 +15,13 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.xmilioner.math-tutor"
+      "bundleIdentifier": "com.mathmetodic.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "package": "com.xmilioner.mathtutor"
+      "package": "com.mathmetodic.app"
     },
     "web": {
       "favicon": "./assets/images/icon.png"

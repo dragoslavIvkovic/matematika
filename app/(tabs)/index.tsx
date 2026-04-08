@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WeeklyStreak } from "@/components/WeeklyStreak";
 import Colors from "@/constants/colors";
 import { ROUTE_ONBOARDING, ROUTE_PRACTICE } from "@/constants/routes";
+import { computeDailyStreak } from "@/utils/dateUtils";
 import { LevelManager, type LevelState } from "@/utils/LevelManager";
 import { getLevelConfig, LEVEL_CONFIGS, type LevelId } from "@/utils/ProblemGenerator";
 import { AppStorage } from "@/utils/storage";
@@ -100,7 +101,10 @@ export default function LearnScreen() {
     >
       {/* Header with Weekly Streak */}
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-        <WeeklyStreak activeDays={state?.activeDays || []} currentStreak={state?.streak || 0} />
+        <WeeklyStreak
+          activeDays={state?.activeDays || []}
+          currentStreak={computeDailyStreak(state?.activeDays || [])}
+        />
       </Animated.View>
 
       <ScrollView

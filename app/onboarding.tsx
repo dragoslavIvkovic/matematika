@@ -6,9 +6,11 @@ import {
   Dimensions,
   FlatList,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
   type ViewToken,
 } from "react-native";
@@ -25,37 +27,75 @@ const { width: SCREEN_W } = Dimensions.get("window");
 const ONBOARDING_KEY = "math_tutor_onboarding_v1";
 
 function Slide1() {
+  const { height: windowH } = useWindowDimensions();
+  // Robot scales with viewport; clamp keeps tiny / huge phones readable
+  const robotSize = Math.round(Math.min(132, Math.max(72, windowH * 0.17)));
+  // Mascot floats ±4px + antenna — reserve vertical space so text never overlaps
+  const robotSectionMinH = robotSize * 1.28;
+  const textGap = Math.max(20, Math.min(36, Math.round(windowH * 0.03)));
+  const titleFontSize = windowH < 620 ? 22 : windowH < 720 ? 24 : windowH < 840 ? 26 : 28;
+  const titleLineHeight = Math.round(titleFontSize * 1.28);
+  const subtitleFontSize = windowH < 620 ? 13 : 14;
+  const subtitleLineHeight = Math.round(subtitleFontSize * 1.45);
+  const featurePadV = windowH < 640 ? 10 : 12;
+  const scrollBottomPad = Math.max(8, Math.round(windowH * 0.03));
+
   return (
     <View style={slideStyles.container}>
-      <Animated.View entering={ZoomIn.delay(200).duration(600)} style={slideStyles.robotWrap}>
-        <RobotMascot size={120} />
-      </Animated.View>
-      <Animated.View entering={FadeInDown.delay(400).duration(500)} style={slideStyles.textBlock}>
-        <View style={slideStyles.badge}>
-          <Text style={slideStyles.badgeText}>SMART TUTOR</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        bounces
+        contentContainerStyle={[slideStyles.slideScrollContent, { paddingBottom: scrollBottomPad }]}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={[slideStyles.robotSection, { minHeight: robotSectionMinH }]}>
+          <Animated.View entering={ZoomIn.delay(200).duration(600)} style={slideStyles.robotWrap}>
+            <RobotMascot size={robotSize} />
+          </Animated.View>
         </View>
-        <Text style={slideStyles.title}>The Future of{"\n"}Learning Math</Text>
-        <Text style={slideStyles.subtitle}>
-          I don't just give answers. I analyze your steps, find exactly where you're struggling, and
-          guide you back to core basics.
-        </Text>
-        <View style={slideStyles.featureGrid}>
-          {[
-            { icon: "analytics", detail: "Step Diagnostics", color: C.primary },
-            { icon: "trending-up", detail: "Adaptive Levels", color: C.accent },
-            { icon: "book", detail: "Theory on Demand", color: C.orange },
-          ].map((f, i) => (
-            <Animated.View
-              key={f.detail}
-              entering={FadeInUp.delay(600 + i * 100)}
-              style={slideStyles.featureItem}
-            >
-              <Ionicons name={f.icon as keyof typeof Ionicons.glyphMap} size={20} color={f.color} />
-              <Text style={slideStyles.featureText}>{f.detail}</Text>
-            </Animated.View>
-          ))}
-        </View>
-      </Animated.View>
+        <Animated.View
+          entering={FadeInDown.delay(400).duration(500)}
+          style={[slideStyles.textBlock, { marginTop: textGap }]}
+        >
+          <View style={slideStyles.badge}>
+            <Text style={slideStyles.badgeText}>SMART TUTOR</Text>
+          </View>
+          <Text
+            style={[slideStyles.title, { fontSize: titleFontSize, lineHeight: titleLineHeight }]}
+          >
+            The Future of{"\n"}Learning Math
+          </Text>
+          <Text
+            style={[
+              slideStyles.subtitle,
+              { fontSize: subtitleFontSize, lineHeight: subtitleLineHeight },
+            ]}
+          >
+            I don't just give answers. I analyze your steps, find exactly where you're struggling,
+            and guide you back to core basics.
+          </Text>
+          <View style={slideStyles.featureGrid}>
+            {[
+              { icon: "analytics", detail: "Step Diagnostics", color: C.primary },
+              { icon: "trending-up", detail: "Adaptive Levels", color: C.accent },
+              { icon: "book", detail: "Theory on Demand", color: C.orange },
+            ].map((f, i) => (
+              <Animated.View
+                key={f.detail}
+                entering={FadeInUp.delay(600 + i * 100)}
+                style={[slideStyles.featureItem, { paddingVertical: featurePadV }]}
+              >
+                <Ionicons
+                  name={f.icon as keyof typeof Ionicons.glyphMap}
+                  size={20}
+                  color={f.color}
+                />
+                <Text style={slideStyles.featureText}>{f.detail}</Text>
+              </Animated.View>
+            ))}
+          </View>
+        </Animated.View>
+      </ScrollView>
     </View>
   );
 }
@@ -63,40 +103,46 @@ function Slide1() {
 function Slide2() {
   return (
     <View style={slideStyles.container}>
-      <Animated.View entering={FadeInDown.delay(200)} style={slideStyles.textBlockTop}>
-        <Text style={slideStyles.stepLabel}>METHODOLOGY</Text>
-        <Text style={slideStyles.title}>Step-by-Step Solving</Text>
-        <Text style={slideStyles.subtitle}>
-          Just like a real notebook, we encourage you to solve math problems step-by-step instead of
-          just guessing the final answer.
-        </Text>
-      </Animated.View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={slideStyles.slideScrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Animated.View entering={FadeInDown.delay(200)} style={slideStyles.textBlockTop}>
+          <Text style={slideStyles.stepLabel}>METHODOLOGY</Text>
+          <Text style={slideStyles.title}>Step-by-Step Solving</Text>
+          <Text style={slideStyles.subtitle}>
+            Just like a real notebook, we encourage you to solve math problems step-by-step instead
+            of just guessing the final answer.
+          </Text>
+        </Animated.View>
 
-      <Animated.View entering={FadeInUp.delay(400)} style={slideStyles.interactiveMockWrap}>
-        <View style={slideStyles.mockNotebook}>
-          <View style={slideStyles.mockHeader}>
-            <Text style={slideStyles.mockEquationText}>2x + 4 = 10</Text>
-          </View>
+        <Animated.View entering={FadeInUp.delay(400)} style={slideStyles.interactiveMockWrap}>
+          <View style={slideStyles.mockNotebook}>
+            <View style={slideStyles.mockHeader}>
+              <Text style={slideStyles.mockEquationText}>2x + 4 = 10</Text>
+            </View>
 
-          {/* Notebook lines */}
-          {["nb1", "nb2", "nb3"].map((k, i) => (
-            <View key={k} style={[slideStyles.mockNotebookLine, { top: 68 + i * 46 }]} />
-          ))}
-          <View style={slideStyles.mockMarginLine} />
+            {/* Notebook lines */}
+            {["nb1", "nb2", "nb3"].map((k, i) => (
+              <View key={k} style={[slideStyles.mockNotebookLine, { top: 68 + i * 46 }]} />
+            ))}
+            <View style={slideStyles.mockMarginLine} />
 
-          <View style={slideStyles.mockRow}>
-            <Text style={slideStyles.mockRowText}>2x = 10 - 4</Text>
-            <Ionicons name="checkmark-circle" size={18} color={C.success} />
+            <View style={slideStyles.mockRow}>
+              <Text style={slideStyles.mockRowText}>2x = 10 - 4</Text>
+              <Ionicons name="checkmark-circle" size={18} color={C.success} />
+            </View>
+            <View style={slideStyles.mockRow}>
+              <Text style={slideStyles.mockRowText}>2x = 6</Text>
+              <Ionicons name="checkmark-circle" size={18} color={C.success} />
+            </View>
+            <View style={[slideStyles.mockRow, slideStyles.mockRowActive]}>
+              <Text style={slideStyles.mockRowTextActive}>x = 3</Text>
+            </View>
           </View>
-          <View style={slideStyles.mockRow}>
-            <Text style={slideStyles.mockRowText}>2x = 6</Text>
-            <Ionicons name="checkmark-circle" size={18} color={C.success} />
-          </View>
-          <View style={[slideStyles.mockRow, slideStyles.mockRowActive]}>
-            <Text style={slideStyles.mockRowTextActive}>x = 3</Text>
-          </View>
-        </View>
-      </Animated.View>
+        </Animated.View>
+      </ScrollView>
     </View>
   );
 }
@@ -104,42 +150,48 @@ function Slide2() {
 function Slide3() {
   return (
     <View style={slideStyles.container}>
-      <Animated.View entering={FadeInDown.delay(200)} style={slideStyles.textBlockTop}>
-        <Text style={slideStyles.stepLabel}>SMART FEEDBACK</Text>
-        <Text style={slideStyles.title}>We Find Exact Mistakes</Text>
-        <Text style={slideStyles.subtitle}>
-          If you make a mathematical error, I'll pinpoint exactly which step went wrong and explain
-          why.
-        </Text>
-      </Animated.View>
-
-      <Animated.View
-        entering={FadeInUp.delay(400)}
-        style={[slideStyles.interactiveMockWrap, { justifyContent: "center", marginBottom: 20 }]}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={slideStyles.slideScrollContent}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={slideStyles.mockNotebook}>
-          <View style={slideStyles.mockErrorToast}>
-            <RobotMascot size={32} />
-            <Text style={slideStyles.mockErrorText}>
-              Wait, when moving +4 to the other side, it should become -4!
-            </Text>
-          </View>
+        <Animated.View entering={FadeInDown.delay(200)} style={slideStyles.textBlockTop}>
+          <Text style={slideStyles.stepLabel}>SMART FEEDBACK</Text>
+          <Text style={slideStyles.title}>We Find Exact Mistakes</Text>
+          <Text style={slideStyles.subtitle}>
+            If you make a mathematical error, I'll pinpoint exactly which step went wrong and
+            explain why.
+          </Text>
+        </Animated.View>
 
-          <View style={slideStyles.mockHeader}>
-            <Text style={slideStyles.mockEquationText}>2x + 4 = 10</Text>
-          </View>
+        <Animated.View
+          entering={FadeInUp.delay(400)}
+          style={[slideStyles.interactiveMockWrap, { justifyContent: "center", marginBottom: 12 }]}
+        >
+          <View style={slideStyles.mockNotebook}>
+            <View style={slideStyles.mockErrorToast}>
+              <RobotMascot size={32} />
+              <Text style={slideStyles.mockErrorText}>
+                Wait, when moving +4 to the other side, it should become -4!
+              </Text>
+            </View>
 
-          {["nbe1", "nbe2"].map((k, i) => (
-            <View key={k} style={[slideStyles.mockNotebookLine, { top: 155 + i * 46 }]} />
-          ))}
-          <View style={[slideStyles.mockMarginLine, { top: 75 }]} />
+            <View style={slideStyles.mockHeader}>
+              <Text style={slideStyles.mockEquationText}>2x + 4 = 10</Text>
+            </View>
 
-          <View style={[slideStyles.mockRow, slideStyles.mockRowError]}>
-            <Text style={slideStyles.mockRowTextError}>2x = 10 + 4</Text>
-            <Ionicons name="close-circle" size={18} color={C.error} />
+            {["nbe1", "nbe2"].map((k, i) => (
+              <View key={k} style={[slideStyles.mockNotebookLine, { top: 155 + i * 46 }]} />
+            ))}
+            <View style={[slideStyles.mockMarginLine, { top: 75 }]} />
+
+            <View style={[slideStyles.mockRow, slideStyles.mockRowError]}>
+              <Text style={slideStyles.mockRowTextError}>2x = 10 + 4</Text>
+              <Ionicons name="close-circle" size={18} color={C.error} />
+            </View>
           </View>
-        </View>
-      </Animated.View>
+        </Animated.View>
+      </ScrollView>
     </View>
   );
 }
@@ -191,16 +243,16 @@ export default function OnboardingScreen() {
 
       <FlatList
         ref={flatListRef}
+        style={styles.listFill}
         data={SLIDES_CONTENT}
         horizontal
         pagingEnabled
+        nestedScrollEnabled
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id}
         onViewableItemsChanged={onViewableItemsChanged.current}
         viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
-        renderItem={({ item }) => (
-          <View style={{ width: SCREEN_W, height: "100%" }}>{item.render()}</View>
-        )}
+        renderItem={({ item }) => <View style={styles.slidePage}>{item.render()}</View>}
         scrollEventThrottle={16}
       />
 
@@ -239,22 +291,37 @@ export default function OnboardingScreen() {
 const slideStyles = StyleSheet.create({
   container: {
     flex: 1,
+    width: "100%",
     paddingHorizontal: 24,
-    paddingTop: 10,
-    paddingBottom: 8,
-    gap: 20,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  slideScrollContent: {
+    flexGrow: 1,
+    width: "100%",
+  },
+  /** Reserves height for robot + float animation so the next block cannot overlap */
+  robotSection: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 6,
   },
   robotWrap: {
     alignItems: "center",
-    paddingTop: 20,
+    justifyContent: "center",
   },
   textBlock: {
     gap: 12,
     alignItems: "center",
+    width: "100%",
+    paddingTop: 0,
   },
   textBlockTop: {
-    gap: 8,
+    gap: 10,
     alignItems: "center",
+    width: "100%",
+    paddingBottom: 8,
   },
   badge: {
     backgroundColor: C.cardNeutral,
@@ -272,41 +339,40 @@ const slideStyles = StyleSheet.create({
   },
   title: {
     fontFamily: "Inter_700Bold",
-    fontSize: 28,
     color: C.text,
     textAlign: "center",
-    lineHeight: 36,
   },
   subtitle: {
     fontFamily: "Inter_400Regular",
-    fontSize: 15,
     color: C.textSecondary,
     textAlign: "center",
-    lineHeight: 22,
     maxWidth: 320,
+    alignSelf: "center",
   },
   featureGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
+    width: "100%",
+    maxWidth: 360,
+    alignSelf: "center",
+    marginTop: 6,
     gap: 10,
-    marginTop: 10,
   },
   featureItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
     backgroundColor: C.white,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: C.borderLight,
+    width: "100%",
   },
   featureText: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
+    fontSize: 14,
     color: C.text,
+    flex: 1,
   },
   stepLabel: {
     fontFamily: "Inter_700Bold",
@@ -316,9 +382,10 @@ const slideStyles = StyleSheet.create({
     letterSpacing: 1.5,
   },
   interactiveMockWrap: {
-    flex: 1,
-    paddingTop: 10,
+    flexGrow: 1,
+    paddingTop: 8,
     width: "100%",
+    minHeight: 200,
   },
   mockNotebook: {
     backgroundColor: C.paper,
@@ -454,6 +521,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: C.background,
+  },
+  listFill: {
+    flex: 1,
+  },
+  slidePage: {
+    width: SCREEN_W,
+    flex: 1,
   },
   skipBtn: {
     position: "absolute",
