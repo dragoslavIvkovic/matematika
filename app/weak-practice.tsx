@@ -55,23 +55,7 @@ export default function WeakPracticeScreen() {
     resetQuizState,
     handleCheck: engineHandleCheck,
     handleErrorDismiss: engineHandleErrorDismiss,
-    notebookScrollViewRef,
-    inputRef,
-    typedAnswers,
-    setTypedAnswers,
-    activeInputIndex,
-    setActiveInputIndex,
-    isKeyboardVisible,
-    setIsKeyboardVisible,
-    isChecking,
-    isCorrect,
     isAnswered,
-    errorModal,
-    resultCardStyle,
-    handleKeyboardKeyPress,
-    handleKeyboardDelete,
-    handleKeyboardSubmit,
-    dismissKeyboard,
   } = engine;
 
   const problem = tasks[currentIndex] ?? null;

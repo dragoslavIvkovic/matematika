@@ -31,7 +31,6 @@ interface NotebookInputProps {
 export function NotebookInput({
   typedAnswers,
   setTypedAnswers,
-  activeInputIndex,
   setActiveInputIndex,
   setIsKeyboardVisible,
   requiredLines,
