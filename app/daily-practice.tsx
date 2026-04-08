@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Alert,
@@ -27,41 +27,25 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AssessmentMode } from "@/components/AssessmentMode";
+
 import { ErrorFeedbackModal } from "@/components/ErrorFeedbackModal";
-import { LevelSelector } from "@/components/LevelSelector";
 import { MathKeyboard } from "@/components/MathKeyboard";
 import { RobotMascot } from "@/components/RobotMascot";
-import { TheoryScreen } from "@/components/TheoryScreen";
 import Colors from "@/constants/colors";
 import { useAnalyticsStore } from "@/store/analyticsStore";
+import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
 import { useLevelStatsStore } from "@/store/levelStatsStore";
 import { useUsageStore } from "@/store/usageStore";
+import { generateDailyPracticeTasks } from "@/utils/dailyPracticeGenerator";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import { type ErrorAction, LevelManager } from "@/utils/LevelManager";
-import {
-  type GeneratedProblem,
-  generateProblem,
-  getLevelConfig,
-  LEVEL_CONFIGS,
-  type LevelId,
-} from "@/utils/ProblemGenerator";
-import { getTheoryContent } from "@/utils/TheoryContent";
+import { type GeneratedProblem, getLevelConfig, type LevelId } from "@/utils/ProblemGenerator";
 
 const C = Colors.light;
 
-/** iOS: prazan accessory uklanja podrazumevanu traku sa „Done“ iznad number-pad-a. */
-const IOS_MATH_INPUT_ACCESSORY_ID = "mathPracticeInputAccessory";
+const IOS_DAILY_INPUT_ACCESSORY_ID = "dailyPracticeInputAccessory";
 
-type ScreenMode =
-  | "loading"
-  | "level_select"
-  | "assessment"
-  | "theory"
-  | "practice"
-  | "level_complete";
-
-// ── Bounce Dot for checking animation ──
+// ── Bounce Dot (reused pattern from practice screen) ──
 function BounceDot({ delay }: { delay: number }) {
   const translateY = useSharedValue(0);
   React.useEffect(() => {
@@ -77,12 +61,12 @@ function BounceDot({ delay }: { delay: number }) {
   const style = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
   }));
-  return <Animated.View style={[checkStyles.dot, style]} />;
+  return <Animated.View style={[dotStyles.dot, style]} />;
 }
 
 function CheckingAnimation() {
   return (
-    <View style={checkStyles.container}>
+    <View style={dotStyles.container}>
       <BounceDot delay={0} />
       <BounceDot delay={200} />
       <BounceDot delay={400} />
@@ -90,7 +74,7 @@ function CheckingAnimation() {
   );
 }
 
-const checkStyles = StyleSheet.create({
+const dotStyles = StyleSheet.create({
   container: {
     flexDirection: "row",
     gap: 8,
@@ -106,23 +90,34 @@ const checkStyles = StyleSheet.create({
   },
 });
 
-export default function PracticeScreen() {
+export default function DailyPracticeScreen() {
   const insets = useSafeAreaInsets();
-  const incrementTasksCompleted = useUsageStore((state) => state.incrementTasksCompleted);
+  const incrementTasksCompleted = useUsageStore((s) => s.incrementTasksCompleted);
   const syncStats = useLevelStatsStore((s) => s.syncFromManager);
   const trackEvent = useAnalyticsStore((s) => s.trackEvent);
-  const { action, level } = useLocalSearchParams();
+  const markCompleted = useDailyPracticeStore((s) => s.markCompleted);
+  const selectedLevels = useDailyPracticeStore((s) => s.selectedLevels);
 
-  // Session-level counters for drop-off/completion tracking
+  // Generate all tasks once on mount
+  const [tasks] = useState<GeneratedProblem[]>(() => generateDailyPracticeTasks(selectedLevels));
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [sessionDone, setSessionDone] = useState(false);
+
+  // Session answer counters for completion/drop-off tracking
   const sessionAnswersRef = useRef({ total: 0, correct: 0 });
-  const [mode, setMode] = useState<ScreenMode>("loading");
-  const [isTheoryOnly, setIsTheoryOnly] = useState(false);
-  // Use ref for manager (mutable class) + counter to force re-renders
-  const managerRef = useRef<LevelManager | null>(null);
-  const [, forceUpdate] = useState(0);
-  const rerender = useCallback(() => forceUpdate((n) => n + 1), []);
 
-  const [problem, setProblem] = useState<GeneratedProblem | null>(null);
+  // Track session start once on mount
+  const hasTrackedStartRef = useRef(false);
+  if (!hasTrackedStartRef.current) {
+    hasTrackedStartRef.current = true;
+    trackEvent({
+      event: "daily_practice_started",
+      properties: { levelIds: selectedLevels, taskCount: tasks.length },
+    });
+  }
+
+  // Current problem state
   const [typedAnswers, setTypedAnswers] = useState<string[]>([""]);
   const [isChecking, setIsChecking] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -133,147 +128,59 @@ export default function PracticeScreen() {
     failedAtStep: number;
     action: ErrorAction | null;
   } | null>(null);
-  const [levelCompleteInfo, setLevelCompleteInfo] = useState<{
-    fromLevel: string;
-    toLevel?: string;
-  } | null>(null);
 
   const inputRef = useRef<TextInput>(null);
+  const notebookScrollViewRef = useRef<ScrollView>(null);
   const resultScale = useSharedValue(0);
   const resultOpacity = useSharedValue(0);
-
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [activeInputIndex, setActiveInputIndex] = useState(0);
 
-  const notebookScrollViewRef = useRef<ScrollView>(null);
+  const managerRef = useRef<LevelManager>(LevelManager.load());
 
   const resultCardStyle = useAnimatedStyle(() => ({
-    // Clamp so easing/back never scales past 100% width (avoids clipping / “off screen”)
     transform: [{ scale: Math.min(resultScale.value, 1) }],
     opacity: resultOpacity.value,
   }));
 
-  // ── Generate new problem ──
-  const generateNew = useCallback(
-    (mgr: LevelManager) => {
-      const level = mgr.getCurrentLevel();
-      const op = mgr.getNextOperationType();
-      const newProblem = generateProblem(level, op);
-      setProblem(newProblem);
-      setTypedAnswers([""]);
-      setIsChecking(false);
-      setIsCorrect(null);
-      resultScale.value = 0;
-      resultOpacity.value = 0;
-      rerender();
-    },
-    [rerender, resultOpacity, resultScale],
-  );
+  const problem = tasks[currentIndex] ?? null;
+  const totalTasks = tasks.length;
 
-  // ── Start practicing a level ──
-  const startPractice = useCallback(
-    (mgr: LevelManager) => {
-      if (mgr.needsTheoryDisplay()) {
-        setMode("theory");
-      } else {
-        generateNew(mgr);
-        setMode("practice");
-      }
-    },
-    [generateNew],
-  );
-
-  // ── Load manager on focus ──
-  useFocusEffect(
-    useCallback(() => {
-      const mgr = LevelManager.load();
-      managerRef.current = mgr;
-      syncStats(mgr.getState());
-      rerender();
-      if (action === "start") {
-        router.setParams({ action: "" }); // Consume the action so we don't loop
-        startPractice(mgr);
-      } else if (action === "theory" && level) {
-        mgr.setCurrentLevel(level as LevelId);
-        mgr.save();
-        syncStats(mgr.getState());
-        setIsTheoryOnly(true);
-        setMode("theory");
-        router.setParams({ action: "", level: "" });
-      } else {
-        setMode((prev) => (prev === "loading" ? "level_select" : prev));
-      }
-    }, [rerender, action, level, startPractice, syncStats]),
-  );
-
-  // ── Handle level selection ──
-  const handleSelectLevel = useCallback(
-    (level: LevelId) => {
-      const mgr = managerRef.current;
-      if (!mgr) return;
-      mgr.setCurrentLevel(level);
-      mgr.save();
-      syncStats(mgr.getState());
-      rerender();
-      sessionAnswersRef.current = { total: 0, correct: 0 };
-      trackEvent({ event: "level_started", properties: { levelId: level } });
-      startPractice(mgr);
-    },
-    [startPractice, rerender, syncStats, trackEvent],
-  );
-
-  // ── Handle theory dismiss ──
-  const handleTheoryDismiss = useCallback(() => {
-    const mgr = managerRef.current;
-    if (!mgr) return;
-
-    if (isTheoryOnly) {
-      setIsTheoryOnly(false);
-      router.back();
+  // ── Reset for next problem ──
+  const goToNext = useCallback(() => {
+    const nextIdx = currentIndex + 1;
+    if (nextIdx >= totalTasks) {
+      // Session complete
+      const { total, correct } = sessionAnswersRef.current;
+      trackEvent({
+        event: "daily_practice_completed",
+        properties: { levelIds: selectedLevels, totalAnswers: total, correctAnswers: correct },
+      });
+      setSessionDone(true);
+      const today = new Date().toISOString().split("T")[0];
+      markCompleted(today);
       return;
     }
-
-    mgr.markTheoryShown();
-    mgr.save();
-    syncStats(mgr.getState());
-    generateNew(mgr);
-    setMode("practice");
-  }, [generateNew, isTheoryOnly, syncStats]);
-
-  // ── Handle assessment complete ──
-  const handleAssessmentComplete = useCallback(
-    (recommendedLevel: LevelId) => {
-      const mgr = managerRef.current;
-      if (!mgr) return;
-      Alert.alert(
-        "Assessment Complete!",
-        `Based on your results, we recommend starting at Level ${recommendedLevel}: ${getLevelConfig(recommendedLevel).name}`,
-        [
-          {
-            text: `Start Level ${recommendedLevel}`,
-            onPress: () => {
-              mgr.setCurrentLevel(recommendedLevel);
-              mgr.save();
-              syncStats(mgr.getState());
-              rerender();
-              startPractice(mgr);
-            },
-          },
-          {
-            text: "Choose My Own",
-            style: "cancel",
-            onPress: () => setMode("level_select"),
-          },
-        ],
-      );
-    },
-    [startPractice, rerender, syncStats],
-  );
+    setCurrentIndex(nextIdx);
+    setTypedAnswers([""]);
+    setIsChecking(false);
+    setIsCorrect(null);
+    setActiveInputIndex(0);
+    resultScale.value = 0;
+    resultOpacity.value = 0;
+  }, [
+    currentIndex,
+    totalTasks,
+    markCompleted,
+    resultScale,
+    resultOpacity,
+    trackEvent,
+    selectedLevels,
+  ]);
 
   // ── Check answer ──
   const handleCheck = useCallback(() => {
-    const mgr = managerRef.current;
-    if (!problem || !mgr) return;
+    if (!problem) return;
     const lastInput = typedAnswers[typedAnswers.length - 1];
     if (!lastInput?.trim() && typedAnswers.length === 1) return;
 
@@ -293,9 +200,9 @@ export default function PracticeScreen() {
 
       if (validation.isValid) {
         if (validation.isComplete) {
-          // ✅ Correct!
           setIsCorrect(true);
           setIsChecking(false);
+          setCorrectCount((c) => c + 1);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
           sessionAnswersRef.current.total++;
@@ -305,34 +212,16 @@ export default function PracticeScreen() {
             properties: { levelId: problem.level as LevelId },
           });
 
-          const result = mgr.recordCorrect(problem.type);
+          // Sync stats via manager
+          const mgr = managerRef.current;
+          mgr.recordCorrect(problem.type);
           mgr.save();
           syncStats(mgr.getState());
-          rerender();
           incrementTasksCompleted();
-
-          if (result.levelComplete) {
-            const { total, correct } = sessionAnswersRef.current;
-            trackEvent({
-              event: "level_completed",
-              properties: {
-                levelId: problem.level as LevelId,
-                totalAnswers: total,
-                correctAnswers: correct,
-              },
-            });
-            sessionAnswersRef.current = { total: 0, correct: 0 };
-            setLevelCompleteInfo({
-              fromLevel: problem.level,
-              toLevel: result.newLevel,
-            });
-            setTimeout(() => setMode("level_complete"), 1500);
-          }
 
           setIsKeyboardVisible(false);
           inputRef.current?.blur();
 
-          // No spring overshoot — scale must stay ≤1 or the card jumps off-screen
           resultScale.value = 0.92;
           resultOpacity.value = 0;
           resultScale.value = withTiming(1, {
@@ -344,16 +233,10 @@ export default function PracticeScreen() {
             easing: Easing.out(Easing.cubic),
           });
         } else {
-          // Partially correct, need more steps
           setIsChecking(false);
-          Alert.alert(
-            "Keep going!",
-            validation.message ||
-              "Correct so far, but the solution isn't complete. Add more steps.",
-          );
+          Alert.alert("Keep going!", validation.message || "Correct so far, but add more steps.");
         }
       } else {
-        // ❌ Error
         setIsChecking(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
@@ -364,12 +247,7 @@ export default function PracticeScreen() {
         });
 
         const failedStep = validation.failedAtStep || 1;
-        const errorAction = mgr.recordError(failedStep);
-        mgr.save();
-        syncStats(mgr.getState());
-        rerender();
 
-        // Hide custom keyboard so the feedback modal is never covered by it
         setIsKeyboardVisible(false);
         inputRef.current?.blur();
 
@@ -378,14 +256,13 @@ export default function PracticeScreen() {
           message: validation.modalMessage || "That's not correct. Check your work.",
           procedure: validation.expectedProcedure || [],
           failedAtStep: failedStep,
-          action: errorAction,
+          action: null, // No level fallback in daily practice
         });
       }
     }, 800);
   }, [
     typedAnswers,
     problem,
-    rerender,
     resultOpacity,
     resultScale,
     incrementTasksCompleted,
@@ -395,7 +272,6 @@ export default function PracticeScreen() {
 
   const handleKeyboardKeyPress = (key: string) => {
     const newAns = [...typedAnswers];
-
     newAns[activeInputIndex] = (newAns[activeInputIndex] || "") + key;
     setTypedAnswers(newAns);
   };
@@ -409,10 +285,8 @@ export default function PracticeScreen() {
   };
 
   const handleKeyboardSubmit = () => {
-    const problem_ = problem;
-    if (!problem_) return;
-
-    const requiredSteps = problem_.requiredSteps;
+    if (!problem) return;
+    const requiredSteps = problem.requiredSteps;
 
     if (
       activeInputIndex === typedAnswers.length - 1 &&
@@ -427,161 +301,59 @@ export default function PracticeScreen() {
     }
   };
 
-  // ── Handle error modal dismiss ──
   const handleErrorDismiss = useCallback(() => {
-    const mgr = managerRef.current;
-    if (!mgr || !errorModal) return;
-    const action = errorModal.action;
     setErrorModal(null);
-
-    if (action?.type === "show_theory") {
-      setMode("theory");
-    } else if (action?.type === "fallback_level") {
-      rerender();
-      startPractice(mgr);
-    } else {
-      // Just retry
-      generateNew(mgr);
-    }
-  }, [errorModal, startPractice, generateNew, rerender]);
-
-  // ── Handle next problem ──
-  const handleNextProblem = useCallback(() => {
-    const mgr = managerRef.current;
-    if (!mgr) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    generateNew(mgr);
-  }, [generateNew]);
-
-  // ── Handle level complete dismiss ──
-  const handleLevelCompleteDismiss = useCallback(() => {
-    const mgr = managerRef.current;
-    if (!mgr) return;
-    setLevelCompleteInfo(null);
-    const config = getLevelConfig(mgr.getCurrentLevel());
-    if (config.hasTheory && mgr.needsTheoryDisplay()) {
-      setMode("theory");
-    } else {
-      generateNew(mgr);
-      setMode("practice");
-    }
-  }, [generateNew]);
+    // Just retry the same problem in daily practice
+    setTypedAnswers([""]);
+    setIsChecking(false);
+    setIsCorrect(null);
+    setActiveInputIndex(0);
+    resultScale.value = 0;
+    resultOpacity.value = 0;
+  }, [resultScale, resultOpacity]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const isAnswered = isCorrect !== null;
+  const requiredLines = problem ? EquationStepValidator.getRequiredLines(problem.level) : 1;
+  const progressPercent =
+    totalTasks > 0 ? ((currentIndex + (isAnswered ? 1 : 0)) / totalTasks) * 100 : 0;
 
-  // ── Loading ──
-  if (mode === "loading" || !managerRef.current) {
+  // ── Session Complete ──
+  if (sessionDone) {
     return (
       <View style={[styles.container, { paddingTop: topPad }]}>
-        <View style={styles.loadingCenter}>
-          <RobotMascot size={80} isThinking />
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      </View>
-    );
-  }
-
-  const manager = managerRef.current;
-  const state = manager.getState();
-
-  // ── Level Select ──
-  if (mode === "level_select") {
-    return (
-      <View style={[styles.container, { paddingTop: topPad }]}>
-        <LevelSelector
-          completedLevels={state.completedLevels}
-          currentLevel={state.currentLevel}
-          onSelectLevel={handleSelectLevel}
-          onStartAssessment={() => setMode("assessment")}
-          levelStats={state.levelStats}
-        />
-      </View>
-    );
-  }
-
-  // ── Assessment ──
-  if (mode === "assessment") {
-    return (
-      <View style={[styles.container, { paddingTop: topPad }]}>
-        <AssessmentMode
-          onComplete={handleAssessmentComplete}
-          onCancel={() => setMode("level_select")}
-        />
-      </View>
-    );
-  }
-
-  // ── Theory ──
-  if (mode === "theory") {
-    const theory = getTheoryContent(state.currentLevel);
-    if (theory) {
-      return (
-        <View style={[styles.container, { paddingTop: topPad }]}>
-          <TheoryScreen
-            theory={theory}
-            levelId={state.currentLevel}
-            onDismiss={handleTheoryDismiss}
-          />
-        </View>
-      );
-    }
-    // If no theory, go directly to practice
-    handleTheoryDismiss();
-    return null;
-  }
-
-  // ── Level Complete ──
-  if (mode === "level_complete") {
-    return (
-      <View style={[styles.container, { paddingTop: topPad }]}>
-        <View style={styles.levelCompleteCenter}>
-          <Animated.View entering={FadeInDown.duration(500)} style={styles.levelCompleteContent}>
+        <View style={styles.completeCenter}>
+          <Animated.View entering={FadeInDown.duration(500)} style={styles.completeContent}>
             <View style={styles.celebrationIcon}>
-              <Ionicons name="trophy" size={48} color={C.white} />
+              <Ionicons name="star" size={48} color={C.white} />
             </View>
-            <Text style={styles.levelCompleteTitle}>Level Complete! 🎉</Text>
-            <Text style={styles.levelCompleteMessage}>
-              You've mastered Level {levelCompleteInfo?.fromLevel}!
-              {levelCompleteInfo?.toLevel
-                ? `\n\nNext up: Level ${levelCompleteInfo.toLevel} — ${getLevelConfig(levelCompleteInfo.toLevel as LevelId).name}`
-                : "\n\nYou've completed all levels! Amazing work!"}
+            <Text style={styles.completeTitle}>Daily Practice Done!</Text>
+            <Text style={styles.completeMessage}>
+              You got {correctCount}/{totalTasks} correct. Great job keeping your skills sharp!
             </Text>
-
-            <View style={styles.levelCompleteStats}>
-              <View style={styles.lcStatItem}>
-                <Text style={styles.lcStatValue}>{state.totalSolved}</Text>
-                <Text style={styles.lcStatLabel}>Total Solved</Text>
+            <View style={styles.completeStats}>
+              <View style={styles.cStatItem}>
+                <Text style={styles.cStatValue}>{correctCount}</Text>
+                <Text style={styles.cStatLabel}>Correct</Text>
               </View>
-              <View style={styles.lcStatDivider} />
-              <View style={styles.lcStatItem}>
-                <Text style={styles.lcStatValue}>
-                  {state.completedLevels.length}/{LEVEL_CONFIGS.length}
-                </Text>
-                <Text style={styles.lcStatLabel}>Levels Done</Text>
+              <View style={styles.cStatDivider} />
+              <View style={styles.cStatItem}>
+                <Text style={styles.cStatValue}>{totalTasks}</Text>
+                <Text style={styles.cStatLabel}>Total</Text>
+              </View>
+              <View style={styles.cStatDivider} />
+              <View style={styles.cStatItem}>
+                <Text style={styles.cStatValue}>{selectedLevels.length}</Text>
+                <Text style={styles.cStatLabel}>Areas</Text>
               </View>
             </View>
-
             <TouchableOpacity
-              style={styles.lcContinueBtn}
-              onPress={handleLevelCompleteDismiss}
+              style={styles.backHomeBtn}
+              onPress={() => router.back()}
               activeOpacity={0.9}
             >
-              <Text style={styles.lcContinueBtnText}>
-                {levelCompleteInfo?.toLevel ? "Continue" : "Back to Levels"}
-              </Text>
-              <Ionicons
-                name={levelCompleteInfo?.toLevel ? "arrow-forward" : "grid"}
-                size={18}
-                color={C.white}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.lcBackBtn}
-              onPress={() => setMode("level_select")}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.lcBackBtnText}>Choose a different level</Text>
+              <Text style={styles.backHomeBtnText}>Back to Home</Text>
+              <Ionicons name="home" size={18} color={C.white} />
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -589,59 +361,50 @@ export default function PracticeScreen() {
     );
   }
 
-  // ── Practice Mode ──
-  const currentConfig = getLevelConfig(state.currentLevel);
-  const isAnswered = isCorrect !== null;
-  const streakProgress = manager.getStreakProgress();
-  const requiredLines = problem ? EquationStepValidator.getRequiredLines(problem.level) : 1;
-
+  // ── Practice UI ──
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       {Platform.OS === "ios" && (
-        <InputAccessoryView nativeID={IOS_MATH_INPUT_ACCESSORY_ID}>
+        <InputAccessoryView nativeID={IOS_DAILY_INPUT_ACCESSORY_ID}>
           <View style={{ height: 0 }} />
         </InputAccessoryView>
       )}
-      {/* ── Compact Header ── */}
+
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={styles.backToLevelsBtn}
+          style={styles.backBtn}
           onPress={() => {
             const { total, correct } = sessionAnswersRef.current;
             if (total > 0) {
               trackEvent({
-                event: "level_dropped",
+                event: "daily_practice_dropped",
                 properties: {
-                  levelId: state.currentLevel,
+                  levelIds: selectedLevels,
                   totalAnswers: total,
                   correctAnswers: correct,
                 },
               });
             }
-            sessionAnswersRef.current = { total: 0, correct: 0 };
-            setMode("level_select");
+            router.back();
           }}
           activeOpacity={0.7}
         >
-          <Ionicons name="home" size={18} color={C.primary} />
+          <Ionicons name="arrow-back" size={18} color={C.primary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>
-            {state.currentLevel} · {currentConfig.name}
+            Daily Practice · {currentIndex + 1}/{totalTasks}
           </Text>
-          <View style={styles.miniProgressBar}>
-            <View style={[styles.miniProgressFill, { width: `${streakProgress.percent}%` }]} />
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
           </View>
-          <Text style={styles.headerSub}>
-            {streakProgress.current}/{streakProgress.required} correct
-          </Text>
+          {problem && (
+            <Text style={styles.headerSub}>
+              Level {problem.level} – {getLevelConfig(problem.level as LevelId).name}
+            </Text>
+          )}
         </View>
-        {state.consecutiveErrors > 0 && (
-          <View style={styles.errorBadge}>
-            <Ionicons name="alert-circle" size={12} color={C.errorDark} />
-            <Text style={styles.errorBadgeText}>{state.consecutiveErrors}</Text>
-          </View>
-        )}
       </View>
 
       <ScrollView
@@ -651,13 +414,22 @@ export default function PracticeScreen() {
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Problem ── */}
+        {/* Problem card */}
         {problem && (
           <Animated.View
-            key={`problem-${problem.equation}`}
+            key={`dp-${currentIndex}`}
             entering={FadeInDown.delay(120).duration(400)}
             style={styles.equationCard}
           >
+            <View style={styles.levelChip}>
+              <View
+                style={[
+                  styles.levelChipDot,
+                  { backgroundColor: C.levels[problem.level] || C.primary },
+                ]}
+              />
+              <Text style={styles.levelChipText}>Level {problem.level}</Text>
+            </View>
             <Text style={styles.equationLabel}>
               {problem.requiredSteps === 1 ? "Calculate" : "Solve step by step"}
             </Text>
@@ -665,35 +437,30 @@ export default function PracticeScreen() {
           </Animated.View>
         )}
 
-        {/* ── Notebook Input ── */}
+        {/* Notebook input */}
         {!isAnswered && !isChecking && problem && (
           <Animated.View
             entering={SlideInDown.duration(350)}
             exiting={SlideOutDown.duration(250)}
-            style={styles.notebookInputCard}
+            style={styles.notebookCard}
           >
-            {/* Notebook lines */}
-            {Array.from({
-              length: Math.max(8, requiredLines + 1),
-            }).map((_, i) => (
+            {Array.from({ length: Math.max(8, requiredLines + 1) }).map((_, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: Static lines
-              <View key={`nb-line-${i}`} style={[styles.notebookLine, { top: 40 + i * 46 }]} />
+              <View key={`nb-line-${i}`} style={[styles.nbLine, { top: 40 + i * 46 }]} />
             ))}
-            {/* Red margin line */}
             <View style={styles.marginLine} />
-
-            <View style={styles.typeInputHeader}>
-              <Text style={styles.typeInputLabel}>
+            <View style={styles.inputHeader}>
+              <Text style={styles.inputLabel}>
                 {requiredLines === 1 ? "Your answer" : "Solve step by step"}
               </Text>
             </View>
             <View style={{ gap: 0, paddingTop: 10 }}>
               {typedAnswers.map((ans, idx) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: Rows correspond to index
-                <View key={`row-${idx}`} style={styles.notebookInputRow}>
+                <View key={`row-${idx}`} style={styles.inputRow}>
                   {(typedAnswers.length > 1 || ans.length > 0) && (
                     <TouchableOpacity
-                      style={styles.deleteRowBtn}
+                      style={styles.deleteBtn}
                       onPress={() => {
                         if (typedAnswers.length === 1) {
                           setTypedAnswers([""]);
@@ -710,9 +477,9 @@ export default function PracticeScreen() {
                   )}
                   <TextInput
                     ref={idx === typedAnswers.length - 1 ? inputRef : undefined}
-                    style={styles.notebookTextInput}
+                    style={styles.textInput}
                     inputAccessoryViewID={
-                      Platform.OS === "ios" ? IOS_MATH_INPUT_ACCESSORY_ID : undefined
+                      Platform.OS === "ios" ? IOS_DAILY_INPUT_ACCESSORY_ID : undefined
                     }
                     placeholder={requiredLines === 1 ? "Type your answer..." : `Step ${idx + 1}...`}
                     placeholderTextColor={C.textMuted}
@@ -720,7 +487,6 @@ export default function PracticeScreen() {
                     onFocus={() => {
                       setActiveInputIndex(idx);
                       setIsKeyboardVisible(true);
-                      // Scroll to ensure the input is visible above keyboard
                       setTimeout(() => {
                         notebookScrollViewRef.current?.scrollTo({
                           y: 200 + idx * 46,
@@ -756,7 +522,7 @@ export default function PracticeScreen() {
                   />
                   {idx === typedAnswers.length - 1 && typedAnswers.length < requiredLines && (
                     <TouchableOpacity
-                      style={[styles.notebookAddBtn, !ans.trim() && styles.notebookAddBtnDisabled]}
+                      style={[styles.addBtn, !ans.trim() && styles.addBtnDisabled]}
                       onPress={() => {
                         setTypedAnswers((prev) => [...prev, ""]);
                         setTimeout(() => inputRef.current?.focus(), 100);
@@ -770,22 +536,20 @@ export default function PracticeScreen() {
                 </View>
               ))}
             </View>
-
-            {/* Check Button */}
-            <View style={styles.notebookActions}>
+            <View style={styles.nbActions}>
               <TouchableOpacity
-                style={[styles.checkAnswerBtn, { flex: 1, justifyContent: "center" }]}
+                style={[styles.checkBtn, { flex: 1, justifyContent: "center" }]}
                 onPress={handleCheck}
                 activeOpacity={0.9}
               >
                 <Ionicons name="checkmark-circle" size={20} color={C.white} />
-                <Text style={styles.checkAnswerBtnText}>Check Answer</Text>
+                <Text style={styles.checkBtnText}>Check Answer</Text>
               </TouchableOpacity>
             </View>
           </Animated.View>
         )}
 
-        {/* ── Checking Animation ── */}
+        {/* Checking animation */}
         {isChecking && (
           <View style={styles.middleArea}>
             <Animated.View
@@ -793,28 +557,23 @@ export default function PracticeScreen() {
               exiting={FadeOut.duration(200)}
               style={styles.checkingArea}
             >
-              <View style={styles.robotCheckingSlot}>
+              <View style={styles.robotSlot}>
                 <RobotMascot size={70} isThinking />
               </View>
-              <Text style={[styles.checkingLabel, styles.checkingLabelBelowRobot]}>
-                Checking your answer...
-              </Text>
+              <Text style={styles.checkingLabel}>Checking your answer...</Text>
               <CheckingAnimation />
             </Animated.View>
           </View>
         )}
 
-        {/* ── Correct Result ── */}
+        {/* Correct result */}
         {isAnswered && isCorrect && problem && (
           <View style={styles.middleArea}>
             <Animated.View
               style={[
                 styles.resultCard,
                 resultCardStyle,
-                {
-                  backgroundColor: C.cardCorrect,
-                  borderColor: C.cardCorrectBorder,
-                },
+                { backgroundColor: C.cardCorrect, borderColor: C.cardCorrectBorder },
               ]}
             >
               <View style={styles.resultHeader}>
@@ -822,17 +581,25 @@ export default function PracticeScreen() {
                   <Ionicons name="checkmark" size={24} color={C.white} />
                 </View>
                 <View style={styles.resultTextBlock}>
-                  <Text style={styles.resultTitle}>Correct! 🎉</Text>
-                  <Text style={styles.resultMessage}>Great work — you solved it!</Text>
+                  <Text style={styles.resultTitle}>Correct!</Text>
+                  <Text style={styles.resultMessage}>
+                    {currentIndex + 1 < totalTasks
+                      ? `${totalTasks - currentIndex - 1} tasks remaining`
+                      : "Last one — well done!"}
+                  </Text>
                 </View>
               </View>
-
               <TouchableOpacity
-                style={styles.nextProblemBtn}
-                onPress={handleNextProblem}
+                style={styles.nextBtn}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  goToNext();
+                }}
                 activeOpacity={0.9}
               >
-                <Text style={styles.nextProblemBtnText}>Next Problem</Text>
+                <Text style={styles.nextBtnText}>
+                  {currentIndex + 1 < totalTasks ? "Next Task" : "Finish"}
+                </Text>
                 <Ionicons name="arrow-forward" size={16} color={C.white} />
               </TouchableOpacity>
             </Animated.View>
@@ -849,10 +616,10 @@ export default function PracticeScreen() {
           setIsKeyboardVisible(false);
           inputRef.current?.blur();
         }}
-        bottomOffset={Platform.OS === "ios" ? 49 + insets.bottom : 60}
+        bottomOffset={Platform.OS === "ios" ? insets.bottom : 0}
       />
 
-      {/* ── Error Modal ── */}
+      {/* Error modal */}
       {errorModal?.visible && (
         <ErrorFeedbackModal
           visible={errorModal.visible}
@@ -868,25 +635,7 @@ export default function PracticeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: C.background,
-  },
-  inner: {
-    flex: 1,
-    flexDirection: "column",
-  },
-  loadingCenter: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 16,
-  },
-  loadingText: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 16,
-    color: C.textSecondary,
-  },
+  container: { flex: 1, backgroundColor: C.background },
 
   // Header
   header: {
@@ -899,7 +648,7 @@ const styles = StyleSheet.create({
     borderBottomColor: C.borderLight,
     gap: 10,
   },
-  backToLevelsBtn: {
+  backBtn: {
     width: 34,
     height: 34,
     borderRadius: 10,
@@ -907,49 +656,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerCenter: {
-    flex: 1,
-    gap: 2,
-  },
-  headerTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 14,
-    color: C.text,
-  },
-  headerSub: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
-    color: C.textSecondary,
-  },
-  miniProgressBar: {
+  headerCenter: { flex: 1, gap: 2 },
+  headerTitle: { fontFamily: "Inter_700Bold", fontSize: 14, color: C.text },
+  headerSub: { fontFamily: "Inter_400Regular", fontSize: 11, color: C.textSecondary },
+  progressBar: {
     height: 4,
     backgroundColor: C.border,
     borderRadius: 2,
     overflow: "hidden" as const,
   },
-  miniProgressFill: {
+  progressFill: {
     height: "100%",
     backgroundColor: C.accent,
     borderRadius: 2,
   },
-  errorBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: C.errorLighter,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: C.errorLight,
-  },
-  errorBadgeText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 11,
-    color: C.errorDark,
-  },
 
-  // Equation
+  // Problem card
   equationCard: {
     backgroundColor: C.white,
     borderRadius: 24,
@@ -963,6 +685,22 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 4,
     gap: 10,
+  },
+  levelChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    backgroundColor: C.backgroundAlt,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  levelChipDot: { width: 8, height: 8, borderRadius: 4 },
+  levelChipText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 11,
+    color: C.textSecondary,
   },
   equationLabel: {
     fontFamily: "Inter_500Medium",
@@ -980,7 +718,7 @@ const styles = StyleSheet.create({
   },
 
   // Notebook
-  notebookInputCard: {
+  notebookCard: {
     marginHorizontal: 16,
     marginTop: 12,
     backgroundColor: C.paper,
@@ -998,7 +736,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     position: "relative",
   },
-  notebookLine: {
+  nbLine: {
     position: "absolute",
     left: 0,
     right: 0,
@@ -1014,24 +752,20 @@ const styles = StyleSheet.create({
     backgroundColor: C.errorLight,
     opacity: 0.6,
   },
-  typeInputHeader: {
+  inputHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  typeInputLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-    color: C.text,
-  },
-  notebookInputRow: {
+  inputLabel: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: C.text },
+  inputRow: {
     flexDirection: "row",
     alignItems: "center",
     height: 46,
     marginLeft: 4,
     position: "relative",
   },
-  deleteRowBtn: {
+  deleteBtn: {
     position: "absolute",
     left: -34,
     zIndex: 10,
@@ -1040,7 +774,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  notebookTextInput: {
+  textInput: {
     flex: 1,
     fontFamily: "Inter_500Medium",
     fontSize: 22,
@@ -1048,7 +782,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     padding: 0,
   },
-  notebookAddBtn: {
+  addBtn: {
     width: 36,
     height: 36,
     borderRadius: 12,
@@ -1061,12 +795,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  notebookAddBtnDisabled: {
+  addBtnDisabled: {
     backgroundColor: C.border,
     shadowOpacity: 0,
     elevation: 0,
   },
-  notebookActions: {
+  nbActions: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -1075,7 +809,7 @@ const styles = StyleSheet.create({
     borderTopColor: C.border,
     paddingTop: 16,
   },
-  checkAnswerBtn: {
+  checkBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
@@ -1089,13 +823,9 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  checkAnswerBtnText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 15,
-    color: C.white,
-  },
+  checkBtnText: { fontFamily: "Inter_700Bold", fontSize: 15, color: C.white },
 
-  // Middle area (no flex:1 — avoids odd stretching inside ScrollView vs keyboard)
+  // Middle area
   middleArea: {
     alignItems: "center",
     justifyContent: "center",
@@ -1103,14 +833,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     minHeight: 200,
   },
-  checkingArea: {
-    alignItems: "center",
-    gap: 12,
-    width: "100%",
-    paddingHorizontal: 4,
-  },
-  /** Slot for thinking robot — extra room + spacing so label never sits under the paint bounds */
-  robotCheckingSlot: {
+  checkingArea: { alignItems: "center", gap: 12, width: "100%", paddingHorizontal: 4 },
+  robotSlot: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
@@ -1122,13 +846,11 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
     color: C.textSecondary,
-  },
-  checkingLabelBelowRobot: {
     marginTop: 8,
     textAlign: "center",
   },
 
-  // Result card
+  // Result
   resultCard: {
     borderRadius: 24,
     padding: 20,
@@ -1141,11 +863,7 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 4,
   },
-  resultHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
+  resultHeader: { flexDirection: "row", alignItems: "center", gap: 14 },
   resultIconCircle: {
     width: 50,
     height: 50,
@@ -1154,21 +872,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
-  resultTextBlock: {
-    flex: 1,
-    gap: 2,
-  },
-  resultTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 20,
-    color: C.text,
-  },
-  resultMessage: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    color: C.textSecondary,
-  },
-  nextProblemBtn: {
+  resultTextBlock: { flex: 1, gap: 2 },
+  resultTitle: { fontFamily: "Inter_700Bold", fontSize: 20, color: C.text },
+  resultMessage: { fontFamily: "Inter_400Regular", fontSize: 14, color: C.textSecondary },
+  nextBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1182,24 +889,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  nextProblemBtnText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 16,
-    color: C.white,
-  },
+  nextBtnText: { fontFamily: "Inter_700Bold", fontSize: 16, color: C.white },
 
-  // Level complete
-  levelCompleteCenter: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
-  levelCompleteContent: {
-    alignItems: "center",
-    gap: 16,
-    width: "100%",
-  },
+  scroll: { flex: 1 },
+  scrollContent: { paddingBottom: 24 },
+
+  // Session complete
+  completeCenter: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
+  completeContent: { alignItems: "center", gap: 16, width: "100%" },
   celebrationIcon: {
     width: 80,
     height: 80,
@@ -1213,13 +910,13 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
   },
-  levelCompleteTitle: {
+  completeTitle: {
     fontFamily: "Inter_700Bold",
     fontSize: 28,
     color: C.text,
     textAlign: "center",
   },
-  levelCompleteMessage: {
+  completeMessage: {
     fontFamily: "Inter_400Regular",
     fontSize: 15,
     color: C.textSecondary,
@@ -1227,7 +924,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     maxWidth: 300,
   },
-  levelCompleteStats: {
+  completeStats: {
     flexDirection: "row",
     backgroundColor: C.white,
     borderRadius: 16,
@@ -1240,32 +937,11 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  lcStatItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 4,
-  },
-  lcStatDivider: {
-    width: 1,
-    backgroundColor: C.border,
-  },
-  lcStatValue: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 28,
-    color: C.text,
-  },
-  lcStatLabel: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 12,
-    color: C.textMuted,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 24,
-  },
-  lcContinueBtn: {
+  cStatItem: { flex: 1, alignItems: "center", gap: 4 },
+  cStatDivider: { width: 1, backgroundColor: C.border },
+  cStatValue: { fontFamily: "Inter_700Bold", fontSize: 28, color: C.text },
+  cStatLabel: { fontFamily: "Inter_500Medium", fontSize: 12, color: C.textMuted },
+  backHomeBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1281,17 +957,5 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
-  lcContinueBtnText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 17,
-    color: C.white,
-  },
-  lcBackBtn: {
-    paddingVertical: 8,
-  },
-  lcBackBtnText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-    color: C.textSecondary,
-  },
+  backHomeBtnText: { fontFamily: "Inter_700Bold", fontSize: 17, color: C.white },
 });

@@ -9,9 +9,11 @@ export const ROUTES = {
   PRACTICE: "/(tabs)/practice" as Href,
   PROGRESS: "/(tabs)/progress" as Href,
   ONBOARDING: "/onboarding" as Href,
+  DAILY_PRACTICE: "/daily-practice" as Href,
 } as const;
 
 export const ROUTE_HOME: Href = "/";
 export const ROUTE_PRACTICE: Href = "/(tabs)/practice";
 export const ROUTE_PROGRESS: Href = "/(tabs)/progress";
 export const ROUTE_ONBOARDING: Href = "/onboarding";
+export const ROUTE_DAILY_PRACTICE: Href = "/daily-practice";

@@ -12,9 +12,12 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { DailyPracticeCard } from "@/components/DailyPracticeCard";
+import { DailyPracticeSelectionModal } from "@/components/DailyPracticeSelectionModal";
 import { WeeklyStreak } from "@/components/WeeklyStreak";
 import Colors from "@/constants/colors";
-import { ROUTE_ONBOARDING, ROUTE_PRACTICE } from "@/constants/routes";
+import { ROUTE_DAILY_PRACTICE, ROUTE_ONBOARDING, ROUTE_PRACTICE } from "@/constants/routes";
+import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
 import { useLevelStatsStore } from "@/store/levelStatsStore";
 import { computeDailyStreak } from "@/utils/dateUtils";
 import { LevelManager } from "@/utils/LevelManager";
@@ -75,6 +78,11 @@ export default function LearnScreen() {
 
   const completedCount = completedLevels.length;
 
+  // ── Daily Practice state ──
+  const dailySelectedLevels = useDailyPracticeStore((s) => s.selectedLevels);
+  const setDailySelectedLevels = useDailyPracticeStore((s) => s.setSelectedLevels);
+  const [showDailyModal, setShowDailyModal] = useState(false);
+
   useEffect(() => {
     // Check onboarding
     const isDone = AppStorage.getString(ONBOARDING_KEY) === "done";
@@ -109,6 +117,14 @@ export default function LearnScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Daily Practice Card */}
+        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <DailyPracticeCard
+            onSetup={() => setShowDailyModal(true)}
+            onStart={() => router.push(ROUTE_DAILY_PRACTICE)}
+          />
+        </Animated.View>
+
         {/* Simplified stats */}
         <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.statsRow}>
           <View style={styles.miniStat}>
@@ -270,6 +286,18 @@ export default function LearnScreen() {
           );
         })}
       </ScrollView>
+
+      {/* Daily Practice Selection Modal */}
+      <DailyPracticeSelectionModal
+        visible={showDailyModal}
+        initialSelection={dailySelectedLevels}
+        onConfirm={(levels) => {
+          setDailySelectedLevels(levels);
+          setShowDailyModal(false);
+          router.push(ROUTE_DAILY_PRACTICE);
+        }}
+        onDismiss={() => setShowDailyModal(false)}
+      />
     </View>
   );
 }
