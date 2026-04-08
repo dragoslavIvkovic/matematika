@@ -90,8 +90,8 @@ export function ErrorFeedbackModal({
         <View style={styles.stepIndicator}>
           <MaterialCommunityIcons name="alert-circle" size={16} color={actionColor} />
           <Text style={[styles.stepIndicatorText, { color: actionColor }]}>
-            Greška {errorAction?.errorCount ?? 1}/{errorAction?.threshold ?? 2}
-            {failedAtStep > 0 ? ` · Korak ${failedAtStep}` : ""}
+            Error {errorAction?.errorCount ?? 1}/{errorAction?.threshold ?? 2}
+            {failedAtStep > 0 ? ` · Step ${failedAtStep}` : ""}
           </Text>
         </View>
 

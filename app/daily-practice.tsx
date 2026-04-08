@@ -34,6 +34,7 @@ import { RobotMascot } from "@/components/RobotMascot";
 import Colors from "@/constants/colors";
 import { useAnalyticsStore } from "@/store/analyticsStore";
 import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
+import { useErrorStore } from "@/store/errorStore";
 import { useLevelStatsStore } from "@/store/levelStatsStore";
 import { useUsageStore } from "@/store/usageStore";
 import { generateDailyPracticeTasks } from "@/utils/dailyPracticeGenerator";
@@ -95,6 +96,7 @@ export default function DailyPracticeScreen() {
   const incrementTasksCompleted = useUsageStore((s) => s.incrementTasksCompleted);
   const syncStats = useLevelStatsStore((s) => s.syncFromManager);
   const trackEvent = useAnalyticsStore((s) => s.trackEvent);
+  const recordError = useErrorStore((s) => s.recordError);
   const markCompleted = useDailyPracticeStore((s) => s.markCompleted);
   const selectedLevels = useDailyPracticeStore((s) => s.selectedLevels);
 
@@ -245,6 +247,7 @@ export default function DailyPracticeScreen() {
           event: "quiz_answer_incorrect",
           properties: { levelId: problem.level as LevelId },
         });
+        recordError(problem.level as LevelId);
 
         const failedStep = validation.failedAtStep || 1;
 
@@ -268,6 +271,7 @@ export default function DailyPracticeScreen() {
     incrementTasksCompleted,
     syncStats,
     trackEvent,
+    recordError,
   ]);
 
   const handleKeyboardKeyPress = (key: string) => {

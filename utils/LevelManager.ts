@@ -72,7 +72,10 @@ export type LevelManager = {
   setCurrentLevel(level: LevelId): void;
   markTheoryShown(): void;
   needsTheoryDisplay(): boolean;
-  recordCorrect(operationType: string): { levelComplete: boolean; newLevel?: LevelId };
+  recordCorrect(operationType: string): {
+    levelComplete: boolean;
+    newLevel?: LevelId;
+  };
   recordError(failedAtStep: number): ErrorAction;
   getNextOperationType(): string;
   isLevelUnlocked(_levelId: string): boolean;
@@ -236,7 +239,7 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
 
       return {
         type: "retry",
-        message: `Greška ${errCount}/${threshold}. Pokušaj ponovo!`,
+        message: `Error ${errCount}/${threshold}. Pokušaj ponovo!`,
         errorCount: errCount,
         threshold,
       };

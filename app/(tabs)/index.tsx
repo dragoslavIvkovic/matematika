@@ -14,14 +14,20 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DailyPracticeCard } from "@/components/DailyPracticeCard";
 import { DailyPracticeSelectionModal } from "@/components/DailyPracticeSelectionModal";
+import { WeakAreasCard } from "@/components/WeakAreasCard";
 import { WeeklyStreak } from "@/components/WeeklyStreak";
 import Colors from "@/constants/colors";
-import { ROUTE_DAILY_PRACTICE, ROUTE_ONBOARDING, ROUTE_PRACTICE } from "@/constants/routes";
+import {
+  ROUTE_DAILY_PRACTICE,
+  ROUTE_ONBOARDING,
+  ROUTE_PRACTICE,
+  ROUTE_WEAK_PRACTICE,
+} from "@/constants/routes";
 import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
 import { useLevelStatsStore } from "@/store/levelStatsStore";
 import { computeDailyStreak } from "@/utils/dateUtils";
 import { LevelManager } from "@/utils/LevelManager";
-import { getLevelConfig, LEVEL_CONFIGS, type LevelId } from "@/utils/ProblemGenerator";
+import { LEVEL_CONFIGS } from "@/utils/ProblemGenerator";
 import { AppStorage } from "@/utils/storage";
 import { hasTheory } from "@/utils/TheoryContent";
 
@@ -103,7 +109,7 @@ export default function LearnScreen() {
     <View
       style={[styles.container, { paddingTop: Platform.OS === "web" ? webTopPadding : insets.top }]}
     >
-      {/* Header with Weekly Streak */}
+      {/* 1. Streak */}
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
         <WeeklyStreak activeDays={activeDays} currentStreak={computeDailyStreak(activeDays)} />
       </Animated.View>
@@ -117,7 +123,15 @@ export default function LearnScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Daily Practice Card */}
+        {/* 2. Subscription Status */}
+        <Animated.View entering={FadeInDown.delay(50).duration(400)}>
+          <View style={styles.subBadge}>
+            <Ionicons name="diamond-outline" size={14} color={C.primary} />
+            <Text style={styles.subBadgeText}>Free</Text>
+          </View>
+        </Animated.View>
+
+        {/* 3. Daily Practice Card — hero element */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <DailyPracticeCard
             onSetup={() => setShowDailyModal(true)}
@@ -125,7 +139,7 @@ export default function LearnScreen() {
           />
         </Animated.View>
 
-        {/* Simplified stats */}
+        {/* 4. Solved / Levels stats */}
         <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.statsRow}>
           <View style={styles.miniStat}>
             <Ionicons name="checkmark-circle" size={14} color={C.accent} />
@@ -139,11 +153,15 @@ export default function LearnScreen() {
           </View>
         </Animated.View>
 
-        {/* Current level CTA */}
-        <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+        {/* 5. Secondary Practice Cards — compact row */}
+        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.secondaryRow}>
+          {/* Weak Areas (conditional — returns null when no errors) */}
+          <WeakAreasCard onStart={() => router.push(ROUTE_WEAK_PRACTICE)} />
+
+          {/* Continue Practice (compact) */}
           <TouchableOpacity
             style={[
-              styles.continueCta,
+              styles.compactCta,
               {
                 backgroundColor: C.levels[currentLevel] || C.primary,
                 shadowColor: C.levels[currentLevel] || C.primary,
@@ -155,20 +173,18 @@ export default function LearnScreen() {
             }}
             activeOpacity={0.9}
           >
-            <View style={styles.ctaLeft}>
-              <View style={styles.ctaIconContainer}>
-                <Ionicons name="play" size={32} color={C.white} />
-              </View>
-              <View style={styles.ctaTextBlock}>
-                <Text style={styles.ctaTitle}>Continue Practice</Text>
-                <Text style={styles.ctaSub}>
-                  Level {currentLevel} – {getLevelConfig(currentLevel as LevelId).name}
-                </Text>
-              </View>
+            <View style={styles.compactIcon}>
+              <Ionicons name="play" size={18} color={C.white} />
             </View>
-            <View style={styles.ctaArrow}>
-              <Ionicons name="arrow-forward" size={24} color={C.white} />
+            <View style={styles.compactTextBlock}>
+              <Text style={styles.compactTitle} numberOfLines={1}>
+                Continue
+              </Text>
+              <Text style={styles.compactSub} numberOfLines={1}>
+                Lvl {currentLevel}
+              </Text>
             </View>
+            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
           </TouchableOpacity>
         </Animated.View>
 
@@ -310,68 +326,32 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
     backgroundColor: C.background,
   },
-  headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
-  headerBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: C.backgroundAlt,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 16,
-    color: C.text,
-    lineHeight: 20,
-  },
-  headerSub: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-    color: C.textSecondary,
-    lineHeight: 16,
-  },
-  levelPill: {
+  scrollContent: { padding: 16, gap: 14 },
+
+  // Subscription badge
+  subBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    backgroundColor: C.cardNeutral,
+    gap: 6,
+    alignSelf: "flex-start",
+    backgroundColor: C.surface,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: C.cardNeutralBorder,
+    borderColor: C.borderLight,
   },
-  levelPillText: {
+  subBadgeText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 13,
-    color: C.warning,
-  },
-  scrollContent: { padding: 16, gap: 14 },
-
-  dashboardWelcome: { gap: 8, marginTop: 0 },
-  dashboardTitle: {
-    fontFamily: "Inter_800ExtraBold",
-    fontSize: 28,
-    color: C.text,
-    letterSpacing: -1,
-  },
-  progressSummary: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  progressSummaryText: {
-    fontFamily: "Inter_600SemiBold",
     fontSize: 12,
-    color: C.textSecondary,
+    color: C.primary,
   },
 
   // Stats
   statsRow: {
     flexDirection: "row",
     gap: 12,
-    marginVertical: 4,
+    marginVertical: 2,
   },
   miniStat: {
     flex: 1,
@@ -396,46 +376,47 @@ const styles = StyleSheet.create({
     color: C.textMuted,
   },
 
-  // Continue CTA
-  continueCta: {
+  // Secondary practice cards — compact half-width row
+  secondaryRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  compactCta: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 24,
-    padding: 20,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 6,
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+    gap: 10,
   },
-  ctaLeft: { flexDirection: "row", alignItems: "center", gap: 16, flex: 1 },
-  ctaIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 18,
+  compactIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
-  ctaTextBlock: { gap: 4, flex: 1 },
-  ctaTitle: {
-    fontFamily: "Inter_800ExtraBold",
-    fontSize: 20,
+  compactTextBlock: {
+    flex: 1,
+    gap: 1,
+  },
+  compactTitle: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 14,
     color: C.white,
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
   },
-  ctaSub: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-    color: "rgba(255, 255, 255, 0.9)",
-  },
-  ctaArrow: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    alignItems: "center",
-    justifyContent: "center",
+  compactSub: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.8)",
   },
 
   // Section header

@@ -17,3 +17,4 @@ export const ROUTE_PRACTICE: Href = "/(tabs)/practice";
 export const ROUTE_PROGRESS: Href = "/(tabs)/progress";
 export const ROUTE_ONBOARDING: Href = "/onboarding";
 export const ROUTE_DAILY_PRACTICE: Href = "/daily-practice";
+export const ROUTE_WEAK_PRACTICE: Href = "/weak-practice";

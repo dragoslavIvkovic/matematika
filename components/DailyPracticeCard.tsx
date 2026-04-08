@@ -32,17 +32,15 @@ export function DailyPracticeCard({ onSetup, onStart }: DailyPracticeCardProps) 
         }}
         activeOpacity={0.9}
       >
-        <View style={s.left}>
-          <View style={s.iconBox}>
-            <Ionicons name="calendar" size={32} color={C.white} />
-          </View>
-          <View style={s.textBlock}>
-            <Text style={s.title}>Daily Practice</Text>
-            <Text style={s.sub}>Tap to choose your practice areas</Text>
-          </View>
+        <View style={s.iconBox}>
+          <Ionicons name="calendar" size={40} color={C.white} />
+        </View>
+        <View style={s.textBlock}>
+          <Text style={s.title}>Daily Practice</Text>
+          <Text style={s.sub}>Tap to choose your practice areas</Text>
         </View>
         <View style={s.arrow}>
-          <Ionicons name="arrow-forward" size={24} color={C.white} />
+          <Ionicons name="arrow-forward" size={28} color={C.white} />
         </View>
       </TouchableOpacity>
     );
@@ -53,17 +51,15 @@ export function DailyPracticeCard({ onSetup, onStart }: DailyPracticeCardProps) 
   if (completedToday) {
     return (
       <View style={[s.card, { opacity: 0.85 }]}>
-        <View style={s.left}>
-          <View style={s.iconBox}>
-            <Ionicons name="checkmark-circle" size={32} color={C.white} />
-          </View>
-          <View style={s.textBlock}>
-            <Text style={s.title}>Daily Practice Done</Text>
-            <Text style={s.sub}>
-              {selectedLevels.length} area{selectedLevels.length > 1 ? "s" : ""} · {taskCount} tasks
-              completed
-            </Text>
-          </View>
+        <View style={s.iconBox}>
+          <Ionicons name="checkmark-circle" size={40} color={C.white} />
+        </View>
+        <View style={s.textBlock}>
+          <Text style={s.title}>Daily Practice Done</Text>
+          <Text style={s.sub}>
+            {selectedLevels.length} area{selectedLevels.length > 1 ? "s" : ""} · {taskCount} tasks
+            completed
+          </Text>
         </View>
         <TouchableOpacity
           style={s.settingsBtn}
@@ -74,7 +70,7 @@ export function DailyPracticeCard({ onSetup, onStart }: DailyPracticeCardProps) 
           activeOpacity={0.7}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="settings-outline" size={18} color="rgba(255,255,255,0.7)" />
+          <Ionicons name="settings-outline" size={20} color="rgba(255,255,255,0.7)" />
         </TouchableOpacity>
       </View>
     );
@@ -89,16 +85,14 @@ export function DailyPracticeCard({ onSetup, onStart }: DailyPracticeCardProps) 
       }}
       activeOpacity={0.9}
     >
-      <View style={s.left}>
-        <View style={s.iconBox}>
-          <Ionicons name="calendar" size={32} color={C.white} />
-        </View>
-        <View style={s.textBlock}>
-          <Text style={s.title}>Daily Practice</Text>
-          <Text style={s.sub}>
-            {selectedLevels.length} area{selectedLevels.length > 1 ? "s" : ""} · {taskCount} tasks
-          </Text>
-        </View>
+      <View style={s.iconBox}>
+        <Ionicons name="calendar" size={40} color={C.white} />
+      </View>
+      <View style={s.textBlock}>
+        <Text style={s.title}>Daily Practice</Text>
+        <Text style={s.sub}>
+          {selectedLevels.length} area{selectedLevels.length > 1 ? "s" : ""} · {taskCount} tasks
+        </Text>
       </View>
       <View style={s.rightGroup}>
         <TouchableOpacity
@@ -111,10 +105,10 @@ export function DailyPracticeCard({ onSetup, onStart }: DailyPracticeCardProps) 
           activeOpacity={0.7}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="settings-outline" size={18} color="rgba(255,255,255,0.7)" />
+          <Ionicons name="settings-outline" size={20} color="rgba(255,255,255,0.7)" />
         </TouchableOpacity>
         <View style={s.arrow}>
-          <Ionicons name="play" size={22} color={C.white} />
+          <Ionicons name="play" size={28} color={C.white} />
         </View>
       </View>
     </TouchableOpacity>
@@ -126,28 +120,23 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderRadius: 24,
-    padding: 22,
+    borderRadius: 28,
+    padding: 28,
     backgroundColor: CARD_COLOR,
     shadowColor: CARD_COLOR,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 6,
-  },
-  left: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    flex: 1,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.35,
+    shadowRadius: 20,
+    elevation: 8,
   },
   iconBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 18,
+    width: 72,
+    height: 72,
+    borderRadius: 22,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     alignItems: "center",
     justifyContent: "center",
+    marginRight: 18,
   },
   textBlock: {
     gap: 4,
@@ -155,13 +144,13 @@ const s = StyleSheet.create({
   },
   title: {
     fontFamily: "Inter_800ExtraBold",
-    fontSize: 20,
+    fontSize: 24,
     color: C.white,
     letterSpacing: -0.5,
   },
   sub: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
+    fontSize: 14,
     color: "rgba(255, 255, 255, 0.9)",
   },
   rightGroup: {
@@ -170,17 +159,17 @@ const s = StyleSheet.create({
     gap: 8,
   },
   arrow: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     alignItems: "center",
     justifyContent: "center",
   },
   settingsBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
