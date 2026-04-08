@@ -3,17 +3,11 @@ import * as Haptics from "expo-haptics";
 import { type Href, router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Animated, {
-  Easing,
-  FadeInDown,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DailyPracticeCard } from "@/components/DailyPracticeCard";
 import { DailyPracticeSelectionModal } from "@/components/DailyPracticeSelectionModal";
+import { ProgressBar } from "@/components/ProgressBar";
 import { WeakAreasCard } from "@/components/WeakAreasCard";
 import { WeeklyStreak } from "@/components/WeeklyStreak";
 import Colors from "@/constants/colors";
@@ -33,42 +27,6 @@ import { hasTheory } from "@/utils/TheoryContent";
 
 const C = Colors.light;
 const ONBOARDING_KEY = "math_tutor_onboarding_v1";
-
-function ProgressBar({
-  progress,
-  color,
-  delay = 0,
-}: {
-  progress: number;
-  color: string;
-  delay?: number;
-}) {
-  const width = useSharedValue(0);
-  useEffect(() => {
-    width.value = withDelay(
-      delay,
-      withTiming(progress, { duration: 800, easing: Easing.out(Easing.cubic) }),
-    );
-  }, [progress, delay, width]);
-  const barStyle = useAnimatedStyle(() => ({
-    width: `${width.value}%`,
-  }));
-  return (
-    <View style={pbStyles.track}>
-      <Animated.View style={[pbStyles.fill, barStyle, { backgroundColor: color }]} />
-    </View>
-  );
-}
-const pbStyles = StyleSheet.create({
-  track: {
-    height: 6,
-    backgroundColor: C.border,
-    borderRadius: 3,
-    overflow: "hidden",
-    flex: 1,
-  },
-  fill: { height: "100%", borderRadius: 3 },
-});
 
 export default function LearnScreen() {
   const insets = useSafeAreaInsets();

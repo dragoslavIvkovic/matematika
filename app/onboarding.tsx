@@ -164,10 +164,7 @@ function Slide3() {
           </Text>
         </Animated.View>
 
-        <Animated.View
-          entering={FadeInUp.delay(400)}
-          style={[slideStyles.interactiveMockWrap, { justifyContent: "center", marginBottom: 12 }]}
-        >
+        <Animated.View entering={FadeInUp.delay(400)} style={slideStyles.interactiveMockWrap}>
           <View style={slideStyles.mockNotebook}>
             <View style={slideStyles.mockErrorToast}>
               <RobotMascot size={32} />
@@ -292,13 +289,12 @@ const slideStyles = StyleSheet.create({
   container: {
     flex: 1,
     width: "100%",
+    justifyContent: "center",
     paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 4,
   },
   slideScrollContent: {
     flexGrow: 1,
-    width: "100%",
+    justifyContent: "center",
   },
   /** Reserves height for robot + float animation so the next block cannot overlap */
   robotSection: {
@@ -318,10 +314,9 @@ const slideStyles = StyleSheet.create({
     paddingTop: 0,
   },
   textBlockTop: {
-    gap: 10,
+    gap: 12,
     alignItems: "center",
     width: "100%",
-    paddingBottom: 8,
   },
   badge: {
     backgroundColor: C.cardNeutral,
@@ -333,17 +328,21 @@ const slideStyles = StyleSheet.create({
   },
   badgeText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 12,
+    fontSize: 13,
     color: C.primaryDark,
     letterSpacing: 1,
   },
   title: {
     fontFamily: "Inter_700Bold",
+    fontSize: 28,
+    lineHeight: 36,
     color: C.text,
     textAlign: "center",
   },
   subtitle: {
     fontFamily: "Inter_400Regular",
+    fontSize: 16,
+    lineHeight: 24,
     color: C.textSecondary,
     textAlign: "center",
     maxWidth: 320,
@@ -370,22 +369,21 @@ const slideStyles = StyleSheet.create({
   },
   featureText: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
+    fontSize: 16,
     color: C.text,
     flex: 1,
   },
   stepLabel: {
     fontFamily: "Inter_700Bold",
-    fontSize: 11,
+    fontSize: 13,
     color: C.primary,
     textTransform: "uppercase",
     letterSpacing: 1.5,
+    textAlign: "center",
   },
   interactiveMockWrap: {
-    flexGrow: 1,
-    paddingTop: 8,
+    paddingTop: 16,
     width: "100%",
-    minHeight: 200,
   },
   mockNotebook: {
     backgroundColor: C.paper,
@@ -394,6 +392,7 @@ const slideStyles = StyleSheet.create({
     paddingLeft: 40,
     paddingBottom: 24,
     minHeight: 280,
+    width: "100%",
     shadowColor: C.black,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -428,7 +427,7 @@ const slideStyles = StyleSheet.create({
   },
   mockEquationText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 24,
+    fontSize: 26,
     color: C.text,
   },
   mockRow: {
@@ -452,17 +451,17 @@ const slideStyles = StyleSheet.create({
   },
   mockRowText: {
     fontFamily: "Inter_500Medium",
-    fontSize: 20,
+    fontSize: 22,
     color: C.text,
   },
   mockRowTextActive: {
     fontFamily: "Inter_700Bold",
-    fontSize: 20,
+    fontSize: 22,
     color: C.primary,
   },
   mockRowTextError: {
     fontFamily: "Inter_700Bold",
-    fontSize: 20,
+    fontSize: 22,
     color: C.error,
     textDecorationLine: "line-through",
   },
@@ -488,8 +487,8 @@ const slideStyles = StyleSheet.create({
   },
   mockErrorText: {
     fontFamily: "Inter_500Medium",
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
     color: C.text,
     flex: 1,
   },

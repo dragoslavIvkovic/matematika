@@ -15,7 +15,6 @@ import Animated, {
   Easing,
   FadeInDown,
   useAnimatedProps,
-  useAnimatedStyle,
   useSharedValue,
   withDelay,
   withTiming,
@@ -25,6 +24,7 @@ import Svg, { Circle } from "react-native-svg";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
+import { ProgressBar } from "@/components/ProgressBar";
 import Colors from "@/constants/colors";
 import { useLevelStatsStore } from "@/store/levelStatsStore";
 import { LevelManager } from "@/utils/LevelManager";
@@ -33,42 +33,6 @@ import { LEVEL_CONFIGS } from "@/utils/ProblemGenerator";
 const C = Colors.light;
 
 const LEVEL_COLORS: Record<string, string> = C.levels;
-
-function ProgressBar({
-  progress,
-  color,
-  delay = 0,
-}: {
-  progress: number;
-  color: string;
-  delay?: number;
-}) {
-  const width = useSharedValue(0);
-  useEffect(() => {
-    width.value = withDelay(
-      delay,
-      withTiming(progress, { duration: 800, easing: Easing.out(Easing.cubic) }),
-    );
-  }, [progress, delay, width]);
-  const barStyle = useAnimatedStyle(() => ({
-    width: `${width.value}%`,
-  }));
-  return (
-    <View style={progressBarStyles.track}>
-      <Animated.View style={[progressBarStyles.fill, barStyle, { backgroundColor: color }]} />
-    </View>
-  );
-}
-const progressBarStyles = StyleSheet.create({
-  track: {
-    height: 8,
-    backgroundColor: C.border,
-    borderRadius: 4,
-    overflow: "hidden",
-    flex: 1,
-  },
-  fill: { height: "100%", borderRadius: 4 },
-});
 
 function AccuracyGauge({ accuracy }: { accuracy: number }) {
   const radius = 64;
@@ -348,6 +312,7 @@ export default function ProgressScreen() {
                     }
                     color={color}
                     delay={400 + index * 80}
+                    height={8}
                   />
                   <Text style={[styles.topicScore, { color }]}>
                     {total > 0 ? `${levelAccuracy}%` : "—"}
