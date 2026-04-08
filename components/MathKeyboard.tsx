@@ -51,8 +51,8 @@ export function MathKeyboard({
   const mathKeys = [
     ["1", "2", "3", "+"],
     ["4", "5", "6", "-"],
-    ["7", "8", "9", "×"],
-    [".", "0", "=", "÷"],
+    ["7", "8", "9", "*"],
+    [".", "0", "=", "/"],
     ["ABC", "x", "y", "DEL"],
   ];
 
@@ -66,8 +66,11 @@ export function MathKeyboard({
   const keys = mode === "math" ? mathKeys : letterKeys;
 
   const renderKey = (key: string) => {
-    const isAction = ["DEL", "ABC", "123"].includes(key);
-    const isOperator = ["+", "-", "×", "÷", "=", "(", ")"].includes(key);
+    const isAction = ["ABC", "123"].includes(key);
+    const isDelete = key === "DEL";
+    const isLightMinusDivide = key === "-" || key === "/";
+    const isEquals = key === "=";
+    const isOperator = ["+", "-", "*", "/", "=", "(", ")"].includes(key);
     const isSpecial = ["x", "y"].includes(key);
 
     let content: React.ReactNode = (
@@ -75,7 +78,9 @@ export function MathKeyboard({
         style={[
           styles.keyText,
           isAction && styles.actionKeyText,
-          isOperator && styles.operatorKeyText,
+          isLightMinusDivide && styles.lightMinusDivideKeyText,
+          isEquals && styles.equalsKeyText,
+          isOperator && !isLightMinusDivide && !isEquals && styles.operatorKeyText,
         ]}
       >
         {key}
@@ -83,7 +88,7 @@ export function MathKeyboard({
     );
 
     if (key === "DEL") {
-      content = <Ionicons name="backspace-outline" size={24} color={C.text} />;
+      content = <Ionicons name="backspace-outline" size={24} color={C.white} />;
     }
 
     return (
@@ -93,8 +98,11 @@ export function MathKeyboard({
         onPress={() => handlePress(key)}
         style={[
           styles.key,
+          isDelete && styles.deleteKey,
           isAction && styles.actionKey,
-          isOperator && styles.operatorKey,
+          isLightMinusDivide && styles.lightMinusDivideKey,
+          isEquals && styles.equalsKey,
+          isOperator && !isLightMinusDivide && !isEquals && styles.operatorKey,
           isSpecial && styles.specialKey,
         ]}
       >
@@ -221,12 +229,30 @@ const styles = StyleSheet.create({
   operatorKeyText: {
     color: "#FFFFFF",
   },
+  lightMinusDivideKey: {
+    backgroundColor: C.infoLight,
+    borderWidth: 1,
+    borderColor: "rgba(37, 99, 235, 0.2)",
+  },
+  lightMinusDivideKeyText: {
+    color: C.primary,
+    fontSize: 20,
+  },
+  equalsKey: {
+    backgroundColor: C.success,
+    borderWidth: 0,
+  },
+  equalsKeyText: {
+    color: "#FFFFFF",
+    fontSize: 20,
+  },
   specialKey: {
     backgroundColor: C.orangeLighter,
     borderWidth: 1,
     borderColor: C.orangeLight,
   },
   deleteKey: {
-    backgroundColor: C.errorLighter,
+    backgroundColor: C.error,
+    borderWidth: 0,
   },
 });

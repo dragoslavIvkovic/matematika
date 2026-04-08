@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useCallback, useRef, useState } from "react";
 import {
+  InputAccessoryView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -26,6 +27,9 @@ import {
 } from "@/utils/ProblemGenerator";
 
 const C = Colors.light;
+
+/** iOS: prazan accessory uklanja podrazumevanu traku sa „Done“ iznad tastature. */
+const IOS_MATH_INPUT_ACCESSORY_ID = "mathAssessmentInputAccessory";
 
 // Assessment: 2 problems per level, test from 1.1 up to 1.6
 const PROBLEMS_PER_LEVEL = 2;
@@ -169,13 +173,10 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
 
   const handleKeyboardKeyPress = (key: string) => {
     const newAns = [...typedAnswers];
-    let char = key;
-    if (key === "×") char = "*";
-    if (key === "÷") char = "/";
     const currentStep = newAns[activeInputIndex];
     newAns[activeInputIndex] = {
       ...currentStep,
-      text: (currentStep.text || "") + char,
+      text: (currentStep.text || "") + key,
     };
     setTypedAnswers(newAns);
   };
@@ -351,6 +352,11 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
 
   return (
     <View style={styles.container}>
+      {Platform.OS === "ios" && (
+        <InputAccessoryView nativeID={IOS_MATH_INPUT_ACCESSORY_ID}>
+          <View style={{ height: 0 }} />
+        </InputAccessoryView>
+      )}
       <View style={styles.testContent}>
         {/* Progress header */}
         <View style={styles.testHeader}>
@@ -406,6 +412,9 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
                 key={step.id}
                 ref={idx === typedAnswers.length - 1 ? inputRef : undefined}
                 style={styles.testInput}
+                inputAccessoryViewID={
+                  Platform.OS === "ios" ? IOS_MATH_INPUT_ACCESSORY_ID : undefined
+                }
                 placeholder={`Step ${idx + 1}...`}
                 placeholderTextColor={C.textMuted}
                 value={step.text}

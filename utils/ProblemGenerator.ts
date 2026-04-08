@@ -93,7 +93,7 @@ function generateLevel12(type: "*" | "/"): GeneratedProblem {
     const a = randInt(2, 20);
     const b = randInt(2, 10);
     return {
-      equation: `${a} × ${b}`,
+      equation: `${a} * ${b}`,
       level: "1.2",
       type: "*",
       a,
@@ -109,7 +109,7 @@ function generateLevel12(type: "*" | "/"): GeneratedProblem {
     const quotient = randInt(2, 10);
     const dividend = divisor * quotient;
     return {
-      equation: `${dividend} ÷ ${divisor}`,
+      equation: `${dividend} / ${divisor}`,
       level: "1.2",
       type: "/",
       a: dividend,
@@ -169,7 +169,7 @@ function generateLevel14(type: "*" | "/"): GeneratedProblem {
     const x = randInt(1, 10);
     const b = a * x;
     return {
-      equation: `${a} · ${variable} = ${b}`,
+      equation: `${a} * ${variable} = ${b}`,
       level: "1.4",
       type: "*",
       a,
@@ -185,7 +185,7 @@ function generateLevel14(type: "*" | "/"): GeneratedProblem {
     const b = randInt(1, 10);
     const x = a * b;
     return {
-      equation: `${variable} ÷ ${a} = ${b}`,
+      equation: `${variable} / ${a} = ${b}`,
       level: "1.4",
       type: "/",
       a,
@@ -237,7 +237,7 @@ function generateLevel15(type: "+" | "-"): GeneratedProblem {
   }
 }
 
-// ─── Level 1.6: ± b = c (x ÷ a ± b = c) ─────────────────────
+// ─── Level 1.6: ± b = c (x / a ± b = c) ─────────────────────
 function generateLevel16(type: "+" | "-"): GeneratedProblem {
   const variable = getRandomVariable();
   const a = randInt(2, 12);
@@ -248,7 +248,7 @@ function generateLevel16(type: "+" | "-"): GeneratedProblem {
     const b = randInt(1, 50);
     const c = xOverA + b;
     return {
-      equation: `${variable} ÷ ${a} + ${b} = ${c}`,
+      equation: `${variable} / ${a} + ${b} = ${c}`,
       level: "1.6",
       type: "+",
       a,
@@ -263,7 +263,7 @@ function generateLevel16(type: "+" | "-"): GeneratedProblem {
     const b = maxB > 0 ? randInt(1, Math.min(maxB, 50)) : 1;
     const c = xOverA - b;
     return {
-      equation: `${variable} ÷ ${a} - ${b} = ${c}`,
+      equation: `${variable} / ${a} - ${b} = ${c}`,
       level: "1.6",
       type: "-",
       a,
@@ -321,7 +321,7 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
   {
     id: "1.4",
     name: "ax = b",
-    description: "Solve a·x = b and x÷a = b step by step",
+    description: "Solve a*x = b and x/a = b step by step",
     requiredStreak: 6,
     operations: ["*", "/"],
     operationsPerType: 3,
@@ -338,8 +338,8 @@ export const LEVEL_CONFIGS: LevelConfig[] = [
   },
   {
     id: "1.6",
-    name: "± b = c (x ÷ a ± b = c)",
-    description: "Solve x÷a + b = c and x÷a - b = c",
+    name: "± b = c (x / a ± b = c)",
+    description: "Solve x/a + b = c and x/a - b = c",
     requiredStreak: 6,
     operations: ["+", "-"],
     operationsPerType: 3,

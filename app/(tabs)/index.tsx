@@ -15,8 +15,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WeeklyStreak } from "@/components/WeeklyStreak";
 import Colors from "@/constants/colors";
 import { ROUTE_ONBOARDING, ROUTE_PRACTICE } from "@/constants/routes";
+import { useLevelStatsStore } from "@/store/levelStatsStore";
 import { computeDailyStreak } from "@/utils/dateUtils";
-import { LevelManager, type LevelState } from "@/utils/LevelManager";
+import { LevelManager } from "@/utils/LevelManager";
 import { getLevelConfig, LEVEL_CONFIGS, type LevelId } from "@/utils/ProblemGenerator";
 import { AppStorage } from "@/utils/storage";
 import { hasTheory } from "@/utils/TheoryContent";
@@ -62,8 +63,17 @@ const pbStyles = StyleSheet.create({
 
 export default function LearnScreen() {
   const insets = useSafeAreaInsets();
-  const [state, setState] = useState<LevelState | null>(null);
   const [manager, setManager] = useState<LevelManager | null>(null);
+
+  const totalSolved = useLevelStatsStore((s) => s.totalSolved);
+  const completedLevels = useLevelStatsStore((s) => s.completedLevels);
+  const levelStats = useLevelStatsStore((s) => s.levelStats);
+  const activeDays = useLevelStatsStore((s) => s.activeDays);
+  const currentLevel = useLevelStatsStore((s) => s.currentLevel);
+  const streak = useLevelStatsStore((s) => s.streak);
+  const syncStats = useLevelStatsStore((s) => s.syncFromManager);
+
+  const completedCount = completedLevels.length;
 
   useEffect(() => {
     // Check onboarding
@@ -73,27 +83,13 @@ export default function LearnScreen() {
       router.replace(ROUTE_ONBOARDING);
     }
 
-    // Load state
+    // Load manager for mutations & sync store
     const mgr = LevelManager.load();
     setManager(mgr);
-    setState(mgr.getState());
-  }, []);
-
-  // Refresh when screen comes into focus
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const mgr = LevelManager.load();
-      setManager(mgr);
-      setState(mgr.getState());
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+    syncStats(mgr.getState());
+  }, [syncStats]);
 
   const webTopPadding = Platform.OS === "web" ? 67 : 0;
-
-  const totalSolved = state?.totalSolved || 0;
-  const completedCount = state?.completedLevels.length || 0;
-  const currentLevel = state?.currentLevel || "1.1";
 
   return (
     <View
@@ -101,10 +97,7 @@ export default function LearnScreen() {
     >
       {/* Header with Weekly Streak */}
       <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
-        <WeeklyStreak
-          activeDays={state?.activeDays || []}
-          currentStreak={computeDailyStreak(state?.activeDays || [])}
-        />
+        <WeeklyStreak activeDays={activeDays} currentStreak={computeDailyStreak(activeDays)} />
       </Animated.View>
 
       <ScrollView
@@ -169,10 +162,10 @@ export default function LearnScreen() {
         </Animated.View>
 
         {LEVEL_CONFIGS.map((config, index) => {
-          const completed = state?.completedLevels.includes(config.id) || false;
+          const completed = completedLevels.includes(config.id);
           const isCurrent = config.id === currentLevel;
           const color = C.levels[config.id] || C.primary;
-          const stats = state?.levelStats[config.id];
+          const stats = levelStats[config.id];
           const solved = stats?.solved || 0;
           const bestStreak = stats?.bestStreak || 0;
 
@@ -180,7 +173,7 @@ export default function LearnScreen() {
           const progressPercent = completed
             ? 100
             : isCurrent
-              ? ((state?.streak || 0) / config.requiredStreak) * 100
+              ? (streak / config.requiredStreak) * 100
               : 0;
 
           return (
@@ -222,6 +215,7 @@ export default function LearnScreen() {
                     if (manager) {
                       manager.setCurrentLevel(config.id);
                       manager.save();
+                      syncStats(manager.getState());
                       router.push(`${ROUTE_PRACTICE}?action=start` as Href);
                     }
                   }}
@@ -261,6 +255,7 @@ export default function LearnScreen() {
                         if (manager) {
                           manager.setCurrentLevel(config.id);
                           manager.save();
+                          syncStats(manager.getState());
                           router.push(`${ROUTE_PRACTICE}?action=theory&level=${config.id}` as Href);
                         }
                       }}

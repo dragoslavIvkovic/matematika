@@ -13,3 +13,4 @@ android
 *.apk
 *.aab
 *.ipa
+.DS_Store

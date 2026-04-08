@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Alert,
   Platform,
@@ -26,7 +26,8 @@ import Svg, { Circle } from "react-native-svg";
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 import Colors from "@/constants/colors";
-import { LevelManager, type LevelState } from "@/utils/LevelManager";
+import { useLevelStatsStore } from "@/store/levelStatsStore";
+import { LevelManager } from "@/utils/LevelManager";
 import { LEVEL_CONFIGS } from "@/utils/ProblemGenerator";
 
 const C = Colors.light;
@@ -168,26 +169,13 @@ const gaugeStyles = StyleSheet.create({
 
 export default function ProgressScreen() {
   const insets = useSafeAreaInsets();
-  const [state, setState] = useState<LevelState | null>(null);
-  const [manager, setManager] = useState<LevelManager | null>(null);
+  const totalSolved = useLevelStatsStore((s) => s.totalSolved);
+  const totalErrors = useLevelStatsStore((s) => s.totalErrors);
+  const completedLevels = useLevelStatsStore((s) => s.completedLevels);
+  const levelStats = useLevelStatsStore((s) => s.levelStats);
+  const resetStats = useLevelStatsStore((s) => s.resetStats);
 
-  useEffect(() => {
-    const mgr = LevelManager.load();
-    setManager(mgr);
-    setState(mgr.getState());
-  }, []);
-
-  // Refresh periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const mgr = LevelManager.load();
-      setManager(mgr);
-      setState(mgr.getState());
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleReset = async () => {
+  const handleReset = () => {
     Alert.alert(
       "Reset All Progress",
       "This will delete all your progress and start fresh. Are you sure?",
@@ -196,12 +184,11 @@ export default function ProgressScreen() {
         {
           text: "Reset",
           style: "destructive",
-          onPress: async () => {
-            if (manager) {
-              await manager.reset();
-              setState(manager.getState());
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            }
+          onPress: () => {
+            const mgr = LevelManager.load();
+            mgr.reset();
+            resetStats();
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           },
         },
       ],
@@ -209,9 +196,7 @@ export default function ProgressScreen() {
   };
 
   const webTopPadding = Platform.OS === "web" ? 67 : 0;
-  const totalSolved = state?.totalSolved || 0;
-  const totalErrors = state?.totalErrors || 0;
-  const completedCount = state?.completedLevels.length || 0;
+  const completedCount = completedLevels.length;
   const accuracy =
     totalSolved + totalErrors > 0
       ? Math.round((totalSolved / (totalSolved + totalErrors)) * 100)
@@ -321,11 +306,11 @@ export default function ProgressScreen() {
         <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.topicCard}>
           {LEVEL_CONFIGS.map((config, index) => {
             const color = LEVEL_COLORS[config.id] || C.primary;
-            const stats = state?.levelStats[config.id];
+            const stats = levelStats[config.id];
             const solved = stats?.solved || 0;
             const errors = stats?.errors || 0;
             const bestStr = stats?.bestStreak || 0;
-            const completed = state?.completedLevels.includes(config.id) || false;
+            const completed = completedLevels.includes(config.id);
             const total = solved + errors;
             const levelAccuracy = total > 0 ? Math.round((solved / total) * 100) : 0;
 

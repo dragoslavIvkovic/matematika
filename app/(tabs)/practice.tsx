@@ -4,6 +4,7 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Alert,
+  InputAccessoryView,
   Platform,
   ScrollView,
   StyleSheet,
@@ -33,6 +34,7 @@ import { MathKeyboard } from "@/components/MathKeyboard";
 import { RobotMascot } from "@/components/RobotMascot";
 import { TheoryScreen } from "@/components/TheoryScreen";
 import Colors from "@/constants/colors";
+import { useLevelStatsStore } from "@/store/levelStatsStore";
 import { useUsageStore } from "@/store/usageStore";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import { type ErrorAction, LevelManager } from "@/utils/LevelManager";
@@ -46,6 +48,9 @@ import {
 import { getTheoryContent } from "@/utils/TheoryContent";
 
 const C = Colors.light;
+
+/** iOS: prazan accessory uklanja podrazumevanu traku sa „Done“ iznad number-pad-a. */
+const IOS_MATH_INPUT_ACCESSORY_ID = "mathPracticeInputAccessory";
 
 type ScreenMode =
   | "loading"
@@ -103,6 +108,7 @@ const checkStyles = StyleSheet.create({
 export default function PracticeScreen() {
   const insets = useSafeAreaInsets();
   const incrementTasksCompleted = useUsageStore((state) => state.incrementTasksCompleted);
+  const syncStats = useLevelStatsStore((s) => s.syncFromManager);
   const { action, level } = useLocalSearchParams();
   const [mode, setMode] = useState<ScreenMode>("loading");
   const [isTheoryOnly, setIsTheoryOnly] = useState(false);
@@ -177,6 +183,7 @@ export default function PracticeScreen() {
     useCallback(() => {
       const mgr = LevelManager.load();
       managerRef.current = mgr;
+      syncStats(mgr.getState());
       rerender();
       if (action === "start") {
         router.setParams({ action: "" }); // Consume the action so we don't loop
@@ -184,13 +191,14 @@ export default function PracticeScreen() {
       } else if (action === "theory" && level) {
         mgr.setCurrentLevel(level as LevelId);
         mgr.save();
+        syncStats(mgr.getState());
         setIsTheoryOnly(true);
         setMode("theory");
         router.setParams({ action: "", level: "" });
       } else {
         setMode((prev) => (prev === "loading" ? "level_select" : prev));
       }
-    }, [rerender, action, level, startPractice]),
+    }, [rerender, action, level, startPractice, syncStats]),
   );
 
   // ── Handle level selection ──
@@ -200,10 +208,11 @@ export default function PracticeScreen() {
       if (!mgr) return;
       mgr.setCurrentLevel(level);
       mgr.save();
+      syncStats(mgr.getState());
       rerender();
       startPractice(mgr);
     },
-    [startPractice, rerender],
+    [startPractice, rerender, syncStats],
   );
 
   // ── Handle theory dismiss ──
@@ -219,9 +228,10 @@ export default function PracticeScreen() {
 
     mgr.markTheoryShown();
     mgr.save();
+    syncStats(mgr.getState());
     generateNew(mgr);
     setMode("practice");
-  }, [generateNew, isTheoryOnly]);
+  }, [generateNew, isTheoryOnly, syncStats]);
 
   // ── Handle assessment complete ──
   const handleAssessmentComplete = useCallback(
@@ -237,6 +247,7 @@ export default function PracticeScreen() {
             onPress: () => {
               mgr.setCurrentLevel(recommendedLevel);
               mgr.save();
+              syncStats(mgr.getState());
               rerender();
               startPractice(mgr);
             },
@@ -249,7 +260,7 @@ export default function PracticeScreen() {
         ],
       );
     },
-    [startPractice, rerender],
+    [startPractice, rerender, syncStats],
   );
 
   // ── Check answer ──
@@ -282,6 +293,7 @@ export default function PracticeScreen() {
 
           const result = mgr.recordCorrect(problem.type);
           mgr.save();
+          syncStats(mgr.getState());
           rerender();
           incrementTasksCompleted();
 
@@ -303,7 +315,10 @@ export default function PracticeScreen() {
             duration: 300,
             easing: Easing.out(Easing.cubic),
           });
-          resultOpacity.value = withTiming(1, { duration: 280, easing: Easing.out(Easing.cubic) });
+          resultOpacity.value = withTiming(1, {
+            duration: 280,
+            easing: Easing.out(Easing.cubic),
+          });
         } else {
           // Partially correct, need more steps
           setIsChecking(false);
@@ -321,6 +336,7 @@ export default function PracticeScreen() {
         const failedStep = validation.failedAtStep || 1;
         const errorAction = mgr.recordError(failedStep);
         mgr.save();
+        syncStats(mgr.getState());
         rerender();
 
         // Hide custom keyboard so the feedback modal is never covered by it
@@ -336,15 +352,20 @@ export default function PracticeScreen() {
         });
       }
     }, 800);
-  }, [typedAnswers, problem, rerender, resultOpacity, resultScale, incrementTasksCompleted]);
+  }, [
+    typedAnswers,
+    problem,
+    rerender,
+    resultOpacity,
+    resultScale,
+    incrementTasksCompleted,
+    syncStats,
+  ]);
 
   const handleKeyboardKeyPress = (key: string) => {
     const newAns = [...typedAnswers];
-    let char = key;
-    if (key === "×") char = "*";
-    if (key === "÷") char = "/";
 
-    newAns[activeInputIndex] = (newAns[activeInputIndex] || "") + char;
+    newAns[activeInputIndex] = (newAns[activeInputIndex] || "") + key;
     setTypedAnswers(newAns);
   };
 
@@ -545,6 +566,11 @@ export default function PracticeScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
+      {Platform.OS === "ios" && (
+        <InputAccessoryView nativeID={IOS_MATH_INPUT_ACCESSORY_ID}>
+          <View style={{ height: 0 }} />
+        </InputAccessoryView>
+      )}
       {/* ── Compact Header ── */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -640,6 +666,9 @@ export default function PracticeScreen() {
                   <TextInput
                     ref={idx === typedAnswers.length - 1 ? inputRef : undefined}
                     style={styles.notebookTextInput}
+                    inputAccessoryViewID={
+                      Platform.OS === "ios" ? IOS_MATH_INPUT_ACCESSORY_ID : undefined
+                    }
                     placeholder={requiredLines === 1 ? "Type your answer..." : `Step ${idx + 1}...`}
                     placeholderTextColor={C.textMuted}
                     value={ans}

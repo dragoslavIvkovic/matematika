@@ -1,5 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import type { ComponentProps } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
 
@@ -7,6 +8,8 @@ import Colors from "@/constants/colors";
 import type { ErrorAction } from "@/utils/LevelManager";
 
 const C = Colors.light;
+
+type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
 interface ErrorFeedbackModalProps {
   visible: boolean;
@@ -39,7 +42,7 @@ export function ErrorFeedbackModal({
     }
   };
 
-  const getActionIcon = (): string => {
+  const getActionIcon = (): IoniconName => {
     if (!errorAction) return "alert-circle";
     switch (errorAction.type) {
       case "fallback_level":
@@ -70,7 +73,7 @@ export function ErrorFeedbackModal({
       <Animated.View entering={SlideInDown.duration(350)} style={styles.card}>
         {/* Error icon */}
         <View style={[styles.iconCircle, { backgroundColor: actionColor }]}>
-          <Ionicons name={getActionIcon() as any} size={32} color={C.white} />
+          <Ionicons name={getActionIcon()} size={32} color={C.white} />
         </View>
 
         {/* Error text */}
