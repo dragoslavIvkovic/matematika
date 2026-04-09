@@ -20,7 +20,7 @@ import { ErrorFeedbackModal } from "@/components/ErrorFeedbackModal";
 import { LevelSelector } from "@/components/LevelSelector";
 import { MathKeyboard } from "@/components/MathKeyboard";
 import { NotebookInput } from "@/components/NotebookInput";
-import { RobotMascot } from "@/components/RobotMascot";
+import { OwlMascot } from "@/components/OwlMascot";
 import { TheoryScreen } from "@/components/TheoryScreen";
 import Colors from "@/constants/colors";
 import { useQuizEngine } from "@/hooks/useQuizEngine";
@@ -284,7 +284,7 @@ export default function PracticeScreen() {
     return (
       <View style={[styles.container, { paddingTop: topPad }]}>
         <View style={styles.loadingCenter}>
-          <RobotMascot size={80} isThinking />
+          <OwlMascot size={88} isThinking />
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
       </View>
@@ -497,10 +497,10 @@ export default function PracticeScreen() {
               exiting={FadeOut.duration(200)}
               style={styles.checkingArea}
             >
-              <View style={styles.robotCheckingSlot}>
-                <RobotMascot size={70} isThinking />
+              <View style={styles.mascotCheckingSlot}>
+                <OwlMascot size={78} isThinking />
               </View>
-              <Text style={[styles.checkingLabel, styles.checkingLabelBelowRobot]}>
+              <Text style={[styles.checkingLabel, styles.checkingLabelBelowMascot]}>
                 Checking your answer...
               </Text>
               <CheckingAnimation />
@@ -690,7 +690,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 4,
   },
-  robotCheckingSlot: {
+  mascotCheckingSlot: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: C.textSecondary,
   },
-  checkingLabelBelowRobot: {
+  checkingLabelBelowMascot: {
     marginTop: 8,
     textAlign: "center",
   },

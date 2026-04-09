@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp, ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { RobotMascot } from "@/components/RobotMascot";
+import { OwlMascot } from "@/components/OwlMascot";
 import Colors from "@/constants/colors";
 import { ROUTE_HOME } from "@/constants/routes";
 import { AppStorage } from "@/utils/storage";
@@ -28,10 +28,9 @@ const ONBOARDING_KEY = "math_tutor_onboarding_v1";
 
 function Slide1() {
   const { height: windowH } = useWindowDimensions();
-  // Robot scales with viewport; clamp keeps tiny / huge phones readable
-  const robotSize = Math.round(Math.min(132, Math.max(72, windowH * 0.17)));
-  // Mascot floats ±4px + antenna — reserve vertical space so text never overlaps
-  const robotSectionMinH = robotSize * 1.28;
+  // Mascot scales with viewport; clamp keeps tiny / huge phones readable
+  const mascotSize = Math.round(Math.min(132, Math.max(78, windowH * 0.17)));
+  const mascotSectionMinH = mascotSize * 1.32;
   const textGap = Math.max(20, Math.min(36, Math.round(windowH * 0.03)));
   const titleFontSize = windowH < 620 ? 22 : windowH < 720 ? 24 : windowH < 840 ? 26 : 28;
   const titleLineHeight = Math.round(titleFontSize * 1.28);
@@ -48,9 +47,9 @@ function Slide1() {
         contentContainerStyle={[slideStyles.slideScrollContent, { paddingBottom: scrollBottomPad }]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={[slideStyles.robotSection, { minHeight: robotSectionMinH }]}>
-          <Animated.View entering={ZoomIn.delay(200).duration(600)} style={slideStyles.robotWrap}>
-            <RobotMascot size={robotSize} />
+        <View style={[slideStyles.mascotSection, { minHeight: mascotSectionMinH }]}>
+          <Animated.View entering={ZoomIn.delay(200).duration(600)} style={slideStyles.mascotWrap}>
+            <OwlMascot size={mascotSize} />
           </Animated.View>
         </View>
         <Animated.View
@@ -58,7 +57,7 @@ function Slide1() {
           style={[slideStyles.textBlock, { marginTop: textGap }]}
         >
           <View style={slideStyles.badge}>
-            <Text style={slideStyles.badgeText}>SMART TUTOR</Text>
+            <Text style={slideStyles.badgeText}>WISE OWL</Text>
           </View>
           <Text
             style={[slideStyles.title, { fontSize: titleFontSize, lineHeight: titleLineHeight }]}
@@ -76,8 +75,16 @@ function Slide1() {
           </Text>
           <View style={slideStyles.featureGrid}>
             {[
-              { icon: "analytics", detail: "Step Diagnostics", color: C.primary },
-              { icon: "trending-up", detail: "Adaptive Levels", color: C.accent },
+              {
+                icon: "analytics",
+                detail: "Step Diagnostics",
+                color: C.primary,
+              },
+              {
+                icon: "trending-up",
+                detail: "Adaptive Levels",
+                color: C.accent,
+              },
               { icon: "book", detail: "Theory on Demand", color: C.orange },
             ].map((f, i) => (
               <Animated.View
@@ -167,7 +174,7 @@ function Slide3() {
         <Animated.View entering={FadeInUp.delay(400)} style={slideStyles.interactiveMockWrap}>
           <View style={slideStyles.mockNotebook}>
             <View style={slideStyles.mockErrorToast}>
-              <RobotMascot size={32} />
+              <OwlMascot size={36} />
               <Text style={slideStyles.mockErrorText}>
                 Wait, when moving +4 to the other side, it should become -4!
               </Text>
@@ -253,7 +260,7 @@ export default function OnboardingScreen() {
         scrollEventThrottle={16}
       />
 
-      <View style={[styles.bottomBar, { paddingBottom: botPad + 16 }]}>
+      <View style={[styles.bottomBar, { paddingBottom: botPad + 24 }]}>
         <View style={styles.dotsRow}>
           {[0, 1, 2].map((i) => (
             <View
@@ -267,7 +274,10 @@ export default function OnboardingScreen() {
           <TouchableOpacity
             style={styles.ctaBtn}
             onPress={() =>
-              flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true })
+              flatListRef.current?.scrollToIndex({
+                index: currentIndex + 1,
+                animated: true,
+              })
             }
             activeOpacity={0.9}
           >
@@ -296,14 +306,15 @@ const slideStyles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
   },
-  /** Reserves height for robot + float animation so the next block cannot overlap */
-  robotSection: {
+  /** Reserves height for mascot + float animation so the next block cannot overlap */
+  mascotSection: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 6,
+    paddingTop: 4,
+    paddingBottom: 12,
   },
-  robotWrap: {
+  mascotWrap: {
     alignItems: "center",
     justifyContent: "center",
   },

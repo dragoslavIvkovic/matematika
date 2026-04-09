@@ -15,7 +15,7 @@ import {
 import Animated, { FadeIn, FadeInDown, SlideInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MathKeyboard } from "@/components/MathKeyboard";
-import { RobotMascot } from "@/components/RobotMascot";
+import { OwlMascot } from "@/components/OwlMascot";
 import Colors from "@/constants/colors";
 import { useUsageStore } from "@/store/usageStore";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
@@ -217,8 +217,8 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
 
   // ── Intro Phase ──
   if (phase === "intro") {
-    const robotSize = Math.round(Math.min(102, Math.max(64, windowH * 0.13)));
-    const robotSectionMinH = robotSize * 1.32;
+    const mascotSize = Math.round(Math.min(102, Math.max(70, windowH * 0.13)));
+    const mascotSectionMinH = mascotSize * 1.32;
     const titleGap = Math.max(20, Math.min(32, Math.round(windowH * 0.028)));
     const titleSize = windowH < 640 ? 24 : windowH < 780 ? 26 : 28;
     const titleLineHeight = Math.round(titleSize * 1.25);
@@ -236,11 +236,11 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
         <Animated.View entering={FadeInDown.duration(400)} style={styles.introColumn}>
           <View
             style={[
-              styles.robotIntroSection,
-              { minHeight: robotSectionMinH, marginBottom: titleGap },
+              styles.mascotIntroSection,
+              { minHeight: mascotSectionMinH, marginBottom: titleGap },
             ]}
           >
-            <RobotMascot size={robotSize} />
+            <OwlMascot size={mascotSize} />
           </View>
 
           <View style={styles.introHeadingBlock}>
@@ -290,7 +290,7 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
     return (
       <ScrollView contentContainerStyle={styles.resultsContent}>
         <Animated.View entering={FadeInDown.duration(400)} style={styles.resultsHeader}>
-          <RobotMascot size={70} />
+          <OwlMascot size={76} />
           <Text style={styles.resultsTitle}>Assessment Complete!</Text>
           <Text style={styles.resultsSubtitle}>Here's how you did:</Text>
         </Animated.View>
@@ -518,8 +518,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 18,
   },
-  /** Reserves vertical space for mascot + float animation — keeps title below robot */
-  robotIntroSection: {
+  /** Reserves vertical space for mascot + float animation — keeps title below mascot */
+  mascotIntroSection: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",

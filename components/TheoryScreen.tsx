@@ -28,7 +28,7 @@ export function TheoryScreen({ theory, levelId, onDismiss }: TheoryScreenProps) 
           <Text style={styles.subtitle}>{theory.subtitle}</Text>
         </Animated.View>
 
-        {/* Concept — compact, no robot */}
+        {/* Concept — compact, no mascot */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.conceptCard}>
           <Text style={styles.conceptText}>{theory.concept}</Text>
         </Animated.View>
@@ -173,11 +173,6 @@ const styles = StyleSheet.create({
     padding: 14,
     borderWidth: 1.5,
     borderColor: C.primaryLight,
-  },
-  robotRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
   },
   conceptBubble: {
     flex: 1,

@@ -18,7 +18,7 @@ import { CheckingAnimation } from "@/components/CheckingAnimation";
 import { ErrorFeedbackModal } from "@/components/ErrorFeedbackModal";
 import { MathKeyboard } from "@/components/MathKeyboard";
 import { NotebookInput } from "@/components/NotebookInput";
-import { RobotMascot } from "@/components/RobotMascot";
+import { OwlMascot } from "@/components/OwlMascot";
 import Colors from "@/constants/colors";
 import { useQuizEngine } from "@/hooks/useQuizEngine";
 import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
@@ -33,7 +33,6 @@ const IOS_DAILY_INPUT_ACCESSORY_ID = "dailyPracticeInputAccessory";
 
 export default function DailyPracticeScreen() {
   const insets = useSafeAreaInsets();
-  const markCompleted = useDailyPracticeStore((s) => s.markCompleted);
   const selectedLevels = useDailyPracticeStore((s) => s.selectedLevels);
 
   // Generate all tasks once on mount
@@ -97,24 +96,18 @@ export default function DailyPracticeScreen() {
       const { total, correct } = sessionAnswersRef.current;
       trackEvent({
         event: "daily_practice_completed",
-        properties: { levelIds: selectedLevels, totalAnswers: total, correctAnswers: correct },
+        properties: {
+          levelIds: selectedLevels,
+          totalAnswers: total,
+          correctAnswers: correct,
+        },
       });
       setSessionDone(true);
-      const today = new Date().toISOString().split("T")[0];
-      markCompleted(today);
       return;
     }
     setCurrentIndex(nextIdx);
     resetQuizState();
-  }, [
-    currentIndex,
-    totalTasks,
-    markCompleted,
-    resetQuizState,
-    trackEvent,
-    selectedLevels,
-    sessionAnswersRef,
-  ]);
+  }, [currentIndex, totalTasks, resetQuizState, trackEvent, selectedLevels, sessionAnswersRef]);
 
   const handleCheck = useCallback(() => {
     engineHandleCheck(problem);
@@ -273,8 +266,8 @@ export default function DailyPracticeScreen() {
               exiting={FadeOut.duration(200)}
               style={styles.checkingArea}
             >
-              <View style={styles.robotSlot}>
-                <RobotMascot size={70} isThinking />
+              <View style={styles.mascotSlot}>
+                <OwlMascot size={78} isThinking />
               </View>
               <Text style={styles.checkingLabel}>Checking your answer...</Text>
               <CheckingAnimation />
@@ -289,7 +282,10 @@ export default function DailyPracticeScreen() {
               style={[
                 styles.resultCard,
                 resultCardStyle,
-                { backgroundColor: C.cardCorrect, borderColor: C.cardCorrectBorder },
+                {
+                  backgroundColor: C.cardCorrect,
+                  borderColor: C.cardCorrectBorder,
+                },
               ]}
             >
               <View style={styles.resultHeader}>
@@ -371,7 +367,11 @@ const styles = StyleSheet.create({
   },
   headerCenter: { flex: 1, gap: 2 },
   headerTitle: { fontFamily: "Inter_700Bold", fontSize: 14, color: C.text },
-  headerSub: { fontFamily: "Inter_400Regular", fontSize: 11, color: C.textSecondary },
+  headerSub: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    color: C.textSecondary,
+  },
   progressBar: {
     height: 4,
     backgroundColor: C.border,
@@ -438,8 +438,13 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     minHeight: 200,
   },
-  checkingArea: { alignItems: "center", gap: 12, width: "100%", paddingHorizontal: 4 },
-  robotSlot: {
+  checkingArea: {
+    alignItems: "center",
+    gap: 12,
+    width: "100%",
+    paddingHorizontal: 4,
+  },
+  mascotSlot: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
@@ -479,7 +484,11 @@ const styles = StyleSheet.create({
   },
   resultTextBlock: { flex: 1, gap: 2 },
   resultTitle: { fontFamily: "Inter_700Bold", fontSize: 20, color: C.text },
-  resultMessage: { fontFamily: "Inter_400Regular", fontSize: 14, color: C.textSecondary },
+  resultMessage: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    color: C.textSecondary,
+  },
   nextBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -500,7 +509,12 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 24 },
 
   // Session complete
-  completeCenter: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
+  completeCenter: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
   completeContent: { alignItems: "center", gap: 16, width: "100%" },
   celebrationIcon: {
     width: 80,
@@ -545,7 +559,11 @@ const styles = StyleSheet.create({
   cStatItem: { flex: 1, alignItems: "center", gap: 4 },
   cStatDivider: { width: 1, backgroundColor: C.border },
   cStatValue: { fontFamily: "Inter_700Bold", fontSize: 28, color: C.text },
-  cStatLabel: { fontFamily: "Inter_500Medium", fontSize: 12, color: C.textMuted },
+  cStatLabel: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 12,
+    color: C.textMuted,
+  },
   backHomeBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -562,5 +580,9 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
-  backHomeBtnText: { fontFamily: "Inter_700Bold", fontSize: 17, color: C.white },
+  backHomeBtnText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 17,
+    color: C.white,
+  },
 });

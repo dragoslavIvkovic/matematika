@@ -17,10 +17,6 @@ interface DailyPracticeCardProps {
 export function DailyPracticeCard({ onSetup, onStart }: DailyPracticeCardProps) {
   const hasConfigured = useDailyPracticeStore((s) => s.hasConfigured);
   const selectedLevels = useDailyPracticeStore((s) => s.selectedLevels);
-  const lastCompletedDate = useDailyPracticeStore((s) => s.lastCompletedDate);
-
-  const today = new Date().toISOString().split("T")[0];
-  const completedToday = lastCompletedDate === today;
 
   if (!hasConfigured) {
     return (
@@ -47,34 +43,6 @@ export function DailyPracticeCard({ onSetup, onStart }: DailyPracticeCardProps) 
   }
 
   const taskCount = computeTaskCount(selectedLevels.length);
-
-  if (completedToday) {
-    return (
-      <View style={[s.card, { opacity: 0.85 }]}>
-        <View style={s.iconBox}>
-          <Ionicons name="checkmark-circle" size={40} color={C.white} />
-        </View>
-        <View style={s.textBlock}>
-          <Text style={s.title}>Daily Practice Done</Text>
-          <Text style={s.sub}>
-            {selectedLevels.length} area{selectedLevels.length > 1 ? "s" : ""} · {taskCount} tasks
-            completed
-          </Text>
-        </View>
-        <TouchableOpacity
-          style={s.settingsBtn}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onSetup();
-          }}
-          activeOpacity={0.7}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons name="settings-outline" size={20} color="rgba(255,255,255,0.7)" />
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <TouchableOpacity

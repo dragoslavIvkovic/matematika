@@ -21,12 +21,9 @@ interface DailyPracticeState {
   selectedLevels: LevelId[];
   /** Whether the user has completed setup at least once */
   hasConfigured: boolean;
-  /** Date string (YYYY-MM-DD) of the last completed daily practice */
-  lastCompletedDate: string | null;
 
   // Actions
   setSelectedLevels: (levels: LevelId[]) => void;
-  markCompleted: (date: string) => void;
 }
 
 export const useDailyPracticeStore = create<DailyPracticeState>()(
@@ -34,14 +31,9 @@ export const useDailyPracticeStore = create<DailyPracticeState>()(
     (set) => ({
       selectedLevels: [],
       hasConfigured: false,
-      lastCompletedDate: null,
 
       setSelectedLevels: (levels) => {
         set({ selectedLevels: levels, hasConfigured: true });
-      },
-
-      markCompleted: (date) => {
-        set({ lastCompletedDate: date });
       },
     }),
     {

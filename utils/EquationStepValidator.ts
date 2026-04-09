@@ -84,7 +84,10 @@ export const EquationStepValidator = {
           val1 = 0;
         }
         // Only the numeric result is needed
-        steps.push({ display: `${val1}`, variations: [`${val1}`, `${val1}.0`, `${val1},0`] });
+        steps.push({
+          display: `${val1}`,
+          variations: [`${val1}`, `${val1}.0`, `${val1},0`],
+        });
         break;
 
       case "1.3":
@@ -94,14 +97,20 @@ export const EquationStepValidator = {
             display: `${variable} = ${b} - ${a}`,
             variations: [`${variable}=${b}-${a}`],
           });
-          steps.push({ display: `${variable} = ${val1}`, variations: [`${variable}=${val1}`] });
+          steps.push({
+            display: `${variable} = ${val1}`,
+            variations: [`${variable}=${val1}`],
+          });
         } else if (type === "-") {
           val1 = b + a;
           steps.push({
             display: `${variable} = ${b} + ${a}`,
             variations: [`${variable}=${b}+${a}`, `${variable}=${a}+${b}`],
           });
-          steps.push({ display: `${variable} = ${val1}`, variations: [`${variable}=${val1}`] });
+          steps.push({
+            display: `${variable} = ${val1}`,
+            variations: [`${variable}=${val1}`],
+          });
         }
         break;
 
@@ -112,14 +121,20 @@ export const EquationStepValidator = {
             display: `${variable} = ${b} / ${a}`,
             variations: [`${variable}=${b}/${a}`],
           });
-          steps.push({ display: `${variable} = ${val1}`, variations: [`${variable}=${val1}`] });
+          steps.push({
+            display: `${variable} = ${val1}`,
+            variations: [`${variable}=${val1}`],
+          });
         } else if (type === "/") {
           val1 = b * a;
           steps.push({
             display: `${variable} = ${b} * ${a}`,
             variations: [`${variable}=${b}*${a}`, `${variable}=${a}*${b}`],
           });
-          steps.push({ display: `${variable} = ${val1}`, variations: [`${variable}=${val1}`] });
+          steps.push({
+            display: `${variable} = ${val1}`,
+            variations: [`${variable}=${val1}`],
+          });
         }
         break;
 

@@ -63,7 +63,14 @@ function AccuracyGauge({ accuracy }: { accuracy: number }) {
 
   return (
     <View style={gaugeStyles.container}>
-      <View style={{ alignItems: "center", justifyContent: "center", width: size, height: size }}>
+      <View
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+          width: size,
+          height: size,
+        }}
+      >
         <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
           {/* Background Track */}
           <Circle
@@ -181,7 +188,7 @@ export default function ProgressScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Accuracy Gauge Replacements Robot Greeting */}
+        {/* Accuracy gauge + mascot greeting */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <AccuracyGauge accuracy={accuracy} />
         </Animated.View>
