@@ -7,12 +7,11 @@
 
 export const APP_CONFIG = {
   /**
-   * Koliko pogresnih pokusaja na ISTOM zadatku pre nego sto
-   * se aktivira fallback (teorija ili povratak na nizi nivo).
+   * Koliko uzastopnih pogrešnih pokušaja pre nego što se otvara teorija (učenje).
    *
-   * Primer: 2 = korisnik moze da pogresi 2 puta pre akcije
+   * Primer: 3 = posle 3 greške zaredom → link na teoriju, ne "Pokušaj ponovo"
    */
-  ERRORS_BEFORE_FALLBACK: 2,
+  ERRORS_BEFORE_FALLBACK: 3,
 
   /**
    * Koliko pogresnih pokusaja ukupno (kumulativno na nivou)

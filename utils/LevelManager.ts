@@ -1,10 +1,10 @@
 /**
  * LevelManager — Manages level progression, streak tracking, and error-based fallback.
  *
- * Error logic (controlled by AppConfig.ERRORS_BEFORE_FALLBACK):
- * - 1st error on equation level → just retry, show correct procedure
- * - 2nd error (reaches ERRORS_BEFORE_FALLBACK) → show theory
- * - After ERRORS_BEFORE_LEVEL_DROP total errors on level → cascade to lower level
+ * Error logic (controlled by AppConfig):
+ * - Dok ne dostigne ERRORS_BEFORE_FALLBACK uzastopnih grešaka → retry + postupak
+ * - Na ERRORS_BEFORE_FALLBACK uzastopnih grešaka → teorija (učenje), ne "Try again"
+ * - Posle ERRORS_BEFORE_LEVEL_DROP ukupnih grešaka na nivou → niži nivo (ako postoji)
  *
  * All thresholds are in utils/AppConfig.ts — change there, applies everywhere.
  */
@@ -198,15 +198,19 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
 
       const errCount = state.consecutiveErrors;
 
-      if (level === "1.1" || level === "1.2") {
+      // Prvo: uzastopne greške → učenje (teorija), uključujući 1.1 i 1.2
+      if (errCount >= threshold) {
+        state.needsTheory = true;
+        state.consecutiveErrors = 0;
         return {
-          type: "retry",
-          message: "Nije tačno. Pokušaj ponovo!",
+          type: "show_theory",
+          message: `Pogrešio si ${errCount} puta zaredom. Hajde na teoriju da ponovimo gradivo.`,
           errorCount: errCount,
           threshold,
         };
       }
 
+      // Zatim: previše ukupnih grešaka na nivou → niži nivo (jednačine)
       if (state.levelErrorCount >= dropThreshold) {
         const targetLevel = FALLBACK_TARGETS[level];
         if (targetLevel) {
@@ -226,20 +230,9 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
         }
       }
 
-      if (errCount >= threshold) {
-        state.needsTheory = true;
-        state.consecutiveErrors = 0;
-        return {
-          type: "show_theory",
-          message: `Pogrešio si ${errCount} puta. Hajde da pregledamo teoriju.`,
-          errorCount: errCount,
-          threshold,
-        };
-      }
-
       return {
         type: "retry",
-        message: `Error ${errCount}/${threshold}. Pokušaj ponovo!`,
+        message: `Greška ${errCount}/${threshold}. Još jedan pokušaj!`,
         errorCount: errCount,
         threshold,
       };

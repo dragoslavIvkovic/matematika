@@ -5,6 +5,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, SlideInDown } from "react-native-reanimated";
 
 import Colors from "@/constants/colors";
+import { APP_CONFIG } from "@/utils/AppConfig";
 import type { ErrorAction } from "@/utils/LevelManager";
 
 const C = Colors.light;
@@ -60,7 +61,7 @@ export function ErrorFeedbackModal({
       case "fallback_level":
         return `Go to Level ${errorAction.targetLevel}`;
       case "show_theory":
-        return "Review Theory";
+        return "Idi na teoriju";
       default:
         return "Try Again";
     }
@@ -90,7 +91,8 @@ export function ErrorFeedbackModal({
         <View style={styles.stepIndicator}>
           <MaterialCommunityIcons name="alert-circle" size={16} color={actionColor} />
           <Text style={[styles.stepIndicatorText, { color: actionColor }]}>
-            Error {errorAction?.errorCount ?? 1}/{errorAction?.threshold ?? 2}
+            Error {errorAction?.errorCount ?? 1}/
+            {errorAction?.threshold ?? APP_CONFIG.ERRORS_BEFORE_FALLBACK}
             {failedAtStep > 0 ? ` · Step ${failedAtStep}` : ""}
           </Text>
         </View>

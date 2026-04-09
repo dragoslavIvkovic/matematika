@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -31,13 +31,12 @@ export function WeakAreasCard({ onStart }: WeakAreasCardProps) {
       activeOpacity={0.9}
     >
       <View style={s.iconCircle}>
-        <Ionicons name="fitness" size={18} color={C.white} />
+        <MaterialCommunityIcons name="history" size={18} color={C.white} />
       </View>
       <View style={s.textBlock}>
-        <Text style={s.title} numberOfLines={1}>
-          Weak Areas
-        </Text>
-        <Text style={s.sub} numberOfLines={1}>
+        <Text style={s.titleLine}>Weak</Text>
+        <Text style={s.titleLine}>Areas</Text>
+        <Text style={s.sub} numberOfLines={2}>
           {totalErrors()} err · {weakCount} lvl{weakCount !== 1 ? "s" : ""}
         </Text>
       </View>
@@ -73,17 +72,21 @@ const s = StyleSheet.create({
   },
   textBlock: {
     flex: 1,
-    gap: 1,
+    minWidth: 0,
+    gap: 0,
   },
-  title: {
+  titleLine: {
     fontFamily: "Inter_700Bold",
-    fontSize: 14,
+    fontSize: 13,
+    lineHeight: 16,
     color: C.white,
     letterSpacing: -0.3,
   },
   sub: {
     fontFamily: "Inter_500Medium",
-    fontSize: 11,
+    fontSize: 10,
+    lineHeight: 13,
+    marginTop: 2,
     color: "rgba(255, 255, 255, 0.8)",
   },
 });

@@ -1,9 +1,9 @@
 /**
- * TheoryContent — Theory explanations for levels 1.3–1.6.
+ * TheoryContent — Theory explanations for all levels.
  *
  * Shown:
- * 1. Before first attempt at a new equation level
- * 2. After Step 1 errors (conceptual misunderstanding)
+ * 1. Before first attempt at a new equation level (when hasTheory)
+ * 2. After repeated errors (ERRORS_BEFORE_FALLBACK consecutive mistakes)
  */
 
 export interface TheorySection {
@@ -28,6 +28,70 @@ export interface TheoryExample {
 }
 
 const THEORY: Record<string, TheorySection> = {
+  "1.1": {
+    title: "Sabiranje i oduzimanje",
+    subtitle: "Celi brojevi do 100",
+    concept:
+      "Sabiranje spaja dve količine u jednu; oduzimanje traži razliku — koliko je ostalo kada od većeg oduzmemo manji deo.",
+    rules: [
+      {
+        icon: "add",
+        text: "Sabiranje: saberi jedinice, desetice, stotine — možeš u glavi ili ispod sebe.",
+        highlight: true,
+      },
+      {
+        icon: "remove",
+        text: "Oduzimanje: uvek oduzmi manji broj od većeg kada tražiš koliko je „ostalo“.",
+      },
+      {
+        icon: "checkmark-circle",
+        text: "Proveri: posle oduzimanja rezultat mora biti manji od većeg početnog broja.",
+      },
+    ],
+    examples: [
+      {
+        equation: "37 + 28",
+        steps: ["37 + 20 = 57", "57 + 8 = 65"],
+        explanation: "Možeš prvo dodati desetice (20), pa jedinice (8). Rezultat: 65.",
+      },
+      {
+        equation: "84 − 29",
+        steps: ["84 − 30 = 54", "54 + 1 = 55"],
+        explanation: "Oduzmi 30 pa vrati 1 jer si oduzeo jednu više — ili klasično: 84 − 29 = 55.",
+      },
+    ],
+    tip: "Polako broj: prvo desetice, pa jedinice — manje grešaka nego žurba.",
+  },
+  "1.2": {
+    title: "Množenje i deljenje",
+    subtitle: "Celi brojevi do 200",
+    concept:
+      "Množenje je višestruko sabiranje istog broja. Deljenje je obrnuto: koliko puta jedan broj „staje“ u drugi.",
+    rules: [
+      {
+        icon: "close",
+        text: "Tablica množenja: mali brojevi (2–9) vežbaj napamet — ubrzava sve ostalo.",
+        highlight: true,
+      },
+      {
+        icon: "git-branch",
+        text: "Deljenje bez ostatka: množi rezultat da proveriš (količnik × delilac = deljenik).",
+      },
+    ],
+    examples: [
+      {
+        equation: "7 × 8",
+        steps: ["7 × 8 = 56"],
+        explanation: "Iz tablice: sedmica puta osmica je 56.",
+      },
+      {
+        equation: "72 ÷ 9",
+        steps: ["9 × 8 = 72", "znači 72 ÷ 9 = 8"],
+        explanation: "Pitaj: koji broj puta 9 daje 72? Odgovor: 8.",
+      },
+    ],
+    tip: "Uvek proveri množenjem: količnik × delilac mora biti tačno deljenik.",
+  },
   "1.3": {
     title: "Solving Equations x ± a = b",
     subtitle: "Moving terms and changing operations",

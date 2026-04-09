@@ -111,12 +111,8 @@ export default function LearnScreen() {
           </View>
         </Animated.View>
 
-        {/* 5. Secondary Practice Cards — compact row */}
+        {/* 5. Secondary Practice Cards — compact row (Continue left, Weak Areas right) */}
         <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.secondaryRow}>
-          {/* Weak Areas (conditional — returns null when no errors) */}
-          <WeakAreasCard onStart={() => router.push(ROUTE_WEAK_PRACTICE)} />
-
-          {/* Continue Practice (compact) */}
           <TouchableOpacity
             style={[
               styles.compactCta,
@@ -135,15 +131,16 @@ export default function LearnScreen() {
               <Ionicons name="play" size={18} color={C.white} />
             </View>
             <View style={styles.compactTextBlock}>
-              <Text style={styles.compactTitle} numberOfLines={1}>
-                Continue
-              </Text>
-              <Text style={styles.compactSub} numberOfLines={1}>
-                Lvl {currentLevel}
+              <Text style={styles.compactTitleLine}>Continue</Text>
+              <Text style={styles.compactTitleLine}>
+                practice
+                <Text style={styles.compactSubInline}> · Lvl {currentLevel}</Text>
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
           </TouchableOpacity>
+
+          <WeakAreasCard onStart={() => router.push(ROUTE_WEAK_PRACTICE)} />
         </Animated.View>
 
         {/* Level roadmap */}
@@ -363,18 +360,20 @@ const styles = StyleSheet.create({
   },
   compactTextBlock: {
     flex: 1,
-    gap: 1,
+    minWidth: 0,
+    gap: 0,
   },
-  compactTitle: {
+  compactTitleLine: {
     fontFamily: "Inter_700Bold",
-    fontSize: 14,
+    fontSize: 13,
+    lineHeight: 16,
     color: C.white,
     letterSpacing: -0.3,
   },
-  compactSub: {
+  compactSubInline: {
     fontFamily: "Inter_500Medium",
-    fontSize: 11,
-    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 10,
+    color: "rgba(255, 255, 255, 0.85)",
   },
 
   // Section header
