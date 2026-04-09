@@ -19,6 +19,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { OwlMascot } from "@/components/OwlMascot";
 import Colors from "@/constants/colors";
 import { ROUTE_HOME } from "@/constants/routes";
+import {
+  getOnboardingHeroMascotSize,
+  getOnboardingHeroSectionMinHeight,
+  getOnboardingInlineMascotSize,
+} from "@/utils/mascotSizing";
 import { AppStorage } from "@/utils/storage";
 
 const C = Colors.light;
@@ -27,24 +32,26 @@ const { width: SCREEN_W } = Dimensions.get("window");
 const ONBOARDING_KEY = "math_tutor_onboarding_v1";
 
 function Slide1() {
-  const { height: windowH } = useWindowDimensions();
-  // Mascot scales with viewport; clamp keeps tiny / huge phones readable
-  const mascotSize = Math.round(Math.min(132, Math.max(78, windowH * 0.17)));
-  const mascotSectionMinH = mascotSize * 1.32;
-  const textGap = Math.max(20, Math.min(36, Math.round(windowH * 0.03)));
+  const { width: windowW, height: windowH } = useWindowDimensions();
+  const mascotSize = getOnboardingHeroMascotSize(windowW, windowH);
+  const mascotSectionMinH = getOnboardingHeroSectionMinHeight(windowW, windowH);
+  const textGap = Math.max(12, Math.min(24, Math.round(windowH * 0.018)));
   const titleFontSize = windowH < 620 ? 22 : windowH < 720 ? 24 : windowH < 840 ? 26 : 28;
   const titleLineHeight = Math.round(titleFontSize * 1.28);
   const subtitleFontSize = windowH < 620 ? 13 : 14;
   const subtitleLineHeight = Math.round(subtitleFontSize * 1.45);
-  const featurePadV = windowH < 640 ? 10 : 12;
-  const scrollBottomPad = Math.max(8, Math.round(windowH * 0.03));
+  const featurePadV = windowH < 640 ? 8 : 10;
+  const scrollBottomPad = Math.max(16, Math.round(windowH * 0.02));
 
   return (
     <View style={slideStyles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         bounces
-        contentContainerStyle={[slideStyles.slideScrollContent, { paddingBottom: scrollBottomPad }]}
+        contentContainerStyle={[
+          slideStyles.slideScrollContentTop,
+          { paddingBottom: scrollBottomPad },
+        ]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={[slideStyles.mascotSection, { minHeight: mascotSectionMinH }]}>
@@ -73,7 +80,7 @@ function Slide1() {
             I don't just give answers. I analyze your steps, find exactly where you're struggling,
             and guide you back to core basics.
           </Text>
-          <View style={slideStyles.featureGrid}>
+          <View style={[slideStyles.featureGrid, windowH < 720 && { marginTop: 4, gap: 8 }]}>
             {[
               {
                 icon: "analytics",
@@ -155,6 +162,9 @@ function Slide2() {
 }
 
 function Slide3() {
+  const { width: windowW, height: windowH } = useWindowDimensions();
+  const inlineMascotSize = getOnboardingInlineMascotSize(windowW, windowH);
+
   return (
     <View style={slideStyles.container}>
       <ScrollView
@@ -174,7 +184,7 @@ function Slide3() {
         <Animated.View entering={FadeInUp.delay(400)} style={slideStyles.interactiveMockWrap}>
           <View style={slideStyles.mockNotebook}>
             <View style={slideStyles.mockErrorToast}>
-              <OwlMascot size={36} />
+              <OwlMascot size={inlineMascotSize} />
               <Text style={slideStyles.mockErrorText}>
                 Wait, when moving +4 to the other side, it should become -4!
               </Text>
@@ -306,13 +316,19 @@ const slideStyles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
   },
-  /** Reserves height for mascot + float animation so the next block cannot overlap */
+  /** Slide 1: od vrha, bez vertikalnog centra — inače se donji deo seče na niskim ekranima */
+  slideScrollContentTop: {
+    flexGrow: 1,
+    justifyContent: "flex-start",
+    paddingTop: 4,
+  },
+  /** Kompaktan prostor oko sove (minHeight ≈ veličina + mali luft za ZoomIn) */
   mascotSection: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 4,
-    paddingBottom: 12,
+    paddingTop: 0,
+    paddingBottom: 4,
   },
   mascotWrap: {
     alignItems: "center",

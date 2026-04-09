@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   InputAccessoryView,
@@ -24,7 +24,9 @@ import { OwlMascot } from "@/components/OwlMascot";
 import { TheoryScreen } from "@/components/TheoryScreen";
 import Colors from "@/constants/colors";
 import { useQuizEngine } from "@/hooks/useQuizEngine";
+import { useSubscription } from "@/providers/SubscriptionProvider";
 import { useAnalyticsStore } from "@/store/analyticsStore";
+import { requestReviewIfFirstTime } from "@/utils/appStoreReview";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import { LevelManager } from "@/utils/LevelManager";
 import {
@@ -59,6 +61,8 @@ export default function PracticeScreen() {
   const [levelCompleteInfo, setLevelCompleteInfo] = useState<{
     fromLevel: string;
     toLevel?: string;
+    /** Savršen nivo: nijedan pogrešan odgovor u ovoj sesiji (correct === total). */
+    flawless: boolean;
   } | null>(null);
 
   // Use ref for manager (mutable class) + counter to force re-renders
@@ -70,12 +74,26 @@ export default function PracticeScreen() {
   const sessionAnswersRef = useRef({ total: 0, correct: 0 });
   const trackEvent = useAnalyticsStore((s) => s.trackEvent);
 
+  const { isPremium, presentPaywall, purchasesSupported } = useSubscription();
+
+  const handleStartAssessment = useCallback(async () => {
+    if (!purchasesSupported || isPremium) {
+      setMode("assessment");
+      return;
+    }
+    const ok = await presentPaywall();
+    if (ok) {
+      setMode("assessment");
+    }
+  }, [isPremium, presentPaywall, purchasesSupported]);
+
   const engine = useQuizEngine({
     useLevelFallback: true,
     onCorrect: (prob, _mgr, result) => {
       rerender();
       if (result.levelComplete) {
         const { total, correct } = sessionAnswersRef.current;
+        const flawless = total > 0 && correct === total;
         trackEvent({
           event: "level_completed",
           properties: {
@@ -88,6 +106,7 @@ export default function PracticeScreen() {
         setLevelCompleteInfo({
           fromLevel: prob.level,
           toLevel: result.newLevel,
+          flawless,
         });
         setTimeout(() => setMode("level_complete"), 1500);
       }
@@ -279,6 +298,11 @@ export default function PracticeScreen() {
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
+  useEffect(() => {
+    if (mode !== "level_complete" || !levelCompleteInfo?.flawless) return;
+    void requestReviewIfFirstTime();
+  }, [mode, levelCompleteInfo?.flawless]);
+
   // ── Loading ──
   if (mode === "loading" || !managerRef.current) {
     return (
@@ -302,7 +326,7 @@ export default function PracticeScreen() {
           completedLevels={state.completedLevels}
           currentLevel={state.currentLevel}
           onSelectLevel={handleSelectLevel}
-          onStartAssessment={() => setMode("assessment")}
+          onStartAssessment={() => void handleStartAssessment()}
           levelStats={state.levelStats}
         />
       </View>

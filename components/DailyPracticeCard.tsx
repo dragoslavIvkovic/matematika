@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import Colors from "@/constants/colors";
 import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
@@ -91,11 +91,22 @@ const s = StyleSheet.create({
     borderRadius: 28,
     padding: 28,
     backgroundColor: CARD_COLOR,
-    shadowColor: CARD_COLOR,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.35,
-    shadowRadius: 20,
-    elevation: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: CARD_COLOR,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.35,
+        shadowRadius: 20,
+      },
+      android: { elevation: 12 },
+      default: {
+        shadowColor: CARD_COLOR,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.35,
+        shadowRadius: 20,
+        elevation: 12,
+      },
+    }),
   },
   iconBox: {
     width: 72,

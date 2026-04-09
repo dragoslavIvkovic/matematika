@@ -9,6 +9,10 @@ ios
 android
 .expo
 
+# Local env (never commit secrets)
+.env
+.env.*.local
+
 # Build artifacts
 *.apk
 *.aab

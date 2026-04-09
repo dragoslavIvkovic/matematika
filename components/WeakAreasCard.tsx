@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import Colors from "@/constants/colors";
 import { useErrorStore } from "@/store/errorStore";
@@ -54,11 +54,22 @@ const s = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 14,
     backgroundColor: CARD_COLOR,
-    shadowColor: CARD_COLOR,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
+    ...Platform.select({
+      ios: {
+        shadowColor: CARD_COLOR,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.22,
+        shadowRadius: 10,
+      },
+      android: { elevation: 6 },
+      default: {
+        shadowColor: CARD_COLOR,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.22,
+        shadowRadius: 10,
+        elevation: 6,
+      },
+    }),
     gap: 10,
   },
   iconCircle: {

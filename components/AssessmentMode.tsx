@@ -19,6 +19,7 @@ import { OwlMascot } from "@/components/OwlMascot";
 import Colors from "@/constants/colors";
 import { useUsageStore } from "@/store/usageStore";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
+import { getIntroMascotSectionMinHeight, getIntroMascotSize } from "@/utils/mascotSizing";
 import {
   type GeneratedProblem,
   generateProblem,
@@ -57,7 +58,7 @@ const generateStep = (text = "") => ({
 
 export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
   const insets = useSafeAreaInsets();
-  const { height: windowH } = useWindowDimensions();
+  const { width: windowW, height: windowH } = useWindowDimensions();
   const incrementTasksCompleted = useUsageStore((state) => state.incrementTasksCompleted);
   const [phase, setPhase] = useState<"intro" | "testing" | "results">("intro");
   const [currentLevelIdx, setCurrentLevelIdx] = useState(0);
@@ -217,8 +218,8 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
 
   // ── Intro Phase ──
   if (phase === "intro") {
-    const mascotSize = Math.round(Math.min(102, Math.max(70, windowH * 0.13)));
-    const mascotSectionMinH = mascotSize * 1.32;
+    const mascotSize = getIntroMascotSize(windowW, windowH);
+    const mascotSectionMinH = getIntroMascotSectionMinHeight(windowW, windowH);
     const titleGap = Math.max(20, Math.min(32, Math.round(windowH * 0.028)));
     const titleSize = windowH < 640 ? 24 : windowH < 780 ? 26 : 28;
     const titleLineHeight = Math.round(titleSize * 1.25);

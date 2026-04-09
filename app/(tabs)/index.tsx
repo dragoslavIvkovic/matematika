@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { type Href, router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -11,14 +11,12 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { WeakAreasCard } from "@/components/WeakAreasCard";
 import { WeeklyStreak } from "@/components/WeeklyStreak";
 import Colors from "@/constants/colors";
-import {
-  ROUTE_DAILY_PRACTICE,
-  ROUTE_ONBOARDING,
-  ROUTE_PRACTICE,
-  ROUTE_WEAK_PRACTICE,
-} from "@/constants/routes";
+import { homeCardShadow } from "@/constants/homeCardShadow";
+import { ROUTE_ONBOARDING, ROUTE_PRACTICE, ROUTE_WEAK_PRACTICE } from "@/constants/routes";
+import { useSubscription } from "@/providers/SubscriptionProvider";
 import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
 import { useLevelStatsStore } from "@/store/levelStatsStore";
+import { canFreeUserClaimDailyQuizSlot, claimFreeDailyQuizSlot } from "@/utils/dailyQuizLimit";
 import { computeDailyStreak } from "@/utils/dateUtils";
 import { LevelManager } from "@/utils/LevelManager";
 import { LEVEL_CONFIGS } from "@/utils/ProblemGenerator";
@@ -27,6 +25,9 @@ import { hasTheory } from "@/utils/TheoryContent";
 
 const C = Colors.light;
 const ONBOARDING_KEY = "math_tutor_onboarding_v1";
+
+/** Query flag set when Learn tab has already consumed a free daily slot (or user is premium). */
+const DAILY_PRACTICE_WITH_CLAIM_HREF = "/daily-practice?dailyClaimed=1" as Href;
 
 export default function LearnScreen() {
   const insets = useSafeAreaInsets();
@@ -46,6 +47,27 @@ export default function LearnScreen() {
   const dailySelectedLevels = useDailyPracticeStore((s) => s.selectedLevels);
   const setDailySelectedLevels = useDailyPracticeStore((s) => s.setSelectedLevels);
   const [showDailyModal, setShowDailyModal] = useState(false);
+
+  const { isPremium, presentPaywall } = useSubscription();
+
+  const openDailyPracticeOrPaywall = async () => {
+    if (isPremium) {
+      router.push(DAILY_PRACTICE_WITH_CLAIM_HREF);
+      return;
+    }
+    if (canFreeUserClaimDailyQuizSlot()) {
+      if (!claimFreeDailyQuizSlot()) {
+        await presentPaywall();
+        return;
+      }
+      router.push(DAILY_PRACTICE_WITH_CLAIM_HREF);
+      return;
+    }
+    const upgraded = await presentPaywall();
+    if (upgraded) {
+      router.push(DAILY_PRACTICE_WITH_CLAIM_HREF);
+    }
+  };
 
   useEffect(() => {
     // Check onboarding
@@ -83,17 +105,29 @@ export default function LearnScreen() {
       >
         {/* 2. Subscription Status */}
         <Animated.View entering={FadeInDown.delay(50).duration(400)}>
-          <View style={styles.subBadge}>
-            <Ionicons name="diamond-outline" size={14} color={C.primary} />
-            <Text style={styles.subBadgeText}>Free</Text>
-          </View>
+          {isPremium ? (
+            <View style={styles.subBadge}>
+              <MaterialCommunityIcons name="crown" size={16} color={C.warning} />
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.subBadge}
+              onPress={() => void presentPaywall()}
+              activeOpacity={0.75}
+              accessibilityRole="button"
+              accessibilityLabel="Subscription: Free. Tap to upgrade."
+            >
+              <Ionicons name="diamond-outline" size={14} color={C.primary} />
+              <Text style={styles.subBadgeText}>Free</Text>
+            </TouchableOpacity>
+          )}
         </Animated.View>
 
         {/* 3. Daily Practice Card — hero element */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <DailyPracticeCard
             onSetup={() => setShowDailyModal(true)}
-            onStart={() => router.push(ROUTE_DAILY_PRACTICE)}
+            onStart={() => void openDailyPracticeOrPaywall()}
           />
         </Animated.View>
 
@@ -132,10 +166,8 @@ export default function LearnScreen() {
             </View>
             <View style={styles.compactTextBlock}>
               <Text style={styles.compactTitleLine}>Continue</Text>
-              <Text style={styles.compactTitleLine}>
-                practice
-                <Text style={styles.compactSubInline}> · Lvl {currentLevel}</Text>
-              </Text>
+              <Text style={styles.compactTitleLine}>practice</Text>
+              <Text style={styles.compactLvlBelow}>Lvl {currentLevel}</Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
           </TouchableOpacity>
@@ -265,7 +297,7 @@ export default function LearnScreen() {
         onConfirm={(levels) => {
           setDailySelectedLevels(levels);
           setShowDailyModal(false);
-          router.push(ROUTE_DAILY_PRACTICE);
+          void openDailyPracticeOrPaywall();
         }}
         onDismiss={() => setShowDailyModal(false)}
       />
@@ -295,6 +327,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderWidth: 1,
     borderColor: C.borderLight,
+    ...homeCardShadow.surface,
   },
   subBadgeText: {
     fontFamily: "Inter_700Bold",
@@ -319,6 +352,7 @@ const styles = StyleSheet.create({
     gap: 6,
     borderWidth: 1,
     borderColor: C.borderLight,
+    ...homeCardShadow.surface,
   },
   miniStatValue: {
     fontFamily: "Inter_700Bold",
@@ -343,10 +377,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 14,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
+    ...homeCardShadow.raised,
     gap: 10,
   },
   compactIcon: {
@@ -370,10 +401,14 @@ const styles = StyleSheet.create({
     color: C.white,
     letterSpacing: -0.3,
   },
-  compactSubInline: {
+  /** Ispod reči „practice“ */
+  compactLvlBelow: {
+    marginTop: 3,
     fontFamily: "Inter_500Medium",
     fontSize: 10,
-    color: "rgba(255, 255, 255, 0.85)",
+    lineHeight: 13,
+    color: "rgba(255, 255, 255, 0.88)",
+    letterSpacing: -0.2,
   },
 
   // Section header
@@ -420,11 +455,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 14,
     gap: 6,
-    shadowColor: C.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    ...homeCardShadow.surface,
   },
   roadmapHeader: {
     flexDirection: "row",

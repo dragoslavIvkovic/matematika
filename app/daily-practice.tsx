@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   InputAccessoryView,
   Platform,
@@ -21,8 +21,10 @@ import { NotebookInput } from "@/components/NotebookInput";
 import { OwlMascot } from "@/components/OwlMascot";
 import Colors from "@/constants/colors";
 import { useQuizEngine } from "@/hooks/useQuizEngine";
+import { useSubscription } from "@/providers/SubscriptionProvider";
 import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
 import { generateDailyPracticeTasks } from "@/utils/dailyPracticeGenerator";
+import { claimFreeDailyQuizSlot } from "@/utils/dailyQuizLimit";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import type { GeneratedProblem, LevelId } from "@/utils/ProblemGenerator";
 import { getLevelConfig } from "@/utils/ProblemGenerator";
@@ -33,7 +35,16 @@ const IOS_DAILY_INPUT_ACCESSORY_ID = "dailyPracticeInputAccessory";
 
 export default function DailyPracticeScreen() {
   const insets = useSafeAreaInsets();
+  const { dailyClaimed } = useLocalSearchParams<{ dailyClaimed?: string }>();
+  const { isPremium, presentPaywall } = useSubscription();
   const selectedLevels = useDailyPracticeStore((s) => s.selectedLevels);
+
+  useEffect(() => {
+    if (Platform.OS === "web" || isPremium) return;
+    if (dailyClaimed === "1") return;
+    if (claimFreeDailyQuizSlot()) return;
+    void presentPaywall().finally(() => router.back());
+  }, [dailyClaimed, isPremium, presentPaywall]);
 
   // Generate all tasks once on mount
   const [tasks] = useState<GeneratedProblem[]>(() => generateDailyPracticeTasks(selectedLevels));

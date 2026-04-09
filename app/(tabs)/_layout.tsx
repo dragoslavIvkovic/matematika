@@ -12,7 +12,12 @@ function NativeTabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "pencil.and.ruler", selected: "pencil.and.ruler.fill" }} />
+        <Icon
+          sf={{
+            default: "pencil.and.ruler",
+            selected: "pencil.and.ruler.fill",
+          }}
+        />
         <Label>Learn</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="practice">
