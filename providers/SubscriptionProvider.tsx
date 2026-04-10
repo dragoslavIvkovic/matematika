@@ -10,7 +10,7 @@ import {
 import { Platform } from "react-native";
 import Purchases, { type CustomerInfo, LOG_LEVEL } from "react-native-purchases";
 
-import { REVENUECAT_ENTITLEMENT_ID } from "@/constants/revenuecat";
+import { REVENUECAT_ANDROID_API_KEY, REVENUECAT_IOS_API_KEY } from "@/constants/revenuecat";
 
 /** In dev, skip RevenueCat paywalls and treat the app as fully unlocked (no IAP on simulator / unpaid keys). */
 const DEV_FULL_ACCESS = __DEV__;
@@ -38,8 +38,10 @@ type SubscriptionContextValue = {
 
 const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
 
+/** True if RevenueCat reports any active entitlement (data comes from SDK / backend, not app env). */
 function entitlementActive(info: CustomerInfo): boolean {
-  return info.entitlements.active[REVENUECAT_ENTITLEMENT_ID] != null;
+  const active = info.entitlements.active;
+  return active != null && Object.keys(active).length > 0;
 }
 
 function isNativeModuleError(e: unknown): boolean {
@@ -92,10 +94,12 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
     if (!purchasesSupported) return;
 
-    const iosKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
-    const androidKey = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY;
     const apiKey =
-      Platform.OS === "ios" ? iosKey : Platform.OS === "android" ? androidKey : undefined;
+      Platform.OS === "ios"
+        ? REVENUECAT_IOS_API_KEY
+        : Platform.OS === "android"
+          ? REVENUECAT_ANDROID_API_KEY
+          : undefined;
 
     if (!apiKey) {
       console.warn(
