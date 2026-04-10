@@ -5,7 +5,7 @@ import { AppStorage } from "@/utils/storage";
 
 const REVIEW_PROMPT_KEY = "math_tutor_in_app_review_prompted_v1";
 
-/** Da li smo već jednom prikazali nativni dijalog za ocenu (iOS/Android ne javljaju da li je korisnik zaista ocenio). */
+/** Whether we already showed the native rating dialog once (iOS/Android do not report if the user actually rated). */
 export function hasAlreadyBeenAskedToRate(): boolean {
   return AppStorage.getString(REVIEW_PROMPT_KEY) === "1";
 }
@@ -17,8 +17,8 @@ function markReviewPromptShown(): void {
 let reviewRequestInFlight = false;
 
 /**
- * Jednokratni nativni in-app review (SKStoreReview / Play In-App Review).
- * Poziva se nakon savršenog nivoa; ako nema dostupne akcije, ne beležimo da je prikazano.
+ * One-time native in-app review (SKStoreReview / Play In-App Review).
+ * Called after a perfect level; if no action is available, we do not mark it as shown.
  */
 export async function requestReviewIfFirstTime(): Promise<void> {
   if (Platform.OS === "web") return;
@@ -29,7 +29,7 @@ export async function requestReviewIfFirstTime(): Promise<void> {
     markReviewPromptShown();
     await StoreReview.requestReview();
   } catch {
-    // Prompt je već markiran kao prikazan da ne gnjavimo korisnika ponovo
+    // Prompt already marked as shown so we do not nag the user again
   } finally {
     reviewRequestInFlight = false;
   }

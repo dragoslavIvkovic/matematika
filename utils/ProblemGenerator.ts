@@ -22,9 +22,9 @@ export interface GeneratedProblem {
   requiredSteps: number;
 }
 
-/** x i y — prve na math tastaturi (red sa ABC); lako za unos. */
+/** x and y — first on the math keyboard (ABC row); easy to type. */
 export const PRIMARY_VARIABLES = ["x", "y"] as const;
-/** Ostala slova tek kada treba više od dve nepoznate. */
+/** Other letters only when more than two unknowns are needed. */
 export const EXTRA_VARIABLES = ["a", "b", "c", "d", "z", "w", "m", "n", "p", "q"] as const;
 export const ALLOWED_VARIABLES = [...PRIMARY_VARIABLES, ...EXTRA_VARIABLES];
 
@@ -33,8 +33,8 @@ function randInt(min: number, max: number): number {
 }
 
 /**
- * Bira `count` različitih oznaka za nepoznate: uvek prvo iscrpljuje x i y,
- * tek onda redom iz EXTRA (a, b, c, …).
+ * Picks `count` distinct variable names: always exhausts x and y first,
+ * then takes from EXTRA in order (a, b, c, …).
  */
 export function pickVariables(count: number): string[] {
   const max = PRIMARY_VARIABLES.length + EXTRA_VARIABLES.length;

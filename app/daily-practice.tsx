@@ -28,6 +28,7 @@ import { claimFreeDailyQuizSlot } from "@/utils/dailyQuizLimit";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import type { GeneratedProblem, LevelId } from "@/utils/ProblemGenerator";
 import { getLevelConfig } from "@/utils/ProblemGenerator";
+import { alertPaywallUnavailable } from "@/utils/paywallAlert";
 
 const C = Colors.light;
 
@@ -43,7 +44,14 @@ export default function DailyPracticeScreen() {
     if (Platform.OS === "web" || isPremium) return;
     if (dailyClaimed === "1") return;
     if (claimFreeDailyQuizSlot()) return;
-    void presentPaywall().finally(() => router.back());
+    void (async () => {
+      try {
+        const { billingUnavailable } = await presentPaywall();
+        if (billingUnavailable) alertPaywallUnavailable();
+      } finally {
+        router.back();
+      }
+    })();
   }, [dailyClaimed, isPremium, presentPaywall]);
 
   // Generate all tasks once on mount

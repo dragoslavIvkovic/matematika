@@ -3,6 +3,7 @@ import {
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
+  Inter_800ExtraBold,
   useFonts,
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -51,11 +52,12 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    Inter_800ExtraBold,
   });
 
   useEffect(() => {
     if (__DEV__) {
-      // Korisnikov zahtev: Uvek forsiraj onboarding pri podizanju u dev modu
+      // Dev-only: always reset onboarding on launch
       AppStorage.remove("math_tutor_onboarding_v1");
     }
 
@@ -72,7 +74,7 @@ export default function RootLayout() {
       <SubscriptionProvider>
         <ErrorBoundary>
           <QueryClientProvider client={queryClient}>
-            <GestureHandlerRootView>
+            <GestureHandlerRootView style={{ flex: 1 }}>
               <KeyboardProvider>
                 <RootLayoutNav />
               </KeyboardProvider>

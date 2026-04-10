@@ -12,6 +12,16 @@ import Purchases, { type CustomerInfo, LOG_LEVEL } from "react-native-purchases"
 
 import { REVENUECAT_ENTITLEMENT_ID } from "@/constants/revenuecat";
 
+/** In dev, skip RevenueCat paywalls and treat the app as fully unlocked (no IAP on simulator / unpaid keys). */
+const DEV_FULL_ACCESS = __DEV__;
+
+export type PresentPaywallResult = {
+  /** Whether the user has premium after this flow. */
+  premiumActive: boolean;
+  /** Store / RevenueCat could not run (missing keys, native error, paywall failed to open). */
+  billingUnavailable: boolean;
+};
+
 type SubscriptionContextValue = {
   /** RevenueCat finished first fetch (native), or true on web. */
   isReady: boolean;
@@ -22,8 +32,8 @@ type SubscriptionContextValue = {
   /** True when native IAP modules are linked (false in Expo Go / broken prebuild). */
   revenueCatNativeAvailable: boolean;
   refreshCustomerInfo: () => Promise<void>;
-  /** Native RevenueCat paywall sheet. Resolves after dismiss; refreshes entitlement state. Returns whether premium is active after close. */
-  presentPaywall: () => Promise<boolean>;
+  /** Native RevenueCat paywall. After dismiss, refreshes entitlement state. */
+  presentPaywall: () => Promise<PresentPaywallResult>;
 };
 
 const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
@@ -42,24 +52,19 @@ function isNativeModuleError(e: unknown): boolean {
   );
 }
 
-/**
- * Paywall UI is loaded dynamically so Metro does not eagerly resolve
- * react-native-purchases-ui (avoids intermittent "unknown module" bundler errors).
- */
-async function presentNativePaywall(): Promise<void> {
-  const RevenueCatUI = (await import("react-native-purchases-ui")).default;
-  await RevenueCatUI.presentPaywall();
-}
-
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const purchasesSupported = Platform.OS === "ios" || Platform.OS === "android";
 
-  const [isReady, setIsReady] = useState(!purchasesSupported);
-  const [isPremium, setIsPremium] = useState(!purchasesSupported);
+  const [isReady, setIsReady] = useState(() => !purchasesSupported || DEV_FULL_ACCESS);
+  const [isPremium, setIsPremium] = useState(() => !purchasesSupported || DEV_FULL_ACCESS);
   /** Stays true until we detect a native link/configure failure. */
   const [revenueCatNativeAvailable, setRevenueCatNativeAvailable] = useState(true);
 
   const refreshCustomerInfo = useCallback(async () => {
+    if (DEV_FULL_ACCESS) {
+      setIsPremium(true);
+      return;
+    }
     if (!purchasesSupported) {
       setIsPremium(true);
       return;
@@ -79,6 +84,12 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, [purchasesSupported]);
 
   useEffect(() => {
+    if (DEV_FULL_ACCESS) {
+      setIsPremium(true);
+      setIsReady(true);
+      setRevenueCatNativeAvailable(true);
+      return;
+    }
     if (!purchasesSupported) return;
 
     const iosKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
@@ -90,9 +101,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       console.warn(
         "RevenueCat: missing EXPO_PUBLIC_REVENUECAT_IOS_API_KEY / ANDROID_API_KEY — add them to .env and restart Metro (expo start -c).",
       );
+      setRevenueCatNativeAvailable(false);
       setIsReady(true);
       if (__DEV__) {
-        setRevenueCatNativeAvailable(false);
         setIsPremium(true);
       } else {
         setIsPremium(false);
@@ -145,41 +156,54 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     };
   }, [purchasesSupported]);
 
-  const presentPaywall = useCallback(async (): Promise<boolean> => {
-    if (!purchasesSupported) return true;
-    if (!revenueCatNativeAvailable && __DEV__) {
-      console.warn(
-        "RevenueCat: paywall skipped — native module unavailable. Rebuild: npx expo prebuild && npx pod-install && npx expo run:ios",
-      );
-      return false;
-    }
-    if (!revenueCatNativeAvailable) {
-      return false;
-    }
+  const presentPaywall = useCallback(async (): Promise<PresentPaywallResult> => {
     try {
-      await presentNativePaywall();
-    } catch (e) {
-      console.warn("RevenueCat: presentPaywall failed", e);
-      if (__DEV__ && isNativeModuleError(e)) {
-        setRevenueCatNativeAvailable(false);
-        setIsPremium(true);
-        return true;
+      if (DEV_FULL_ACCESS) {
+        return { premiumActive: true, billingUnavailable: false };
       }
-    }
-    try {
-      const info = await Purchases.getCustomerInfo();
-      const next = entitlementActive(info);
-      setIsPremium(next);
-      return next;
-    } catch {
-      return false;
+      if (!purchasesSupported) {
+        return { premiumActive: true, billingUnavailable: false };
+      }
+      if (!revenueCatNativeAvailable) {
+        if (__DEV__) {
+          console.warn(
+            "RevenueCat: paywall skipped — native module unavailable. Rebuild: npx expo prebuild && npx pod-install && npx expo run:ios",
+          );
+        }
+        return { premiumActive: false, billingUnavailable: true };
+      }
+      try {
+        const RevenueCatUI = (await import("react-native-purchases-ui")).default;
+        await RevenueCatUI.presentPaywall();
+      } catch (e) {
+        console.warn("RevenueCat: presentPaywall failed", e);
+        setRevenueCatNativeAvailable(false);
+        if (__DEV__ && isNativeModuleError(e)) {
+          setIsPremium(true);
+          return { premiumActive: true, billingUnavailable: false };
+        }
+        return { premiumActive: false, billingUnavailable: true };
+      }
+      try {
+        const info = await Purchases.getCustomerInfo();
+        const next = entitlementActive(info);
+        setIsPremium(next);
+        return { premiumActive: next, billingUnavailable: false };
+      } catch (e) {
+        console.warn("RevenueCat: getCustomerInfo after paywall failed", e);
+        return { premiumActive: false, billingUnavailable: false };
+      }
+    } catch (e) {
+      console.warn("RevenueCat: presentPaywall unexpected error", e);
+      setRevenueCatNativeAvailable(false);
+      return { premiumActive: false, billingUnavailable: true };
     }
   }, [purchasesSupported, revenueCatNativeAvailable]);
 
   const value = useMemo(
     () => ({
       isReady,
-      isPremium,
+      isPremium: DEV_FULL_ACCESS || isPremium,
       purchasesSupported,
       revenueCatNativeAvailable,
       refreshCustomerInfo,

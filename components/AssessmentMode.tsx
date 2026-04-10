@@ -29,7 +29,7 @@ import {
 
 const C = Colors.light;
 
-/** iOS: prazan accessory uklanja podrazumevanu traku sa „Done“ iznad tastature. */
+/** iOS: empty accessory removes the default bar with “Done” above the keyboard. */
 const IOS_MATH_INPUT_ACCESSORY_ID = "mathAssessmentInputAccessory";
 
 // Assessment: 2 problems per level, test from 1.1 up to 1.6

@@ -58,7 +58,7 @@ export function WeakAreasCard({ isPremium, onPress }: WeakAreasCardProps) {
         </View>
         <Text style={[s.sub, locked && s.subLocked]} numberOfLines={2}>
           {locked
-            ? `Premium — ${totalErr} mistake${totalErr !== 1 ? "s" : ""} saved · tap to unlock`
+            ? `Turn mistakes into mastery. Premium`
             : `${totalErr} error${totalErr !== 1 ? "s" : ""} · ${weakCount} level${
                 weakCount !== 1 ? "s" : ""
               }`}

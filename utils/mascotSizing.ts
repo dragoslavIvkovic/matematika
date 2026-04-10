@@ -1,5 +1,5 @@
 /**
- * Hero owl — Assessment intro; koristi visinu i širinu da maskota ne pređe užan ekran.
+ * Hero owl — assessment intro; scales by height/width so the mascot fits narrow screens.
  */
 export function getIntroMascotSize(width: number, height: number): number {
   const fromHeight = height * 0.26;
@@ -13,7 +13,7 @@ export function getIntroMascotSectionMinHeight(width: number, height: number): n
 }
 
 /**
- * Onboarding slajd 1 — manja maskota i uža sekcija da tekst + kartice stanu na ekran (uz scroll).
+ * Onboarding slide 1 — smaller mascot and tighter section so text + cards fit (with scroll).
  */
 export function getOnboardingHeroMascotSize(width: number, height: number): number {
   const fromHeight = height * 0.175;
@@ -27,7 +27,7 @@ export function getOnboardingHeroSectionMinHeight(width: number, height: number)
 }
 
 /**
- * Manja maskota u onboarding mock-u (toast) — proporcionalna onboarding hero veličini.
+ * Smaller mascot in the onboarding mock (toast) — proportional to onboarding hero size.
  */
 export function getOnboardingInlineMascotSize(width: number, height: number): number {
   const hero = getOnboardingHeroMascotSize(width, height);

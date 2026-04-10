@@ -45,8 +45,7 @@ export const EquationStepValidator = {
   },
 
   /**
-   * POMOĆNA METODA ZA UI
-   * Vraća tačan broj <TextInput> polja koji ti je potreban za ekran
+   * UI helper: returns how many <TextInput> lines the screen needs for this level.
    */
   getRequiredLines(level: string): number {
     if (level === "1.1" || level === "1.2") return 1;

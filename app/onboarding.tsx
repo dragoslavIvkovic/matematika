@@ -316,13 +316,13 @@ const slideStyles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
   },
-  /** Slide 1: od vrha, bez vertikalnog centra — inače se donji deo seče na niskim ekranima */
+  /** Slide 1: from top, no vertical center — avoids clipping on short screens */
   slideScrollContentTop: {
     flexGrow: 1,
     justifyContent: "flex-start",
     paddingTop: 4,
   },
-  /** Kompaktan prostor oko sove (minHeight ≈ veličina + mali luft za ZoomIn) */
+  /** Compact space around the owl (minHeight ≈ size + small margin for ZoomIn) */
   mascotSection: {
     width: "100%",
     alignItems: "center",

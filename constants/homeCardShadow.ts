@@ -1,9 +1,9 @@
 import { Platform, type ViewStyle } from "react-native";
 
 /**
- * Senke za kartice na Learn ekranu.
+ * Card shadows on the Learn screen.
  * iOS: shadowColor / offset / opacity / radius
- * Android: elevation (bez shadowOpacity da ne duple senku)
+ * Android: elevation (no shadowOpacity to avoid double shadow)
  */
 const surfaceIos: ViewStyle = {
   shadowColor: "#000000",
@@ -27,21 +27,21 @@ const heroIos: ViewStyle = {
 };
 
 export const homeCardShadow = {
-  /** Mini stat, roadmap, blage kartice */
+  /** Mini stats, roadmap, light cards */
   surface: Platform.select<ViewStyle>({
     ios: surfaceIos,
     android: { elevation: 4 },
     default: surfaceIos,
   }),
 
-  /** Continue practice — jači lift (Weak Areas ima bojenu senku u komponenti) */
+  /** Continue practice — stronger lift (Weak Areas uses its own colored shadow) */
   raised: Platform.select<ViewStyle>({
     ios: raisedIos,
     android: { elevation: 6 },
     default: raisedIos,
   }),
 
-  /** Rezervisano za zajedničke hero kartice (npr. budući reuse) */
+  /** Reserved for shared hero cards (e.g. future reuse) */
   hero: Platform.select<ViewStyle>({
     ios: heroIos,
     android: { elevation: 12 },

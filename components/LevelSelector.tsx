@@ -24,6 +24,8 @@ interface LevelSelectorProps {
   currentLevel: string;
   onSelectLevel: (level: LevelId) => void;
   onStartAssessment: () => void;
+  /** When true, assessment is premium-only — show lock + crown styling (tap still runs onStartAssessment for paywall). */
+  isAssessmentLocked: boolean;
   levelStats: Record<string, { solved: number; errors: number; bestStreak: number }>;
 }
 
@@ -32,6 +34,7 @@ export function LevelSelector({
   currentLevel,
   onSelectLevel,
   onStartAssessment,
+  isAssessmentLocked,
   levelStats,
 }: LevelSelectorProps) {
   const isUnlocked = (_levelId: string): boolean => {
@@ -61,21 +64,54 @@ export function LevelSelector({
       {/* Assessment card */}
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
         <TouchableOpacity
-          style={styles.assessmentCard}
+          style={[styles.assessmentCard, isAssessmentLocked && styles.assessmentCardLocked]}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             onStartAssessment();
           }}
           activeOpacity={0.9}
+          accessibilityRole="button"
+          accessibilityLabel={
+            isAssessmentLocked
+              ? "Assessment test, premium feature. Tap to unlock."
+              : "Assessment test. Tap to start."
+          }
         >
-          <View style={styles.assessmentIcon}>
-            <MaterialCommunityIcons name="clipboard-check-outline" size={28} color={C.white} />
+          <View style={styles.assessmentIconWrap}>
+            <View
+              style={[styles.assessmentIcon, isAssessmentLocked && styles.assessmentIconLocked]}
+            >
+              <MaterialCommunityIcons name="clipboard-check-outline" size={26} color={C.white} />
+            </View>
+            {isAssessmentLocked && (
+              <View style={styles.assessmentLockCorner}>
+                <Ionicons name="lock-closed" size={11} color={C.warningDark} />
+              </View>
+            )}
           </View>
           <View style={styles.assessmentText}>
-            <Text style={styles.assessmentTitle}>Assessment Test</Text>
-            <Text style={styles.assessmentSub}>Find out your starting level automatically</Text>
+            <View style={styles.assessmentTitleRow}>
+              <Text style={styles.assessmentTitle}>Assessment Test</Text>
+              {isAssessmentLocked && (
+                <View style={styles.proPill}>
+                  <MaterialCommunityIcons name="crown" size={12} color={C.warningDark} />
+                  <Text style={styles.proPillText}>Premium</Text>
+                </View>
+              )}
+            </View>
+            <Text style={styles.assessmentSub}>
+              {isAssessmentLocked
+                ? "Premium — Unlock your personalized learning path"
+                : "Test your current math level"}
+            </Text>
           </View>
-          <Ionicons name="arrow-forward" size={20} color={C.primary} />
+          {isAssessmentLocked ? (
+            <View style={styles.assessmentLockOrb}>
+              <Ionicons name="lock-closed" size={20} color={C.warningDark} />
+            </View>
+          ) : (
+            <Ionicons name="arrow-forward" size={20} color={C.primary} />
+          )}
         </TouchableOpacity>
       </Animated.View>
 
@@ -205,6 +241,15 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
   },
+  assessmentCardLocked: {
+    borderColor: `${C.warning}BB`,
+    backgroundColor: C.warningLight,
+    shadowColor: C.warning,
+    shadowOpacity: 0.22,
+  },
+  assessmentIconWrap: {
+    position: "relative",
+  },
   assessmentIcon: {
     width: 52,
     height: 52,
@@ -213,9 +258,68 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  assessmentIconLocked: {
+    opacity: 0.92,
+  },
+  assessmentLockCorner: {
+    position: "absolute",
+    right: -6,
+    bottom: -4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: C.white,
+    borderWidth: 2,
+    borderColor: C.warningLight,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: C.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  assessmentTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  proPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 100,
+    backgroundColor: C.white,
+    borderWidth: 1,
+    borderColor: C.warningBorder,
+  },
+  proPillText: {
+    fontFamily: "Inter_800ExtraBold",
+    fontSize: 10,
+    color: C.warningDark,
+    letterSpacing: 0.3,
+  },
+  assessmentLockOrb: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: C.white,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: C.warningBorder,
+    shadowColor: C.warning,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
   assessmentText: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   assessmentTitle: {
     fontFamily: "Inter_700Bold",
@@ -226,6 +330,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     fontSize: 13,
     color: C.textSecondary,
+    lineHeight: 18,
   },
   dividerRow: {
     flexDirection: "row",

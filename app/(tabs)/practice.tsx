@@ -36,11 +36,12 @@ import {
   LEVEL_CONFIGS,
   type LevelId,
 } from "@/utils/ProblemGenerator";
+import { alertPaywallUnavailable } from "@/utils/paywallAlert";
 import { getTheoryContent } from "@/utils/TheoryContent";
 
 const C = Colors.light;
 
-/** iOS: prazan accessory uklanja podrazumevanu traku sa „Done" iznad number-pad-a. */
+/** iOS: empty accessory removes the default bar with “Done” above the number pad. */
 const IOS_MATH_INPUT_ACCESSORY_ID = "mathPracticeInputAccessory";
 
 type ScreenMode =
@@ -61,7 +62,7 @@ export default function PracticeScreen() {
   const [levelCompleteInfo, setLevelCompleteInfo] = useState<{
     fromLevel: string;
     toLevel?: string;
-    /** Savršen nivo: nijedan pogrešan odgovor u ovoj sesiji (correct === total). */
+    /** Perfect level: no wrong answers this session (correct === total). */
     flawless: boolean;
   } | null>(null);
 
@@ -81,8 +82,9 @@ export default function PracticeScreen() {
       setMode("assessment");
       return;
     }
-    const ok = await presentPaywall();
-    if (ok) {
+    const { premiumActive, billingUnavailable } = await presentPaywall();
+    if (billingUnavailable) alertPaywallUnavailable();
+    if (premiumActive) {
       setMode("assessment");
     }
   }, [isPremium, presentPaywall, purchasesSupported]);
@@ -327,6 +329,7 @@ export default function PracticeScreen() {
           currentLevel={state.currentLevel}
           onSelectLevel={handleSelectLevel}
           onStartAssessment={() => void handleStartAssessment()}
+          isAssessmentLocked={purchasesSupported && !isPremium}
           levelStats={state.levelStats}
         />
       </View>

@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
@@ -21,10 +21,12 @@ import { NotebookInput } from "@/components/NotebookInput";
 import { OwlMascot } from "@/components/OwlMascot";
 import Colors from "@/constants/colors";
 import { useQuizEngine } from "@/hooks/useQuizEngine";
+import { useSubscription } from "@/providers/SubscriptionProvider";
 import { useErrorStore } from "@/store/errorStore";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import type { GeneratedProblem, LevelId } from "@/utils/ProblemGenerator";
 import { getLevelConfig } from "@/utils/ProblemGenerator";
+import { alertPaywallUnavailable } from "@/utils/paywallAlert";
 import { generateWeakPracticeTasks } from "@/utils/weakPracticeGenerator";
 
 const C = Colors.light;
@@ -33,6 +35,7 @@ const IOS_WEAK_INPUT_ACCESSORY_ID = "weakPracticeInputAccessory";
 
 export default function WeakPracticeScreen() {
   const insets = useSafeAreaInsets();
+  const { isPremium, presentPaywall, purchasesSupported } = useSubscription();
   const errorsByLevel = useErrorStore((s) => s.errorsByLevel);
 
   // Generate all tasks once on mount from weak levels
@@ -84,6 +87,55 @@ export default function WeakPracticeScreen() {
   const requiredLines = problem ? EquationStepValidator.getRequiredLines(problem.level) : 1;
   const progressPercent =
     totalTasks > 0 ? ((currentIndex + (isAnswered ? 1 : 0)) / totalTasks) * 100 : 0;
+
+  // ── Premium only (same entitlement as weak-areas practice from Home) ──
+  if (purchasesSupported && !isPremium) {
+    return (
+      <View style={[styles.container, { paddingTop: topPad }]}>
+        <View style={styles.premiumHeader}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="arrow-back" size={18} color={C.error} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.completeCenter}>
+          <Animated.View entering={FadeInDown.duration(500)} style={styles.premiumLockContent}>
+            <View style={styles.premiumLockOrb}>
+              <Ionicons name="lock-closed" size={36} color={C.warningDark} />
+            </View>
+            <View style={styles.proPillLarge}>
+              <MaterialCommunityIcons name="crown" size={16} color={C.warningDark} />
+              <Text style={styles.proPillLargeText}>Premium</Text>
+            </View>
+            <Text style={styles.premiumLockTitle}>Weak areas</Text>
+            <Text style={styles.premiumLockBody}>
+              Review mistakes from your practice and clear weak topics. Unlock with Premium to
+              continue.
+            </Text>
+            <TouchableOpacity
+              style={styles.premiumUnlockBtn}
+              onPress={() => {
+                void (async () => {
+                  const { billingUnavailable } = await presentPaywall();
+                  if (billingUnavailable) alertPaywallUnavailable();
+                })();
+              }}
+              activeOpacity={0.9}
+            >
+              <MaterialCommunityIcons name="crown" size={20} color={C.white} />
+              <Text style={styles.premiumUnlockBtnText}>Unlock with Premium</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.premiumBackText} onPress={() => router.back()}>
+              <Text style={styles.premiumBackTextLabel}>Back to Home</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </View>
+    );
+  }
 
   // ── Empty state (no errors to practice) ──
   if (tasks.length === 0) {
@@ -488,6 +540,96 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   completeContent: { alignItems: "center", gap: 16, width: "100%" },
+  premiumHeader: {
+    paddingHorizontal: 16,
+    paddingBottom: 4,
+    alignSelf: "stretch",
+  },
+  premiumLockContent: {
+    alignItems: "center",
+    gap: 14,
+    width: "100%",
+    maxWidth: 340,
+    paddingHorizontal: 8,
+  },
+  premiumLockOrb: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: C.warningLight,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: C.white,
+    marginBottom: 4,
+    shadowColor: C.warning,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  proPillLarge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 100,
+    backgroundColor: C.white,
+    borderWidth: 1,
+    borderColor: C.warningBorder,
+  },
+  proPillLargeText: {
+    fontFamily: "Inter_800ExtraBold",
+    fontSize: 13,
+    color: C.warningDark,
+    letterSpacing: 0.4,
+  },
+  premiumLockTitle: {
+    fontFamily: "Inter_800ExtraBold",
+    fontSize: 26,
+    color: C.text,
+    textAlign: "center",
+    letterSpacing: -0.5,
+  },
+  premiumLockBody: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 15,
+    color: C.textSecondary,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  premiumUnlockBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    backgroundColor: C.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 28,
+    borderRadius: 18,
+    alignSelf: "stretch",
+    marginTop: 8,
+    shadowColor: C.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  premiumUnlockBtnText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 17,
+    color: C.white,
+  },
+  premiumBackText: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  premiumBackTextLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 15,
+    color: C.primary,
+  },
   celebrationIcon: {
     width: 80,
     height: 80,

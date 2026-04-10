@@ -18,3 +18,6 @@ export const ROUTE_PROGRESS: Href = "/(tabs)/progress";
 export const ROUTE_ONBOARDING: Href = "/onboarding";
 export const ROUTE_DAILY_PRACTICE: Href = "/daily-practice";
 export const ROUTE_WEAK_PRACTICE: Href = "/weak-practice";
+
+/** Daily quiz entry after slot claim (premium or free quota). */
+export const ROUTE_DAILY_PRACTICE_CLAIMED: Href = "/daily-practice?dailyClaimed=1" as Href;

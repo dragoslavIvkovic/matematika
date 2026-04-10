@@ -29,68 +29,69 @@ export interface TheoryExample {
 
 const THEORY: Record<string, TheorySection> = {
   "1.1": {
-    title: "Sabiranje i oduzimanje",
-    subtitle: "Celi brojevi do 100",
+    title: "Addition and subtraction",
+    subtitle: "Whole numbers up to 100",
     concept:
-      "Sabiranje spaja dve količine u jednu; oduzimanje traži razliku — koliko je ostalo kada od većeg oduzmemo manji deo.",
+      "Addition combines two amounts into one; subtraction finds the difference — how much is left when you take the smaller part from the larger.",
     rules: [
       {
         icon: "add",
-        text: "Sabiranje: saberi jedinice, desetice, stotine — možeš u glavi ili ispod sebe.",
+        text: "Addition: add ones, then tens, then hundreds — in your head or written below.",
         highlight: true,
       },
       {
         icon: "remove",
-        text: "Oduzimanje: uvek oduzmi manji broj od većeg kada tražiš koliko je „ostalo“.",
+        text: "Subtraction: subtract the smaller number from the larger when you want to know how much is “left”.",
       },
       {
         icon: "checkmark-circle",
-        text: "Proveri: posle oduzimanja rezultat mora biti manji od većeg početnog broja.",
+        text: "Check: after subtraction, the result should be less than the larger starting number.",
       },
     ],
     examples: [
       {
         equation: "37 + 28",
         steps: ["37 + 20 = 57", "57 + 8 = 65"],
-        explanation: "Možeš prvo dodati desetice (20), pa jedinice (8). Rezultat: 65.",
+        explanation: "You can add tens first (20), then ones (8). Result: 65.",
       },
       {
         equation: "84 − 29",
         steps: ["84 − 30 = 54", "54 + 1 = 55"],
-        explanation: "Oduzmi 30 pa vrati 1 jer si oduzeo jednu više — ili klasično: 84 − 29 = 55.",
+        explanation:
+          "Subtract 30, then add 1 back because you subtracted one too much — or directly: 84 − 29 = 55.",
       },
     ],
-    tip: "Polako broj: prvo desetice, pa jedinice — manje grešaka nego žurba.",
+    tip: "Count calmly: tens first, then ones — fewer mistakes than rushing.",
   },
   "1.2": {
-    title: "Množenje i deljenje",
-    subtitle: "Celi brojevi do 200",
+    title: "Multiplication and division",
+    subtitle: "Whole numbers up to 200",
     concept:
-      "Množenje je višestruko sabiranje istog broja. Deljenje je obrnuto: koliko puta jedan broj „staje“ u drugi.",
+      "Multiplication is repeated addition of the same number. Division is the inverse: how many times one number “fits” into another.",
     rules: [
       {
         icon: "close",
-        text: "Tablica množenja: mali brojevi (2–9) vežbaj napamet — ubrzava sve ostalo.",
+        text: "Times tables: drill small factors (2–9) from memory — it speeds up everything else.",
         highlight: true,
       },
       {
         icon: "git-branch",
-        text: "Deljenje bez ostatka: množi rezultat da proveriš (količnik × delilac = deljenik).",
+        text: "Division with no remainder: multiply the quotient to check (quotient × divisor = dividend).",
       },
     ],
     examples: [
       {
         equation: "7 × 8",
         steps: ["7 × 8 = 56"],
-        explanation: "Iz tablice: sedmica puta osmica je 56.",
+        explanation: "From the table: seven times eight is 56.",
       },
       {
         equation: "72 ÷ 9",
-        steps: ["9 × 8 = 72", "znači 72 ÷ 9 = 8"],
-        explanation: "Pitaj: koji broj puta 9 daje 72? Odgovor: 8.",
+        steps: ["9 × 8 = 72", "so 72 ÷ 9 = 8"],
+        explanation: "Ask: what times 9 gives 72? Answer: 8.",
       },
     ],
-    tip: "Uvek proveri množenjem: količnik × delilac mora biti tačno deljenik.",
+    tip: "Always verify with multiplication: quotient × divisor must equal the dividend.",
   },
   "1.3": {
     title: "Solving Equations x ± a = b",

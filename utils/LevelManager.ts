@@ -2,9 +2,9 @@
  * LevelManager — Manages level progression, streak tracking, and error-based fallback.
  *
  * Error logic (controlled by AppConfig):
- * - Dok ne dostigne ERRORS_BEFORE_FALLBACK uzastopnih grešaka → retry + postupak
- * - Na ERRORS_BEFORE_FALLBACK uzastopnih grešaka → teorija (učenje), ne "Try again"
- * - Posle ERRORS_BEFORE_LEVEL_DROP ukupnih grešaka na nivou → niži nivo (ako postoji)
+ * - Until ERRORS_BEFORE_FALLBACK consecutive mistakes → retry + procedure
+ * - At ERRORS_BEFORE_FALLBACK consecutive mistakes → theory (learning), not "Try again"
+ * - After ERRORS_BEFORE_LEVEL_DROP total mistakes on a level → lower level (if one exists)
  *
  * All thresholds are in utils/AppConfig.ts — change there, applies everywhere.
  */
@@ -198,19 +198,19 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
 
       const errCount = state.consecutiveErrors;
 
-      // Prvo: uzastopne greške → učenje (teorija), uključujući 1.1 i 1.2
+      // First: consecutive mistakes → theory (learning), including 1.1 and 1.2
       if (errCount >= threshold) {
         state.needsTheory = true;
         state.consecutiveErrors = 0;
         return {
           type: "show_theory",
-          message: `Pogrešio si ${errCount} puta zaredom. Hajde na teoriju da ponovimo gradivo.`,
+          message: `You missed ${errCount} in a row. Let’s review the theory to reinforce the basics.`,
           errorCount: errCount,
           threshold,
         };
       }
 
-      // Zatim: previše ukupnih grešaka na nivou → niži nivo (jednačine)
+      // Then: too many total mistakes on the level → lower level (equations)
       if (state.levelErrorCount >= dropThreshold) {
         const targetLevel = FALLBACK_TARGETS[level];
         if (targetLevel) {
@@ -223,7 +223,7 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
           return {
             type: "fallback_level",
             targetLevel,
-            message: `Potrebno je više vežbe. Idemo na nivo ${targetLevel}: ${targetConfig.name}`,
+            message: `You need a bit more practice. Moving to level ${targetLevel}: ${targetConfig.name}`,
             errorCount: errCount,
             threshold,
           };
@@ -232,7 +232,7 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
 
       return {
         type: "retry",
-        message: `Greška ${errCount}/${threshold}. Još jedan pokušaj!`,
+        message: `Error ${errCount}/${threshold}. One more try!`,
         errorCount: errCount,
         threshold,
       };

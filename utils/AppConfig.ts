@@ -1,28 +1,28 @@
 /**
- * AppConfig — Centralna konfiguracija za celu aplikaciju.
+ * AppConfig — central configuration for the whole app.
  *
- * Sve parametre gresaka, streak-ova i fallback-a menjaj OVDE.
- * Nema potrebe da pretrazujes ostale fajlove.
+ * Change error, streak, and fallback parameters HERE only.
+ * No need to hunt through other files.
  */
 
 export const APP_CONFIG = {
   /**
-   * Koliko uzastopnih pogrešnih pokušaja pre nego što se otvara teorija (učenje).
+   * How many consecutive wrong attempts before opening theory (learning).
    *
-   * Primer: 3 = posle 3 greške zaredom → link na teoriju, ne "Pokušaj ponovo"
+   * Example: 3 = after 3 mistakes in a row → link to theory, not "Try again"
    */
   ERRORS_BEFORE_FALLBACK: 3,
 
   /**
-   * Koliko pogresnih pokusaja ukupno (kumulativno na nivou)
-   * pre nego sto se korisnik salje na prethodni nivo.
+   * How many wrong attempts in total (cumulative on the level)
+   * before the learner is sent to the previous level.
    *
-   * Primer: 3 = posle 3 ukupne greske na nivou → nazad
+   * Example: 3 = after 3 total mistakes on the level → go back
    */
   ERRORS_BEFORE_LEVEL_DROP: 3,
 
   /**
-   * Streak potreban za zavrsetak nivoa
+   * Streak required to complete a level
    */
   STREAK_REQUIREMENTS: {
     "1.1": 10,
@@ -34,7 +34,7 @@ export const APP_CONFIG = {
   } as Record<string, number>,
 
   /**
-   * Operacije po tipu koje moraju da budu balansirane
+   * Operations per type that must be balanced
    */
   OPS_PER_TYPE: {
     "1.1": 5,
@@ -46,7 +46,7 @@ export const APP_CONFIG = {
   } as Record<string, number>,
 
   /**
-   * Da li su svi nivoi otklucani (true = slobodan pristup)
+   * Whether all levels are unlocked (true = free access)
    */
   ALL_LEVELS_UNLOCKED: true,
 };

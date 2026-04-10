@@ -12,11 +12,10 @@ import { WeakAreasCard } from "@/components/WeakAreasCard";
 import { WeeklyStreak } from "@/components/WeeklyStreak";
 import Colors from "@/constants/colors";
 import { homeCardShadow } from "@/constants/homeCardShadow";
-import { ROUTE_ONBOARDING, ROUTE_PRACTICE, ROUTE_WEAK_PRACTICE } from "@/constants/routes";
-import { useSubscription } from "@/providers/SubscriptionProvider";
+import { ROUTE_ONBOARDING, ROUTE_PRACTICE } from "@/constants/routes";
+import { useLearnHomeEntitlements } from "@/hooks/useLearnHomeEntitlements";
 import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
 import { useLevelStatsStore } from "@/store/levelStatsStore";
-import { canFreeUserClaimDailyQuizSlot, claimFreeDailyQuizSlot } from "@/utils/dailyQuizLimit";
 import { computeDailyStreak } from "@/utils/dateUtils";
 import { LevelManager } from "@/utils/LevelManager";
 import { LEVEL_CONFIGS } from "@/utils/ProblemGenerator";
@@ -25,9 +24,6 @@ import { hasTheory } from "@/utils/TheoryContent";
 
 const C = Colors.light;
 const ONBOARDING_KEY = "math_tutor_onboarding_v1";
-
-/** Query flag set when Learn tab has already consumed a free daily slot (or user is premium). */
-const DAILY_PRACTICE_WITH_CLAIM_HREF = "/daily-practice?dailyClaimed=1" as Href;
 
 export default function LearnScreen() {
   const insets = useSafeAreaInsets();
@@ -48,26 +44,13 @@ export default function LearnScreen() {
   const setDailySelectedLevels = useDailyPracticeStore((s) => s.setSelectedLevels);
   const [showDailyModal, setShowDailyModal] = useState(false);
 
-  const { isPremium, presentPaywall } = useSubscription();
-
-  const openDailyPracticeOrPaywall = async () => {
-    if (isPremium) {
-      router.push(DAILY_PRACTICE_WITH_CLAIM_HREF);
-      return;
-    }
-    if (canFreeUserClaimDailyQuizSlot()) {
-      if (!claimFreeDailyQuizSlot()) {
-        await presentPaywall();
-        return;
-      }
-      router.push(DAILY_PRACTICE_WITH_CLAIM_HREF);
-      return;
-    }
-    const upgraded = await presentPaywall();
-    if (upgraded) {
-      router.push(DAILY_PRACTICE_WITH_CLAIM_HREF);
-    }
-  };
+  const {
+    isPremium,
+    freeDailyPlayLocked,
+    openDailyPractice,
+    openWeakAreas,
+    openSubscriptionUpsell,
+  } = useLearnHomeEntitlements();
 
   useEffect(() => {
     // Check onboarding
@@ -112,7 +95,9 @@ export default function LearnScreen() {
           ) : (
             <TouchableOpacity
               style={styles.subBadge}
-              onPress={() => void presentPaywall()}
+              onPress={() => {
+                void openSubscriptionUpsell();
+              }}
               activeOpacity={0.75}
               accessibilityRole="button"
               accessibilityLabel="Subscription: Free. Tap to upgrade."
@@ -127,7 +112,8 @@ export default function LearnScreen() {
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <DailyPracticeCard
             onSetup={() => setShowDailyModal(true)}
-            onStart={() => void openDailyPracticeOrPaywall()}
+            onStart={() => void openDailyPractice()}
+            freeDailyPlayLocked={freeDailyPlayLocked}
           />
         </Animated.View>
 
@@ -145,8 +131,8 @@ export default function LearnScreen() {
           </View>
         </Animated.View>
 
-        {/* 5. Secondary Practice Cards — compact row (Continue left, Weak Areas right) */}
-        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.secondaryRow}>
+        {/* 5. Secondary practice cards — full-width, stacked */}
+        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.secondaryStack}>
           <TouchableOpacity
             style={[
               styles.compactCta,
@@ -162,17 +148,16 @@ export default function LearnScreen() {
             activeOpacity={0.9}
           >
             <View style={styles.compactIcon}>
-              <Ionicons name="play" size={18} color={C.white} />
+              <Ionicons name="play" size={20} color={C.white} />
             </View>
             <View style={styles.compactTextBlock}>
-              <Text style={styles.compactTitleLine}>Continue</Text>
-              <Text style={styles.compactTitleLine}>practice</Text>
-              <Text style={styles.compactLvlBelow}>Lvl {currentLevel}</Text>
+              <Text style={styles.compactTitle}>Continue practice</Text>
+              <Text style={styles.compactSubtitle}>Level {currentLevel}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
+            <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.75)" />
           </TouchableOpacity>
 
-          <WeakAreasCard onStart={() => router.push(ROUTE_WEAK_PRACTICE)} />
+          <WeakAreasCard isPremium={isPremium} onPress={() => void openWeakAreas()} />
         </Animated.View>
 
         {/* Level roadmap */}
@@ -297,7 +282,7 @@ export default function LearnScreen() {
         onConfirm={(levels) => {
           setDailySelectedLevels(levels);
           setShowDailyModal(false);
-          void openDailyPracticeOrPaywall();
+          void openDailyPractice();
         }}
         onDismiss={() => setShowDailyModal(false)}
       />
@@ -365,25 +350,26 @@ const styles = StyleSheet.create({
     color: C.textMuted,
   },
 
-  // Secondary practice cards — compact half-width row
-  secondaryRow: {
-    flexDirection: "row",
-    gap: 10,
+  // Secondary practice cards — full width, one per row
+  secondaryStack: {
+    flexDirection: "column",
+    gap: 12,
+    alignSelf: "stretch",
   },
   compactCta: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    alignSelf: "stretch",
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     ...homeCardShadow.raised,
-    gap: 10,
+    gap: 14,
   },
   compactIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     alignItems: "center",
     justifyContent: "center",
@@ -392,21 +378,19 @@ const styles = StyleSheet.create({
   compactTextBlock: {
     flex: 1,
     minWidth: 0,
-    gap: 0,
+    gap: 4,
   },
-  compactTitleLine: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 13,
-    lineHeight: 16,
+  compactTitle: {
+    fontFamily: "Inter_800ExtraBold",
+    fontSize: 17,
+    lineHeight: 22,
     color: C.white,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
-  /** Ispod reči „practice“ */
-  compactLvlBelow: {
-    marginTop: 3,
+  compactSubtitle: {
     fontFamily: "Inter_500Medium",
-    fontSize: 10,
-    lineHeight: 13,
+    fontSize: 13,
+    lineHeight: 17,
     color: "rgba(255, 255, 255, 0.88)",
     letterSpacing: -0.2,
   },

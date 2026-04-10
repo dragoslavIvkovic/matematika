@@ -1,43 +1,43 @@
 import { createMMKV } from "react-native-mmkv";
 
 /**
- * AppStorage — Globalni MMKV instance za aplikaciju.
+ * AppStorage — global MMKV instance for the app.
  *
- * MMKV v4+ koristi Nitro Modules i zahteva `createMMKV()`.
- * Takođe, `.delete()` je zamenjen sa `.remove()`.
+ * MMKV v4+ uses Nitro Modules and requires `createMMKV()`.
+ * Also, `.delete()` was replaced with `.remove()`.
  */
 export const storage = createMMKV({
   id: "math_tutor_storage",
 });
 
 /**
- * Pomoćne funkcije za rad sa storidžom.
- * Ovo apstrahuje specifičnosti MMKV-a i olakšava migraciju.
+ * Helpers for working with storage.
+ * Abstracts MMKV specifics and eases migration.
  */
 export const AppStorage = {
   /**
-   * Čuva string vrednost
+   * Store a string value
    */
   setString: (key: string, value: string) => {
     storage.set(key, value);
   },
 
   /**
-   * Vraća string vrednost
+   * Get a string value
    */
   getString: (key: string): string | undefined => {
     return storage.getString(key);
   },
 
   /**
-   * Čuva objekat (automatski ga serijalizuje u JSON)
+   * Store an object (serialized to JSON)
    */
   setObject: (key: string, value: any) => {
     storage.set(key, JSON.stringify(value));
   },
 
   /**
-   * Vraća objekat (automatski ga deserijalizuje)
+   * Get an object (deserialized from JSON)
    */
   getObject: <T>(key: string): T | null => {
     const raw = storage.getString(key);
@@ -51,14 +51,14 @@ export const AppStorage = {
   },
 
   /**
-   * Brisanje specifičnog ključa
+   * Remove a specific key
    */
   remove: (key: string) => {
-    storage.remove(key); // U v4+ je `.remove()` umesto `.delete()`
+    storage.remove(key); // v4+ uses `.remove()` instead of `.delete()`
   },
 
   /**
-   * Čišćenje celog storidža
+   * Clear all storage
    */
   clearAll: () => {
     storage.clearAll();

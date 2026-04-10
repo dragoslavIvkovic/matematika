@@ -61,7 +61,7 @@ export function ErrorFeedbackModal({
       case "fallback_level":
         return `Go to Level ${errorAction.targetLevel}`;
       case "show_theory":
-        return "Idi na teoriju";
+        return "Open theory";
       default:
         return "Try Again";
     }
