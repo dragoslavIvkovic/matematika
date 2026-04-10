@@ -9,51 +9,83 @@ const C = Colors.light;
 const CARD_COLOR = C.error;
 
 interface WeakAreasCardProps {
-  onStart: () => void;
+  /** When false, card shows premium lock styling; onPress should open paywall. */
+  isPremium: boolean;
+  onPress: () => void;
 }
 
-export function WeakAreasCard({ onStart }: WeakAreasCardProps) {
-  const hasErrors = useErrorStore((s) => s.hasErrors);
-  const getWeakLevels = useErrorStore((s) => s.getWeakLevels);
-  const totalErrors = useErrorStore((s) => s.getTotalErrors);
+export function WeakAreasCard({ isPremium, onPress }: WeakAreasCardProps) {
+  // Subscribe to derived values, not stable function refs — otherwise the card
+  // never re-renders when errors are recorded until a full remount (e.g. app restart).
+  const hasAnyErrors = useErrorStore((s) => s.hasErrors());
+  const weakCount = useErrorStore((s) => s.getWeakLevels().length);
+  const totalErr = useErrorStore((s) => s.getTotalErrors());
 
-  if (!hasErrors()) return null;
+  if (!hasAnyErrors) return null;
 
-  const weakCount = getWeakLevels().length;
+  const locked = !isPremium;
 
   return (
     <TouchableOpacity
-      style={s.card}
+      style={[s.card, locked && s.cardLocked]}
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        onStart();
+        onPress();
       }}
       activeOpacity={0.9}
+      accessibilityRole="button"
+      accessibilityLabel={locked ? "Tap to unlock." : "Weak areas. Tap to practice."}
     >
-      <View style={s.iconCircle}>
-        <MaterialCommunityIcons name="history" size={18} color={C.white} />
+      <View style={s.iconWrap}>
+        <View style={[s.iconCircle, locked && s.iconCircleLocked]}>
+          <MaterialCommunityIcons name="history" size={20} color={C.white} />
+        </View>
+        {locked && (
+          <View style={s.lockCorner}>
+            <Ionicons name="lock-closed" size={11} color={C.warningDark} />
+          </View>
+        )}
       </View>
       <View style={s.textBlock}>
-        <Text style={s.titleLine}>Weak</Text>
-        <Text style={s.titleLine}>Areas</Text>
-        <Text style={s.sub} numberOfLines={2}>
-          {totalErrors()} err · {weakCount} lvl{weakCount !== 1 ? "s" : ""}
+        <View style={s.titleRow}>
+          <Text style={[s.title, locked && s.titleLocked]}>Weak areas</Text>
+          {locked && (
+            <View style={s.proPill}>
+              <MaterialCommunityIcons name="crown" size={11} color={C.warningDark} />
+              <Text style={s.proPillText}>Premium</Text>
+            </View>
+          )}
+        </View>
+        <Text style={[s.sub, locked && s.subLocked]} numberOfLines={2}>
+          {locked
+            ? `Premium — ${totalErr} mistake${totalErr !== 1 ? "s" : ""} saved · tap to unlock`
+            : `${totalErr} error${totalErr !== 1 ? "s" : ""} · ${weakCount} level${
+                weakCount !== 1 ? "s" : ""
+              }`}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
+      {locked ? (
+        <View style={s.lockOrb}>
+          <Ionicons name="lock-closed" size={20} color={C.warningDark} />
+        </View>
+      ) : (
+        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.75)" />
+      )}
     </TouchableOpacity>
   );
 }
 
 const s = StyleSheet.create({
   card: {
-    flex: 1,
+    alignSelf: "stretch",
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     backgroundColor: CARD_COLOR,
+    borderWidth: 2,
+    borderColor: "transparent",
     ...Platform.select({
       ios: {
         shadowColor: CARD_COLOR,
@@ -70,34 +102,117 @@ const s = StyleSheet.create({
         elevation: 6,
       },
     }),
-    gap: 10,
+    gap: 14,
+  },
+  cardLocked: {
+    borderColor: `${C.warning}99`,
+    backgroundColor: "#B91C1C",
+    shadowColor: C.warning,
+    shadowOpacity: 0.28,
+  },
+  iconWrap: {
+    position: "relative",
+    flexShrink: 0,
   },
   iconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
+  },
+  iconCircleLocked: {
+    backgroundColor: "rgba(255, 255, 255, 0.14)",
+  },
+  lockCorner: {
+    position: "absolute",
+    right: -4,
+    bottom: -2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: C.warningLight,
+    borderWidth: 2,
+    borderColor: C.white,
+    alignItems: "center",
+    justifyContent: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: C.black,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.12,
+        shadowRadius: 2,
+      },
+      default: { elevation: 2 },
+    }),
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  proPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 100,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+  },
+  proPillText: {
+    fontFamily: "Inter_800ExtraBold",
+    fontSize: 10,
+    color: C.warningDark,
+    letterSpacing: 0.3,
+  },
+  lockOrb: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: C.warningLight,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: C.white,
+    ...Platform.select({
+      ios: {
+        shadowColor: C.warning,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+      },
+      android: { elevation: 4 },
+      default: { elevation: 4 },
+    }),
   },
   textBlock: {
     flex: 1,
     minWidth: 0,
-    gap: 0,
+    gap: 4,
   },
-  titleLine: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 13,
-    lineHeight: 16,
+  title: {
+    fontFamily: "Inter_800ExtraBold",
+    fontSize: 17,
+    lineHeight: 22,
     color: C.white,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
+  },
+  titleLocked: {
+    textShadowColor: "rgba(0,0,0,0.15)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   sub: {
     fontFamily: "Inter_500Medium",
-    fontSize: 10,
-    lineHeight: 13,
-    marginTop: 2,
-    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 13,
+    lineHeight: 17,
+    color: "rgba(255, 255, 255, 0.88)",
+    letterSpacing: -0.2,
+  },
+  subLocked: {
+    color: "rgba(255, 255, 255, 0.92)",
   },
 });

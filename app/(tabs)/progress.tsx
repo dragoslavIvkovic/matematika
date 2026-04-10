@@ -1,8 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import {
   Alert,
   Platform,
@@ -27,7 +26,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 import { ProgressBar } from "@/components/ProgressBar";
 import Colors from "@/constants/colors";
-import { useSubscription } from "@/providers/SubscriptionProvider";
+import { useErrorStore } from "@/store/errorStore";
 import { useLevelStatsStore } from "@/store/levelStatsStore";
 import { LevelManager } from "@/utils/LevelManager";
 import { LEVEL_CONFIGS } from "@/utils/ProblemGenerator";
@@ -142,25 +141,18 @@ const gaugeStyles = StyleSheet.create({
 
 export default function ProgressScreen() {
   const insets = useSafeAreaInsets();
-  const { isPremium, isReady, presentPaywall, purchasesSupported } = useSubscription();
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!isReady || !purchasesSupported || isPremium) return;
-      void presentPaywall();
-    }, [isReady, isPremium, presentPaywall, purchasesSupported]),
-  );
 
   const totalSolved = useLevelStatsStore((s) => s.totalSolved);
   const totalErrors = useLevelStatsStore((s) => s.totalErrors);
   const completedLevels = useLevelStatsStore((s) => s.completedLevels);
   const levelStats = useLevelStatsStore((s) => s.levelStats);
   const resetStats = useLevelStatsStore((s) => s.resetStats);
+  const resetWeakAreaErrors = useErrorStore((s) => s.resetErrors);
 
   const handleReset = () => {
     Alert.alert(
       "Reset All Progress",
-      "This will delete all your progress and start fresh. Are you sure?",
+      "This will delete all your progress and weak-area mistake history, then start fresh. Are you sure?",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -170,6 +162,7 @@ export default function ProgressScreen() {
             const mgr = LevelManager.load();
             mgr.reset();
             resetStats();
+            resetWeakAreaErrors();
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           },
         },
@@ -183,63 +176,6 @@ export default function ProgressScreen() {
     totalSolved + totalErrors > 0
       ? Math.round((totalSolved / (totalSolved + totalErrors)) * 100)
       : 0;
-
-  const progressLocked = purchasesSupported && isReady && !isPremium;
-
-  if (purchasesSupported && !isReady) {
-    return (
-      <View
-        style={[
-          styles.container,
-          { paddingTop: Platform.OS === "web" ? webTopPadding : insets.top },
-        ]}
-      >
-        <View style={styles.loadingGate}>
-          <Text style={styles.loadingGateText}>Loading…</Text>
-        </View>
-      </View>
-    );
-  }
-
-  if (progressLocked) {
-    return (
-      <View
-        style={[
-          styles.container,
-          { paddingTop: Platform.OS === "web" ? webTopPadding : insets.top },
-        ]}
-      >
-        <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingBottom: Platform.OS === "web" ? 84 + 16 : insets.bottom + 90,
-              flexGrow: 1,
-              justifyContent: "center",
-            },
-          ]}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.lockPanel}>
-            <Ionicons name="lock-closed" size={52} color={C.textMuted} />
-            <Text style={styles.lockTitle}>Progress is Premium</Text>
-            <Text style={styles.lockBody}>
-              Your stats, accuracy, and achievements are available with Premium. Subscribe to unlock
-              full history and insights.
-            </Text>
-            <TouchableOpacity
-              style={styles.lockCta}
-              onPress={() => void presentPaywall()}
-              activeOpacity={0.85}
-            >
-              <Ionicons name="sparkles" size={20} color={C.white} />
-              <Text style={styles.lockCtaText}>View plans</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </View>
-    );
-  }
 
   return (
     <View
@@ -552,52 +488,6 @@ const styles = StyleSheet.create({
     color: C.error,
   },
   scrollContent: { padding: 16, gap: 12 },
-  loadingGate: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 32,
-  },
-  loadingGateText: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 15,
-    color: C.textMuted,
-  },
-  lockPanel: {
-    alignItems: "center",
-    gap: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 24,
-  },
-  lockTitle: {
-    fontFamily: "Inter_800ExtraBold",
-    fontSize: 22,
-    color: C.text,
-    textAlign: "center",
-  },
-  lockBody: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 15,
-    color: C.textMuted,
-    textAlign: "center",
-    lineHeight: 22,
-    maxWidth: 320,
-  },
-  lockCta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: C.primary,
-    paddingVertical: 14,
-    paddingHorizontal: 22,
-    borderRadius: 14,
-    marginTop: 8,
-  },
-  lockCtaText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 16,
-    color: C.white,
-  },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
