@@ -1,48 +1,50 @@
-const primary = "#2563EB";
-const primaryLight = "#3B82F6";
-const primaryDark = "#1D4ED8";
-const accent = "#10B981";
-const accentLight = "#34D399";
-const orange = "#F97316";
-const orangeLight = "#FB923C";
-const orangeGlow = "rgba(249, 115, 22, 0.25)";
+/** Soft pastels with enough chroma to feel lively — school-friendly, not muddy or neon. */
+const primary = "#4F8FD9";
+const primaryLight = "#7BAEEB";
+const primaryDark = "#3A6BB5";
+const accent = "#3DB88C";
+const accentLight = "#6DD4AE";
+/** Warm accent: coral-peach (not classic orange) — pairs cleanly with sky blue primary. */
+const orange = "#E8847A";
+const orangeLight = "#F0B0A6";
+const orangeGlow = "rgba(232, 132, 122, 0.28)";
 
 /** Shared primitives — single literal per value */
 const white = "#FFFFFF";
 const black = "#000000";
-const notebookPaper = "#FFFEF7";
-const slateMuted = "#94A3B8";
-const errorLight = "#FCA5A5";
-const errorLighter = "#FEE2E2";
+const notebookPaper = "#FFFCF5";
+const slateMuted = "#64748B";
+const errorLight = "#FECACA";
+const errorLighter = "#FEE8E8";
 
-const darkSurface = "#1C1C1E";
-const darkLink = "#0A84FF";
+const darkSurface = "#1C1D22";
+const darkLink = "#7CB3FF";
 
 export default {
   light: {
     white,
     black,
     transparent: "transparent",
-    overlay: "rgba(0, 0, 0, 0.5)",
+    overlay: "rgba(0, 0, 0, 0.45)",
     sheen: "rgba(255, 255, 255, 0.12)",
-    whiteOverlay: "rgba(255, 255, 255, 0.8)",
+    whiteOverlay: "rgba(255, 255, 255, 0.85)",
     text: "#0F172A",
     textSecondary: "#475569",
     textMuted: slateMuted,
     /** App shell; keep in sync with `app.json` → `expo.splash.backgroundColor` (JSON cannot import this module). */
-    background: "#F0F9FF",
-    backgroundAlt: "#E0F2FE",
+    background: "#F3F7FB",
+    backgroundAlt: "#E3EEF8",
     notebook: notebookPaper,
     surface: white,
-    surfaceAlt: "#F8FAFC",
+    surfaceAlt: "#F1F5F9",
     border: "#E2E8F0",
     /** Unfilled progress rings / bars — darker than `border` for contrast on white/light bg */
     progressEmpty: "#CBD5E1",
     /** Stat card gradients (Progress) */
-    gradientSuccessEnd: "#059669",
-    gradientErrorEnd: "#dc2626",
-    /** Weak-areas card when locked — deeper red */
-    errorLockedSurface: "#B91C1C",
+    gradientSuccessEnd: "#22A67A",
+    gradientErrorEnd: "#DC4A4A",
+    /** Weak-areas card when locked */
+    errorLockedSurface: "#C23D3D",
     /** White at alpha — text/icons on solid color buttons & hero cards */
     onColorWhite14: "rgba(255, 255, 255, 0.14)",
     onColorWhite15: "rgba(255, 255, 255, 0.15)",
@@ -54,16 +56,16 @@ export default {
     onColorWhite90: "rgba(255, 255, 255, 0.9)",
     onColorWhite92: "rgba(255, 255, 255, 0.92)",
     onColorWhite95: "rgba(255, 255, 255, 0.95)",
-    textShadowSoft: "rgba(0, 0, 0, 0.15)",
+    textShadowSoft: "rgba(0, 0, 0, 0.12)",
     /** Subtle tinted surfaces */
-    primaryTintSurface: "rgba(37, 99, 235, 0.05)",
-    errorTintSurface: "rgba(239, 68, 68, 0.05)",
-    primaryBorderMuted: "rgba(37, 99, 235, 0.2)",
+    primaryTintSurface: "rgba(79, 143, 217, 0.09)",
+    errorTintSurface: "rgba(239, 68, 68, 0.07)",
+    primaryBorderMuted: "rgba(79, 143, 217, 0.28)",
     /** Owl mascot SVG (`OwlMascotSvg`) — eyes use `white` */
-    mascotBlue: "#262784",
-    mascotEyeWhiteR: "#F6F7F7",
-    mascotHighlight: "#FEFCF0",
-    mascotBeak: "#FB2525",
+    mascotBlue: "#4A56A8",
+    mascotEyeWhiteR: "#F7F8F8",
+    mascotHighlight: "#FFF9F0",
+    mascotBeak: "#F07171",
     /** Android notification channel LED color */
     notificationChannelLight: "#FF231F7C",
     borderLight: "#F1F5F9",
@@ -74,24 +76,24 @@ export default {
     accentLight,
     orange,
     orangeLight,
-    orangeLighter: "#FFF7ED",
-    orangeSubtle: "#FED7AA",
-    orangeDark: "#9A3412",
+    orangeLighter: "#FFF5F3",
+    orangeSubtle: "#F3D4CE",
+    orangeDark: "#B8554A",
     orangeGlow,
-    backgroundSecondary: "#F2F2F7",
-    link: "#007AFF",
+    backgroundSecondary: "#E8EDF4",
+    link: "#2563C8",
     buttonText: white,
-    borderSubtle: "rgba(0, 0, 0, 0.1)",
+    borderSubtle: "rgba(0, 0, 0, 0.09)",
     /** Same hue as `accent` — use for success UI */
     success: accent,
-    successDark: "#166534",
-    warning: "#F59E0B",
+    successDark: "#047857",
+    warning: "#E8A52E",
     warningLight: "#FEF3C7",
     warningBorder: "#FCD34D",
     /** Amber lock / crown on yellow pills (premium badges) */
     warningDark: "#B45309",
     error: "#EF4444",
-    errorDark: "#991B1B",
+    errorDark: "#B91C1C",
     errorLight,
     errorLighter,
     /** Same as `primaryLight` */
@@ -99,37 +101,37 @@ export default {
     infoLight: "#DBEAFE",
     tint: primary,
     tabIconSelected: primary,
-    cardCorrect: "#DCFCE7",
-    cardCorrectBorder: "#86EFAC",
-    cardNeutral: "#EFF6FF",
-    cardNeutralBorder: "#BFDBFE",
+    cardCorrect: "#D8F3E6",
+    cardCorrectBorder: "#6EE7B7",
+    cardNeutral: "#E0F0FE",
+    cardNeutralBorder: "#93C5FD",
     levels: {
       "1.1": accent,
       "1.2": primaryLight,
       "1.3": orange,
-      "1.4": "#8B5CF6",
-      "1.5": "#EC4899",
-      "1.6": "#06B6D4",
+      "1.4": "#A78BFA",
+      "1.5": "#F472B6",
+      "1.6": "#22D3EE",
     } as Record<string, string>,
   },
   dark: {
     white,
     black,
     transparent: "transparent",
-    overlay: "rgba(0, 0, 0, 0.7)",
-    text: "#FFFFFF",
-    textSecondary: "rgba(255, 255, 255, 0.7)",
-    background: "#000000",
+    overlay: "rgba(0, 0, 0, 0.65)",
+    text: "#F8FAFC",
+    textSecondary: "rgba(248, 250, 252, 0.72)",
+    background: "#0C0D10",
     backgroundAlt: darkSurface,
     backgroundSecondary: darkSurface,
     surface: darkSurface,
-    surfaceAlt: "#2C2C2E",
-    border: "#38383A",
+    surfaceAlt: "#2A2B32",
+    border: "#3D3F48",
     primary,
     accent,
     orange,
-    error: "#FF453A",
-    warning: "#FF9F0A",
+    error: "#F87171",
+    warning: "#FBBF24",
     info: darkLink,
     link: darkLink,
     buttonText: white,
