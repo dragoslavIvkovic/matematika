@@ -3,6 +3,7 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 import Colors from "@/constants/colors";
+import { useAnalyticsStore } from "@/store/analyticsStore";
 
 const C = Colors.light;
 
@@ -83,7 +84,34 @@ export async function scheduleDailyNotifications() {
   console.log("✅ Daily notifications successfully scheduled for 08:00 and 14:00");
 }
 
+/**
+ * One event when the user opens the app from a local notification (cold start or tap).
+ * Uses Expo's last response for quit→foreground launches and the response listener when already running.
+ */
+export function subscribeToNotificationOpenAnalytics() {
+  const track = useAnalyticsStore.getState().trackProductEvent;
+
+  void Notifications.getLastNotificationResponseAsync().then((response) => {
+    if (response?.notification) {
+      const title = response.notification.request.content.title;
+      track({
+        event: "app_opened_from_notification",
+        properties: { cold_start: true, title: title ?? undefined },
+      });
+    }
+  });
+
+  return Notifications.addNotificationResponseReceivedListener((response) => {
+    const title = response.notification.request.content.title;
+    track({
+      event: "app_opened_from_notification",
+      properties: { cold_start: false, title: title ?? undefined },
+    });
+  });
+}
+
 export async function initNotifications() {
   await registerForPushNotificationsAsync();
   await scheduleDailyNotifications();
+  subscribeToNotificationOpenAnalytics();
 }

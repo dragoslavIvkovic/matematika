@@ -9,7 +9,54 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { LevelId } from "@/utils/ProblemGenerator";
+import { posthog } from "@/utils/posthog";
 import { storage } from "@/utils/storage";
+
+/** Values returned by RevenueCat `presentPaywall` (see `PAYWALL_RESULT`). */
+export type RevenueCatPaywallResultCode =
+  | "NOT_PRESENTED"
+  | "ERROR"
+  | "CANCELLED"
+  | "PURCHASED"
+  | "RESTORED";
+
+/**
+ * High-signal product / lifecycle events only (PostHog — no local aggregation).
+ * Keeps subscription and funnel noise out of `trackEvent` level/daily counters.
+ */
+export type ProductAnalyticsEvent =
+  | {
+      event: "revenuecat_paywall";
+      properties: {
+        /** RC dismiss result, or why the native flow did not finish */
+        rc_result:
+          | RevenueCatPaywallResultCode
+          | "billing_blocked"
+          | "present_threw"
+          | "unexpected_exception"
+          | "customer_info_unresolved";
+        premium_after?: boolean;
+        block_reason?: "missing_env" | "native_unavailable" | "paywall_ui_load_failed" | null;
+        /** True when RC paywall ran but we could not confirm entitlements afterward */
+        customer_info_failed?: boolean;
+      };
+    }
+  | {
+      event: "app_opened_from_notification";
+      properties: { cold_start: boolean; title?: string };
+    }
+  | {
+      event: "subscription_upsell_tapped";
+      properties: { source: string };
+    }
+  | {
+      event: "weak_practice_started";
+      properties: { task_count: number; level_count: number; levels: LevelId[] };
+    }
+  | {
+      event: "weak_practice_completed";
+      properties: { correct_count: number; total_tasks: number };
+    };
 
 const zustandStorage = {
   getItem: (name: string) => {
@@ -120,6 +167,9 @@ interface AnalyticsState {
    */
   trackEvent: (event: AnalyticsEvent) => void;
 
+  /** Subscription, RevenueCat, and sparse funnel events (PostHog only). */
+  trackProductEvent: (event: ProductAnalyticsEvent) => void;
+
   /** Reset all analytics data */
   resetAnalytics: () => void;
 }
@@ -210,12 +260,12 @@ export const useAnalyticsStore = create<AnalyticsState>()(
 
       // ── Central Event Dispatcher ─────────────────────
 
+      trackProductEvent: (event: ProductAnalyticsEvent) => {
+        posthog.capture(event.event, event.properties);
+      },
+
       trackEvent: (event: AnalyticsEvent) => {
-        // ┌─────────────────────────────────────────────┐
-        // │ Future PostHog integration point:            │
-        // │                                              │
-        // │ posthog.capture(event.event, event.properties);│
-        // └─────────────────────────────────────────────┘
+        posthog.capture(event.event, event.properties);
 
         set((state) => {
           switch (event.event) {

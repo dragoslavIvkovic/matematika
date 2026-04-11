@@ -21,6 +21,7 @@ import { OWL_MASCOT_VIEW_ASPECT } from "@/components/OwlMascotSvg";
 import Colors from "@/constants/colors";
 import { ROUTE_HOME } from "@/constants/routes";
 import { getOnboardingInlineMascotSize } from "@/utils/mascotSizing";
+import { posthog } from "@/utils/posthog";
 import { AppStorage } from "@/utils/storage";
 
 const C = Colors.light;
@@ -212,8 +213,13 @@ export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
-  const handleFinish = () => {
+  const handleFinish = (skipped = false) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    if (skipped) {
+      posthog.capture("onboarding_skipped", { slide_index: currentIndex });
+    } else {
+      posthog.capture("onboarding_completed");
+    }
     // Persist onboarding status
     AppStorage.setString(ONBOARDING_KEY, "done");
     router.replace(ROUTE_HOME);
@@ -245,7 +251,7 @@ export default function OnboardingScreen() {
       {currentIndex < 2 && (
         <TouchableOpacity
           style={[styles.skipBtn, { top: topPad + 12 }]}
-          onPress={handleFinish}
+          onPress={() => handleFinish(true)}
           activeOpacity={0.7}
         >
           <Text style={styles.skipText}>Skip</Text>

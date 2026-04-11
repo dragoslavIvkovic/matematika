@@ -1,7 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   InputAccessoryView,
   Platform,
@@ -22,6 +22,7 @@ import { OwlMascot } from "@/components/OwlMascot";
 import Colors from "@/constants/colors";
 import { useQuizEngine } from "@/hooks/useQuizEngine";
 import { useSubscription } from "@/providers/SubscriptionProvider";
+import { useAnalyticsStore } from "@/store/analyticsStore";
 import { useErrorStore } from "@/store/errorStore";
 import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import type { GeneratedProblem, LevelId } from "@/utils/ProblemGenerator";
@@ -37,6 +38,7 @@ export default function WeakPracticeScreen() {
   const insets = useSafeAreaInsets();
   const { isPremium, presentPaywall, purchasesSupported, paywallBlockReason } = useSubscription();
   const errorsByLevel = useErrorStore((s) => s.errorsByLevel);
+  const trackProductEvent = useAnalyticsStore((s) => s.trackProductEvent);
 
   // Generate all tasks once on mount from weak levels
   const [tasks] = useState<GeneratedProblem[]>(() => generateWeakPracticeTasks(errorsByLevel));
@@ -45,6 +47,23 @@ export default function WeakPracticeScreen() {
   const [sessionDone, setSessionDone] = useState(false);
 
   const totalTasks = tasks.length;
+
+  // Track session start once on mount
+  const hasTrackedStartRef = useRef(false);
+  useEffect(() => {
+    if (!hasTrackedStartRef.current && tasks.length > 0) {
+      hasTrackedStartRef.current = true;
+      const uniqueLevels = [...new Set(tasks.map((t) => t.level))];
+      trackProductEvent({
+        event: "weak_practice_started",
+        properties: {
+          task_count: tasks.length,
+          level_count: uniqueLevels.length,
+          levels: uniqueLevels as LevelId[],
+        },
+      });
+    }
+  }, [tasks, trackProductEvent]);
 
   const engine = useQuizEngine({
     reduceErrorOnCorrect: true,
@@ -67,12 +86,19 @@ export default function WeakPracticeScreen() {
   const goToNext = useCallback(() => {
     const nextIdx = currentIndex + 1;
     if (nextIdx >= totalTasks) {
+      trackProductEvent({
+        event: "weak_practice_completed",
+        properties: {
+          correct_count: correctCount + 1,
+          total_tasks: totalTasks,
+        },
+      });
       setSessionDone(true);
       return;
     }
     setCurrentIndex(nextIdx);
     resetQuizState();
-  }, [currentIndex, totalTasks, resetQuizState]);
+  }, [currentIndex, totalTasks, resetQuizState, correctCount, trackProductEvent]);
 
   const handleCheck = useCallback(() => {
     engineHandleCheck(problem);

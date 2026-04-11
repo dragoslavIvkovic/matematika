@@ -9,8 +9,14 @@ import {
 } from "react";
 import { Platform } from "react-native";
 import Purchases, { type CustomerInfo, LOG_LEVEL } from "react-native-purchases";
+import type { PAYWALL_RESULT } from "react-native-purchases-ui";
 
 import { REVENUECAT_ANDROID_API_KEY, REVENUECAT_IOS_API_KEY } from "@/constants/revenuecat";
+import {
+  type ProductAnalyticsEvent,
+  type RevenueCatPaywallResultCode,
+  useAnalyticsStore,
+} from "@/store/analyticsStore";
 import { loadRevenueCatPurchasesUi } from "@/utils/revenueCatPurchasesUi";
 
 /** Why the native paywall cannot open — drives clearer in-app alerts. */
@@ -72,6 +78,15 @@ function snapshotPaywallBlockReason(
   if (paywallUiModuleFailed) return "paywall_ui_load_failed";
   if (!revenueCatNativeAvailable) return "native_unavailable";
   return null;
+}
+
+function trackRevenueCatPaywall(
+  properties: Extract<ProductAnalyticsEvent, { event: "revenuecat_paywall" }>["properties"],
+) {
+  useAnalyticsStore.getState().trackProductEvent({
+    event: "revenuecat_paywall",
+    properties,
+  });
 }
 
 function isNativeModuleError(e: unknown): boolean {
@@ -202,14 +217,19 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
             );
           }
         }
+        const blockedReason = snapshotPaywallBlockReason(
+          purchasesSupported,
+          revenueCatNativeAvailable,
+          paywallUiModuleFailed,
+        );
+        trackRevenueCatPaywall({
+          rc_result: "billing_blocked",
+          block_reason: blockedReason,
+        });
         return {
           premiumActive: false,
           billingUnavailable: true,
-          unavailableReason: snapshotPaywallBlockReason(
-            purchasesSupported,
-            revenueCatNativeAvailable,
-            paywallUiModuleFailed,
-          ),
+          unavailableReason: blockedReason,
         };
       }
       const uiLoad = loadRevenueCatPurchasesUi();
@@ -217,17 +237,23 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         console.warn("RevenueCat: purchases-ui module could not load", uiLoad.error);
         setPaywallUiModuleFailed(true);
         setRevenueCatNativeAvailable(false);
+        trackRevenueCatPaywall({
+          rc_result: "billing_blocked",
+          block_reason: "paywall_ui_load_failed",
+        });
         return {
           premiumActive: false,
           billingUnavailable: true,
           unavailableReason: "paywall_ui_load_failed",
         };
       }
+      let paywallResult: PAYWALL_RESULT;
       try {
-        await uiLoad.ui.presentPaywall();
+        paywallResult = (await uiLoad.ui.presentPaywall()) as PAYWALL_RESULT;
       } catch (e) {
         console.warn("RevenueCat: presentPaywall failed", e);
         setRevenueCatNativeAvailable(false);
+        trackRevenueCatPaywall({ rc_result: "present_threw" });
         return {
           premiumActive: false,
           billingUnavailable: true,
@@ -252,9 +278,23 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         }
         const next = entitlementActive(info);
         setIsPremium(next);
+        trackRevenueCatPaywall({
+          rc_result: paywallResult as RevenueCatPaywallResultCode,
+          premium_after: next,
+        });
         return { premiumActive: next, billingUnavailable: false };
       } catch (e) {
         console.warn("RevenueCat: could not resolve customer info after paywall", e);
+        trackRevenueCatPaywall({
+          rc_result: paywallResult as RevenueCatPaywallResultCode,
+          premium_after: false,
+          block_reason: snapshotPaywallBlockReason(
+            purchasesSupported,
+            revenueCatNativeAvailable,
+            paywallUiModuleFailed,
+          ),
+          customer_info_failed: true,
+        });
         return {
           premiumActive: false,
           billingUnavailable: true,
@@ -267,6 +307,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       }
     } catch (e) {
       console.warn("RevenueCat: presentPaywall unexpected error", e);
+      trackRevenueCatPaywall({ rc_result: "unexpected_exception" });
       setRevenueCatNativeAvailable(false);
       return {
         premiumActive: false,

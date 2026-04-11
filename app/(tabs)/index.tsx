@@ -14,6 +14,7 @@ import Colors from "@/constants/colors";
 import { homeCardShadow } from "@/constants/homeCardShadow";
 import { ROUTE_ONBOARDING, ROUTE_PRACTICE } from "@/constants/routes";
 import { useLearnHomeEntitlements } from "@/hooks/useLearnHomeEntitlements";
+import { useAnalyticsStore } from "@/store/analyticsStore";
 import { useDailyPracticeStore } from "@/store/dailyPracticeStore";
 import { useLevelStatsStore } from "@/store/levelStatsStore";
 import { computeDailyStreak } from "@/utils/dateUtils";
@@ -51,6 +52,8 @@ export default function LearnScreen() {
     openWeakAreas,
     openSubscriptionUpsell,
   } = useLearnHomeEntitlements();
+
+  const trackProductEvent = useAnalyticsStore((s) => s.trackProductEvent);
 
   useEffect(() => {
     // Check onboarding
@@ -96,6 +99,10 @@ export default function LearnScreen() {
             <TouchableOpacity
               style={styles.subBadge}
               onPress={() => {
+                trackProductEvent({
+                  event: "subscription_upsell_tapped",
+                  properties: { source: "home_badge" },
+                });
                 void openSubscriptionUpsell();
               }}
               activeOpacity={0.75}
