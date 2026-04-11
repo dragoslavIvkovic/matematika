@@ -1,26 +1,30 @@
 import { Platform, type ViewStyle } from "react-native";
 
+import Colors from "@/constants/colors";
+
+const C = Colors.light;
+
 /**
  * Card shadows on the Learn screen.
  * iOS: shadowColor / offset / opacity / radius
  * Android: elevation (no shadowOpacity to avoid double shadow)
  */
 const surfaceIos: ViewStyle = {
-  shadowColor: "#000000",
+  shadowColor: C.black,
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.07,
   shadowRadius: 6,
 };
 
 const raisedIos: ViewStyle = {
-  shadowColor: "#000000",
+  shadowColor: C.black,
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.14,
   shadowRadius: 10,
 };
 
 const heroIos: ViewStyle = {
-  shadowColor: "#000000",
+  shadowColor: C.black,
   shadowOffset: { width: 0, height: 10 },
   shadowOpacity: 0.18,
   shadowRadius: 22,

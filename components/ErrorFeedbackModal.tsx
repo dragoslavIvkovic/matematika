@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: C.cardWrong,
+    backgroundColor: C.errorLighter,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 100,

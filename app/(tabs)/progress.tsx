@@ -41,6 +41,8 @@ function AccuracyGauge({ accuracy }: { accuracy: number }) {
   const center = radius + strokeWidth;
   const size = center * 2;
   const circumference = 2 * Math.PI * radius;
+  // Inner edge of stroke is ~radius - strokeWidth/2 from center; keep text inside with margin
+  const labelMaxWidth = Math.floor(2 * (radius - strokeWidth * 0.5) - 16);
 
   // Use a shared value for animation
   const progress = useSharedValue(0);
@@ -78,7 +80,7 @@ function AccuracyGauge({ accuracy }: { accuracy: number }) {
             cx={center}
             cy={center}
             r={radius}
-            stroke={C.borderLight}
+            stroke={C.progressEmpty}
             strokeWidth={strokeWidth}
             fill="none"
           />
@@ -100,19 +102,29 @@ function AccuracyGauge({ accuracy }: { accuracy: number }) {
             position: "absolute",
             alignItems: "center",
             justifyContent: "center",
+            maxWidth: labelMaxWidth,
+            paddingHorizontal: 4,
           }}
         >
           <Text
+            adjustsFontSizeToFit
+            minimumFontScale={0.42}
+            numberOfLines={1}
             style={{
               fontFamily: "Inter_800ExtraBold",
               fontSize: 38,
               color: C.text,
-              marginTop: 6, // tweak vertical center visually
+              marginTop: 6,
+              textAlign: "center",
+              width: "100%",
             }}
           >
             {Math.round(accuracy)}%
           </Text>
           <Text
+            adjustsFontSizeToFit
+            minimumFontScale={0.75}
+            numberOfLines={1}
             style={{
               fontFamily: "Inter_600SemiBold",
               fontSize: 10,
@@ -120,6 +132,8 @@ function AccuracyGauge({ accuracy }: { accuracy: number }) {
               textTransform: "uppercase",
               letterSpacing: 0.5,
               marginTop: -2,
+              textAlign: "center",
+              width: "100%",
             }}
           >
             Accuracy
@@ -207,13 +221,13 @@ export default function ProgressScreen() {
               icon: "checkmark-circle",
               label: "Problems Solved",
               value: `${totalSolved}`,
-              colors: [C.success, "#059669"] as const,
+              colors: [C.success, C.gradientSuccessEnd] as const,
             },
             {
               icon: "close-circle",
               label: "Errors Made",
               value: `${totalErrors}`,
-              colors: [C.error, "#dc2626"] as const,
+              colors: [C.error, C.gradientErrorEnd] as const,
             },
           ].map((stat) => (
             <LinearGradient
@@ -227,7 +241,7 @@ export default function ProgressScreen() {
               <Ionicons
                 name={stat.icon as keyof typeof Ionicons.glyphMap}
                 size={120}
-                color="white"
+                color={C.white}
                 style={{
                   position: "absolute",
                   right: -30,
@@ -299,7 +313,7 @@ export default function ProgressScreen() {
                     style={[
                       styles.topicDot,
                       {
-                        backgroundColor: completed ? color : C.border,
+                        backgroundColor: completed ? color : C.progressEmpty,
                       },
                     ]}
                   >

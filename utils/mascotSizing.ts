@@ -9,27 +9,13 @@ export function getIntroMascotSize(width: number, height: number): number {
 }
 
 export function getIntroMascotSectionMinHeight(width: number, height: number): number {
-  return getIntroMascotSize(width, height) * 1.12;
+  /** Match `OwlMascot` outer container (~1.42×) so the hero isn’t clipped */
+  return getIntroMascotSize(width, height) * 1.42;
 }
 
 /**
- * Onboarding slide 1 — smaller mascot and tighter section so text + cards fit (with scroll).
- */
-export function getOnboardingHeroMascotSize(width: number, height: number): number {
-  const fromHeight = height * 0.175;
-  const fromWidth = width * 0.5;
-  const scaled = Math.min(fromHeight, fromWidth);
-  return Math.round(Math.min(156, Math.max(76, scaled)));
-}
-
-export function getOnboardingHeroSectionMinHeight(width: number, height: number): number {
-  return getOnboardingHeroMascotSize(width, height) * 1.06;
-}
-
-/**
- * Smaller mascot in the onboarding mock (toast) — proportional to onboarding hero size.
+ * Onboarding slide 3 — small owl in the mock toast (independent of slide 1 layout).
  */
 export function getOnboardingInlineMascotSize(width: number, height: number): number {
-  const hero = getOnboardingHeroMascotSize(width, height);
-  return Math.round(Math.max(36, Math.min(54, hero * 0.3)));
+  return Math.round(Math.max(32, Math.min(52, Math.min(width, height) * 0.068)));
 }

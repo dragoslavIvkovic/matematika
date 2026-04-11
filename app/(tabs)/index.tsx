@@ -154,7 +154,7 @@ export default function LearnScreen() {
               <Text style={styles.compactTitle}>Continue practice</Text>
               <Text style={styles.compactSubtitle}>Level {currentLevel}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.75)" />
+            <Ionicons name="chevron-forward" size={18} color={C.onColorWhite75} />
           </TouchableOpacity>
 
           <WeakAreasCard isPremium={isPremium} onPress={() => void openWeakAreas()} />
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: C.onColorWhite20,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     fontSize: 13,
     lineHeight: 17,
-    color: "rgba(255, 255, 255, 0.88)",
+    color: C.onColorWhite88,
     letterSpacing: -0.2,
   },
 

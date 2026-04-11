@@ -39,7 +39,7 @@ export function ProgressBar({ progress, color, delay = 0, height = 6 }: Progress
 
 const styles = StyleSheet.create({
   track: {
-    backgroundColor: C.border,
+    backgroundColor: C.progressEmpty,
     overflow: "hidden",
     flex: 1,
   },

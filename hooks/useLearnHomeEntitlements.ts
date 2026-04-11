@@ -7,22 +7,27 @@ import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 
 import { ROUTE_DAILY_PRACTICE_CLAIMED, ROUTE_WEAK_PRACTICE } from "@/constants/routes";
-import { type PresentPaywallResult, useSubscription } from "@/providers/SubscriptionProvider";
+import {
+  type PaywallBlockReason,
+  type PresentPaywallResult,
+  useSubscription,
+} from "@/providers/SubscriptionProvider";
 import { canFreeUserClaimDailyQuizSlot, claimFreeDailyQuizSlot } from "@/utils/dailyQuizLimit";
 import { alertPaywallUnavailable } from "@/utils/paywallAlert";
 
 async function paywallWithBillingAlert(
   presentPaywall: () => Promise<PresentPaywallResult>,
+  paywallBlockReason: PaywallBlockReason,
 ): Promise<PresentPaywallResult> {
   const result = await presentPaywall();
   if (result.billingUnavailable) {
-    alertPaywallUnavailable();
+    alertPaywallUnavailable(result.unavailableReason ?? paywallBlockReason);
   }
   return result;
 }
 
 export function useLearnHomeEntitlements() {
-  const { isPremium, presentPaywall } = useSubscription();
+  const { isPremium, presentPaywall, paywallBlockReason } = useSubscription();
 
   /** Storage-backed limit does not trigger React; bump on tab focus so UI matches quota. */
   const [, refreshDailyLimitUi] = useState(0);
@@ -44,31 +49,34 @@ export function useLearnHomeEntitlements() {
     // ── Free: daily quota, then paywall ──
     if (canFreeUserClaimDailyQuizSlot()) {
       if (!claimFreeDailyQuizSlot()) {
-        await paywallWithBillingAlert(presentPaywall);
+        await paywallWithBillingAlert(presentPaywall, paywallBlockReason);
         return;
       }
       router.push(ROUTE_DAILY_PRACTICE_CLAIMED);
       return;
     }
 
-    const { premiumActive, billingUnavailable } = await paywallWithBillingAlert(presentPaywall);
+    const { premiumActive, billingUnavailable } = await paywallWithBillingAlert(
+      presentPaywall,
+      paywallBlockReason,
+    );
     if (billingUnavailable) return;
     if (premiumActive) {
       router.push(ROUTE_DAILY_PRACTICE_CLAIMED);
     }
-  }, [isPremium, presentPaywall]);
+  }, [isPremium, presentPaywall, paywallBlockReason]);
 
   const openWeakAreas = useCallback(async () => {
     if (isPremium) {
       router.push(ROUTE_WEAK_PRACTICE);
       return;
     }
-    await paywallWithBillingAlert(presentPaywall);
-  }, [isPremium, presentPaywall]);
+    await paywallWithBillingAlert(presentPaywall, paywallBlockReason);
+  }, [isPremium, presentPaywall, paywallBlockReason]);
 
   const openSubscriptionUpsell = useCallback(async () => {
-    await paywallWithBillingAlert(presentPaywall);
-  }, [presentPaywall]);
+    await paywallWithBillingAlert(presentPaywall, paywallBlockReason);
+  }, [presentPaywall, paywallBlockReason]);
 
   return {
     isPremium,

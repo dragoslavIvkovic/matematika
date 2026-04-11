@@ -9,17 +9,26 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { OwlMascotSvg } from "@/components/OwlMascotSvg";
+import { OWL_MASCOT_VIEW_ASPECT, OwlMascotSvg } from "@/components/OwlMascotSvg";
 
-/** viewBox width / height — owl art is portrait; `size` maps to drawing height */
-const VIEW_ASPECT = 438 / 835;
+/** viewBox width / height — owl art; `size` maps to drawing height */
+const VIEW_ASPECT = OWL_MASCOT_VIEW_ASPECT;
 
 interface OwlMascotProps {
   size?: number;
   isThinking?: boolean;
+  /**
+   * Minimal wrapper — only for hero / marketing (default reserves ~42% extra height for float).
+   * Use on onboarding slide 1 so the SVG isn’t swimming in empty padding.
+   */
+  compactLayout?: boolean;
 }
 
-export function OwlMascot({ size = 80, isThinking = false }: OwlMascotProps) {
+export function OwlMascot({
+  size = 80,
+  isThinking = false,
+  compactLayout = false,
+}: OwlMascotProps) {
   const scale = useSharedValue(1);
   const floatY = useSharedValue(0);
 
@@ -58,9 +67,9 @@ export function OwlMascot({ size = 80, isThinking = false }: OwlMascotProps) {
 
   const imgH = size;
   const imgW = size * VIEW_ASPECT;
-  /** Reserve box so float + scale (1.03) never clips the SVG at the edges */
-  const outerH = size * (isThinking ? 1.12 : 1.26);
-  const outerW = Math.max(imgW, size * 0.92);
+  /** Default: roomy box for float/scale. Compact: ~10% vertical slack only; width = art width (no forced bar). */
+  const outerH = compactLayout && !isThinking ? size * 1.1 : size * (isThinking ? 1.28 : 1.42);
+  const outerW = compactLayout && !isThinking ? imgW : Math.max(imgW, size * 0.92);
 
   const outerStyle = isThinking
     ? {

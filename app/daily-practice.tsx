@@ -37,7 +37,7 @@ const IOS_DAILY_INPUT_ACCESSORY_ID = "dailyPracticeInputAccessory";
 export default function DailyPracticeScreen() {
   const insets = useSafeAreaInsets();
   const { dailyClaimed } = useLocalSearchParams<{ dailyClaimed?: string }>();
-  const { isPremium, presentPaywall } = useSubscription();
+  const { isPremium, presentPaywall, paywallBlockReason } = useSubscription();
   const selectedLevels = useDailyPracticeStore((s) => s.selectedLevels);
 
   useEffect(() => {
@@ -46,13 +46,13 @@ export default function DailyPracticeScreen() {
     if (claimFreeDailyQuizSlot()) return;
     void (async () => {
       try {
-        const { billingUnavailable } = await presentPaywall();
-        if (billingUnavailable) alertPaywallUnavailable();
+        const { billingUnavailable, unavailableReason } = await presentPaywall();
+        if (billingUnavailable) alertPaywallUnavailable(unavailableReason ?? paywallBlockReason);
       } finally {
         router.back();
       }
     })();
-  }, [dailyClaimed, isPremium, presentPaywall]);
+  }, [dailyClaimed, isPremium, presentPaywall, paywallBlockReason]);
 
   // Generate all tasks once on mount
   const [tasks] = useState<GeneratedProblem[]>(() => generateDailyPracticeTasks(selectedLevels));

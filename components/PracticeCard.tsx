@@ -64,8 +64,8 @@ function OptionButton({
     borderColor = C.cardCorrectBorder;
     textColor = C.successDark;
   } else if (answered && isSelected && !isCorrect) {
-    bgColor = C.cardWrong;
-    borderColor = C.cardWrongBorder;
+    bgColor = C.errorLighter;
+    borderColor = C.errorLight;
     textColor = C.errorDark;
   }
 

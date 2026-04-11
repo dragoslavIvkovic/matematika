@@ -2,6 +2,10 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
+import Colors from "@/constants/colors";
+
+const C = Colors.light;
+
 // Configure how notifications should be handled when the app is in the foreground
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -37,7 +41,7 @@ export async function registerForPushNotificationsAsync() {
       name: "default",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
+      lightColor: C.notificationChannelLight,
     });
   }
 }

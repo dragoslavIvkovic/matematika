@@ -69,7 +69,7 @@ export function WeakAreasCard({ isPremium, onPress }: WeakAreasCardProps) {
           <Ionicons name="lock-closed" size={20} color={C.warningDark} />
         </View>
       ) : (
-        <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.75)" />
+        <Ionicons name="chevron-forward" size={18} color={C.onColorWhite75} />
       )}
     </TouchableOpacity>
   );
@@ -106,7 +106,7 @@ const s = StyleSheet.create({
   },
   cardLocked: {
     borderColor: `${C.warning}99`,
-    backgroundColor: "#B91C1C",
+    backgroundColor: C.errorLockedSurface,
     shadowColor: C.warning,
     shadowOpacity: 0.28,
   },
@@ -118,12 +118,12 @@ const s = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: C.onColorWhite20,
     alignItems: "center",
     justifyContent: "center",
   },
   iconCircleLocked: {
-    backgroundColor: "rgba(255, 255, 255, 0.14)",
+    backgroundColor: C.onColorWhite14,
   },
   lockCorner: {
     position: "absolute",
@@ -160,7 +160,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 100,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: C.onColorWhite95,
   },
   proPillText: {
     fontFamily: "Inter_800ExtraBold",
@@ -201,7 +201,7 @@ const s = StyleSheet.create({
     letterSpacing: -0.4,
   },
   titleLocked: {
-    textShadowColor: "rgba(0,0,0,0.15)",
+    textShadowColor: C.textShadowSoft,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
@@ -209,10 +209,10 @@ const s = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     fontSize: 13,
     lineHeight: 17,
-    color: "rgba(255, 255, 255, 0.88)",
+    color: C.onColorWhite88,
     letterSpacing: -0.2,
   },
   subLocked: {
-    color: "rgba(255, 255, 255, 0.92)",
+    color: C.onColorWhite92,
   },
 });

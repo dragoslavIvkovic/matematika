@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 1.5,
-    backgroundColor: C.cardWrongBorder,
+    backgroundColor: C.errorLight,
     opacity: 0.6,
   },
   content: {

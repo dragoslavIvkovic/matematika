@@ -35,7 +35,7 @@ const IOS_WEAK_INPUT_ACCESSORY_ID = "weakPracticeInputAccessory";
 
 export default function WeakPracticeScreen() {
   const insets = useSafeAreaInsets();
-  const { isPremium, presentPaywall, purchasesSupported } = useSubscription();
+  const { isPremium, presentPaywall, purchasesSupported, paywallBlockReason } = useSubscription();
   const errorsByLevel = useErrorStore((s) => s.errorsByLevel);
 
   // Generate all tasks once on mount from weak levels
@@ -119,8 +119,9 @@ export default function WeakPracticeScreen() {
               style={styles.premiumUnlockBtn}
               onPress={() => {
                 void (async () => {
-                  const { billingUnavailable } = await presentPaywall();
-                  if (billingUnavailable) alertPaywallUnavailable();
+                  const { billingUnavailable, unavailableReason } = await presentPaywall();
+                  if (billingUnavailable)
+                    alertPaywallUnavailable(unavailableReason ?? paywallBlockReason);
                 })();
               }}
               activeOpacity={0.9}

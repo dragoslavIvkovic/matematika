@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -17,13 +17,10 @@ import {
 import Animated, { FadeInDown, FadeInUp, ZoomIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { OwlMascot } from "@/components/OwlMascot";
+import { OWL_MASCOT_VIEW_ASPECT } from "@/components/OwlMascotSvg";
 import Colors from "@/constants/colors";
 import { ROUTE_HOME } from "@/constants/routes";
-import {
-  getOnboardingHeroMascotSize,
-  getOnboardingHeroSectionMinHeight,
-  getOnboardingInlineMascotSize,
-} from "@/utils/mascotSizing";
+import { getOnboardingInlineMascotSize } from "@/utils/mascotSizing";
 import { AppStorage } from "@/utils/storage";
 
 const C = Colors.light;
@@ -31,85 +28,85 @@ const { width: SCREEN_W } = Dimensions.get("window");
 
 const ONBOARDING_KEY = "math_tutor_onboarding_v1";
 
+/** `OwlMascot` compactLayout outer height = size × this */
+const SLIDE1_MASCOT_OUTER = 1.1;
+/** Fixed gap between owl and “WISE OWL” — no large arbitrary margin */
+const SLIDE1_GAP_BADGE = 8;
+
 function Slide1() {
   const { width: windowW, height: windowH } = useWindowDimensions();
-  const mascotSize = getOnboardingHeroMascotSize(windowW, windowH);
-  const mascotSectionMinH = getOnboardingHeroSectionMinHeight(windowW, windowH);
-  const textGap = Math.max(12, Math.min(24, Math.round(windowH * 0.018)));
-  const titleFontSize = windowH < 620 ? 22 : windowH < 720 ? 24 : windowH < 840 ? 26 : 28;
-  const titleLineHeight = Math.round(titleFontSize * 1.28);
-  const subtitleFontSize = windowH < 620 ? 13 : 14;
+  const [slideInnerH, setSlideInnerH] = useState(0);
+  const [bottomBlockH, setBottomBlockH] = useState(0);
+
+  const titleFontSize =
+    windowH < 560 ? 20 : windowH < 620 ? 22 : windowH < 720 ? 24 : windowH < 840 ? 26 : 28;
+  const titleLineHeight = Math.round(titleFontSize * 1.25);
+  const subtitleFontSize = windowH < 560 ? 12 : windowH < 620 ? 13 : 14;
   const subtitleLineHeight = Math.round(subtitleFontSize * 1.45);
-  const featurePadV = windowH < 640 ? 8 : 10;
-  const scrollBottomPad = Math.max(16, Math.round(windowH * 0.02));
+  const featurePadV = windowH < 560 ? 6 : windowH < 640 ? 8 : 10;
+  const featureGap = windowH < 600 ? 6 : 10;
+
+  const mascotSize = useMemo(() => {
+    const maxFromWidth = (windowW - 48) / OWL_MASCOT_VIEW_ASPECT;
+    if (slideInnerH <= 0 || bottomBlockH <= 0) {
+      const guess = Math.min(maxFromWidth, (windowH * 0.28) / SLIDE1_MASCOT_OUTER);
+      return Math.max(44, Math.min(200, Math.floor(guess)));
+    }
+    const available = slideInnerH - bottomBlockH - SLIDE1_GAP_BADGE;
+    const raw = available / SLIDE1_MASCOT_OUTER;
+    return Math.floor(Math.max(44, Math.min(240, Math.min(raw, maxFromWidth))));
+  }, [slideInnerH, bottomBlockH, windowW, windowH]);
 
   return (
-    <View style={slideStyles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        bounces
-        contentContainerStyle={[
-          slideStyles.slideScrollContentTop,
-          { paddingBottom: scrollBottomPad },
-        ]}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={[slideStyles.mascotSection, { minHeight: mascotSectionMinH }]}>
-          <Animated.View entering={ZoomIn.delay(200).duration(600)} style={slideStyles.mascotWrap}>
-            <OwlMascot size={mascotSize} />
-          </Animated.View>
-        </View>
-        <Animated.View
-          entering={FadeInDown.delay(400).duration(500)}
-          style={[slideStyles.textBlock, { marginTop: textGap }]}
-        >
-          <View style={slideStyles.badge}>
-            <Text style={slideStyles.badgeText}>WISE OWL</Text>
-          </View>
-          <Text
-            style={[slideStyles.title, { fontSize: titleFontSize, lineHeight: titleLineHeight }]}
-          >
-            The Future of{"\n"}Learning Math
-          </Text>
-          <Text
-            style={[
-              slideStyles.subtitle,
-              { fontSize: subtitleFontSize, lineHeight: subtitleLineHeight },
-            ]}
-          >
-            I don't just give answers. I analyze your steps, find exactly where you're struggling,
-            and guide you back to core basics.
-          </Text>
-          <View style={[slideStyles.featureGrid, windowH < 720 && { marginTop: 4, gap: 8 }]}>
-            {[
-              {
-                icon: "analytics",
-                detail: "Step Diagnostics",
-                color: C.primary,
-              },
-              {
-                icon: "trending-up",
-                detail: "Adaptive Levels",
-                color: C.accent,
-              },
-              { icon: "book", detail: "Theory on Demand", color: C.orange },
-            ].map((f, i) => (
-              <Animated.View
-                key={f.detail}
-                entering={FadeInUp.delay(600 + i * 100)}
-                style={[slideStyles.featureItem, { paddingVertical: featurePadV }]}
-              >
-                <Ionicons
-                  name={f.icon as keyof typeof Ionicons.glyphMap}
-                  size={20}
-                  color={f.color}
-                />
-                <Text style={slideStyles.featureText}>{f.detail}</Text>
-              </Animated.View>
-            ))}
-          </View>
+    <View
+      style={slideStyles.slide1Root}
+      onLayout={(e) => setSlideInnerH(e.nativeEvent.layout.height)}
+    >
+      <View style={slideStyles.slide1MascotSlot}>
+        <Animated.View entering={ZoomIn.delay(200).duration(600)}>
+          <OwlMascot compactLayout size={mascotSize} />
         </Animated.View>
-      </ScrollView>
+      </View>
+
+      <Animated.View
+        entering={FadeInDown.delay(400).duration(500)}
+        onLayout={(e) => setBottomBlockH(e.nativeEvent.layout.height)}
+        style={slideStyles.slide1Copy}
+      >
+        <View style={slideStyles.badge}>
+          <Text style={slideStyles.badgeText}>WISE OWL</Text>
+        </View>
+        <Text style={[slideStyles.title, { fontSize: titleFontSize, lineHeight: titleLineHeight }]}>
+          The Future of{"\n"}Learning Math
+        </Text>
+        <Text
+          style={[
+            slideStyles.subtitle,
+            { fontSize: subtitleFontSize, lineHeight: subtitleLineHeight },
+          ]}
+        >
+          I don't just give answers. I analyze your steps, find exactly where you're struggling, and
+          guide you back to core basics.
+        </Text>
+        <View
+          style={[slideStyles.featureGrid, { gap: featureGap, marginTop: windowH < 640 ? 4 : 6 }]}
+        >
+          {[
+            { icon: "analytics", detail: "Step Diagnostics", color: C.primary },
+            { icon: "trending-up", detail: "Adaptive Levels", color: C.accent },
+            { icon: "book", detail: "Theory on Demand", color: C.orange },
+          ].map((f, i) => (
+            <Animated.View
+              key={f.detail}
+              entering={FadeInUp.delay(600 + i * 100)}
+              style={[slideStyles.featureItem, { paddingVertical: featurePadV }]}
+            >
+              <Ionicons name={f.icon as keyof typeof Ionicons.glyphMap} size={20} color={f.color} />
+              <Text style={slideStyles.featureText}>{f.detail}</Text>
+            </Animated.View>
+          ))}
+        </View>
+      </Animated.View>
     </View>
   );
 }
@@ -312,26 +309,30 @@ const slideStyles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 24,
   },
+  /** Slide 1 only: fill slide, no vertical centering — no ScrollView */
+  slide1Root: {
+    flex: 1,
+    minHeight: 0,
+    width: "100%",
+    paddingHorizontal: 24,
+    justifyContent: "flex-start",
+  },
+  slide1MascotSlot: {
+    flex: 1,
+    minHeight: 0,
+    width: "100%",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginBottom: SLIDE1_GAP_BADGE,
+  },
+  slide1Copy: {
+    width: "100%",
+    flexShrink: 0,
+    gap: 12,
+    alignItems: "center",
+  },
   slideScrollContent: {
     flexGrow: 1,
-    justifyContent: "center",
-  },
-  /** Slide 1: from top, no vertical center — avoids clipping on short screens */
-  slideScrollContentTop: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    paddingTop: 4,
-  },
-  /** Compact space around the owl (minHeight ≈ size + small margin for ZoomIn) */
-  mascotSection: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 0,
-    paddingBottom: 4,
-  },
-  mascotWrap: {
-    alignItems: "center",
     justifyContent: "center",
   },
   textBlock: {
@@ -413,7 +414,7 @@ const slideStyles = StyleSheet.create({
     width: "100%",
   },
   mockNotebook: {
-    backgroundColor: C.paper,
+    backgroundColor: C.notebook,
     borderRadius: 24,
     paddingRight: 16,
     paddingLeft: 40,
@@ -425,7 +426,7 @@ const slideStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 6,
-    overflow: "hidden",
+    overflow: "visible",
     borderWidth: 1,
     borderColor: C.borderLight,
     position: "relative",
@@ -465,13 +466,13 @@ const slideStyles = StyleSheet.create({
     paddingRight: 8,
   },
   mockRowActive: {
-    backgroundColor: "rgba(37, 99, 235, 0.05)", // C.primary with opacity
+    backgroundColor: C.primaryTintSurface,
     borderRadius: 8,
     marginRight: -10,
     paddingLeft: 5,
   },
   mockRowError: {
-    backgroundColor: "rgba(220, 38, 38, 0.05)", // C.error with opacity
+    backgroundColor: C.errorTintSurface,
     borderRadius: 8,
     marginRight: -10,
     paddingLeft: 5,
@@ -496,8 +497,9 @@ const slideStyles = StyleSheet.create({
     backgroundColor: C.white,
     borderRadius: 16,
     padding: 12,
+    paddingTop: 14,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 10,
     marginTop: 16,
     marginBottom: 8,

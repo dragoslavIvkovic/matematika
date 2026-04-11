@@ -157,13 +157,13 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   keyboardInner: {
-    backgroundColor: Platform.OS === "ios" ? "rgba(255,255,255,0.7)" : "#F1F5F9",
+    backgroundColor: Platform.OS === "ios" ? C.onColorWhite70 : C.borderLight,
     paddingTop: 6,
     paddingBottom: Platform.OS === "ios" ? 20 : 12,
     paddingHorizontal: 8,
     borderTopWidth: 1,
     borderTopColor: C.border,
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -201,11 +201,11 @@ const styles = StyleSheet.create({
   key: {
     flex: 1,
     height: 44,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: C.white,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: C.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -227,12 +227,12 @@ const styles = StyleSheet.create({
     backgroundColor: C.primaryLight,
   },
   operatorKeyText: {
-    color: "#FFFFFF",
+    color: C.white,
   },
   lightMinusDivideKey: {
     backgroundColor: C.infoLight,
     borderWidth: 1,
-    borderColor: "rgba(37, 99, 235, 0.2)",
+    borderColor: C.primaryBorderMuted,
   },
   lightMinusDivideKeyText: {
     color: C.primary,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   equalsKeyText: {
-    color: "#FFFFFF",
+    color: C.white,
     fontSize: 20,
   },
   specialKey: {

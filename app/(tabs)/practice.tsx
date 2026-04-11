@@ -75,19 +75,19 @@ export default function PracticeScreen() {
   const sessionAnswersRef = useRef({ total: 0, correct: 0 });
   const trackEvent = useAnalyticsStore((s) => s.trackEvent);
 
-  const { isPremium, presentPaywall, purchasesSupported } = useSubscription();
+  const { isPremium, presentPaywall, purchasesSupported, paywallBlockReason } = useSubscription();
 
   const handleStartAssessment = useCallback(async () => {
     if (!purchasesSupported || isPremium) {
       setMode("assessment");
       return;
     }
-    const { premiumActive, billingUnavailable } = await presentPaywall();
-    if (billingUnavailable) alertPaywallUnavailable();
+    const { premiumActive, billingUnavailable, unavailableReason } = await presentPaywall();
+    if (billingUnavailable) alertPaywallUnavailable(unavailableReason ?? paywallBlockReason);
     if (premiumActive) {
       setMode("assessment");
     }
-  }, [isPremium, presentPaywall, purchasesSupported]);
+  }, [isPremium, presentPaywall, purchasesSupported, paywallBlockReason]);
 
   const engine = useQuizEngine({
     useLevelFallback: true,

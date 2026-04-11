@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   notebookCard: {
     marginHorizontal: 16,
     marginTop: 12,
-    backgroundColor: C.paper,
+    backgroundColor: C.notebook,
     borderRadius: 16,
     paddingRight: 16,
     paddingLeft: 48,
