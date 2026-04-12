@@ -45,12 +45,10 @@ export default function DailyPracticeScreen() {
     if (dailyClaimed === "1") return;
     if (claimFreeDailyQuizSlot()) return;
     void (async () => {
-      try {
-        const { billingUnavailable, unavailableReason } = await presentPaywall();
-        if (billingUnavailable) alertPaywallUnavailable(unavailableReason ?? paywallBlockReason);
-      } finally {
-        router.back();
-      }
+      const { billingUnavailable, unavailableReason, premiumActive } = await presentPaywall();
+      if (billingUnavailable) alertPaywallUnavailable(unavailableReason ?? paywallBlockReason);
+      if (!premiumActive) router.back();
+      // If purchased → isPremium becomes true, useEffect guard exits, session continues
     })();
   }, [dailyClaimed, isPremium, presentPaywall, paywallBlockReason]);
 
