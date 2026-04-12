@@ -50,6 +50,10 @@ export type ProductAnalyticsEvent =
       properties: { source: string };
     }
   | {
+      event: "paywall_shown";
+      properties: { source: string };
+    }
+  | {
       event: "weak_practice_started";
       properties: { task_count: number; level_count: number; levels: LevelId[] };
     }

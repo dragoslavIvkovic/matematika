@@ -249,6 +249,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       }
       let paywallResult: PAYWALL_RESULT;
       try {
+        useAnalyticsStore.getState().trackProductEvent({
+          event: "paywall_shown",
+          properties: { source: "revenuecat_native" },
+        });
         paywallResult = (await uiLoad.ui.presentPaywall()) as PAYWALL_RESULT;
       } catch (e) {
         console.warn("RevenueCat: presentPaywall failed", e);
