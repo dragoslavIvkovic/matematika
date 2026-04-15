@@ -93,6 +93,13 @@ export function DailyPracticeCard({
         </Text>
       </View>
       <View style={s.rightGroup}>
+        <LevelPickerButton
+          onPress={() => {
+            // No need for stopPropagation as RN Touchables handle nesting by default,
+            // but we call onSetup to open the modal.
+            onSetup();
+          }}
+        />
         <View style={s.arrow}>
           <Ionicons name={freeDailyPlayLocked ? "lock-closed" : "play"} size={28} color={C.white} />
         </View>
