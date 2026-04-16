@@ -232,8 +232,8 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
 
       return {
         type: "retry",
-        message: `Error ${errCount}/${threshold}. One more try!`,
-        errorCount: errCount,
+        message: `Error ${state.levelErrorCount}/${threshold}. One more try!`,
+        errorCount: state.levelErrorCount,
         threshold,
       };
     },

@@ -150,7 +150,7 @@ export default function LearnScreen() {
             ]}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              router.push(ROUTE_PRACTICE);
+              router.push(`${ROUTE_PRACTICE}?action=start` as Href);
             }}
             activeOpacity={0.9}
           >
