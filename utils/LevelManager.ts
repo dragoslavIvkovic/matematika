@@ -4,7 +4,7 @@
  * Error logic (controlled by AppConfig):
  * - Until ERRORS_BEFORE_FALLBACK consecutive mistakes → retry + procedure
  * - At ERRORS_BEFORE_FALLBACK consecutive mistakes → theory (learning), not "Try again"
- * - After ERRORS_BEFORE_LEVEL_DROP total mistakes on a level → lower level (if one exists)
+ * - After ERRORS_BEFORE_LEVEL_DROP total mistakes on the level → one step down in LEVEL_CONFIGS (1.1 has no down)
  *
  * All thresholds are in utils/AppConfig.ts — change there, applies everywhere.
  */
@@ -46,22 +46,18 @@ const DEFAULT_STATE: LevelState = {
   activeDays: [],
 };
 
-/**
- * Fallback map: which level to send the student to when they fail
- * at a specific step in an equation.
- */
-const FALLBACK_TARGETS: Record<string, LevelId> = {
-  "1.3": "1.1",
-  "1.4": "1.2",
-  "1.5": "1.3",
-  "1.6": "1.3",
-};
+/** Previous level in the app roadmap; null for 1.1 (lowest). */
+function getLevelBelow(level: LevelId): LevelId | null {
+  const idx = LEVEL_CONFIGS.findIndex((l) => l.id === level);
+  if (idx <= 0) return null;
+  return LEVEL_CONFIGS[idx - 1].id;
+}
 
 export interface ErrorAction {
   type: "show_theory" | "fallback_level" | "retry";
   targetLevel?: LevelId;
   message: string;
-  errorCount: number; // how many consecutive errors so far
+  errorCount: number; // consecutive (theory) or level total (modal display)
   threshold: number; // how many needed before action
 }
 
@@ -210,9 +206,9 @@ export const createLevelManager = (initialState?: LevelState): LevelManager => {
         };
       }
 
-      // Then: too many total mistakes on the level → lower level (equations)
+      // Posle N ukupnih grešaka → nivo odmah ispod u listi (1.6 → 1.5, 1.4 → 1.3, …)
       if (state.levelErrorCount >= dropThreshold) {
-        const targetLevel = FALLBACK_TARGETS[level];
+        const targetLevel = getLevelBelow(level);
         if (targetLevel) {
           state.currentLevel = targetLevel;
           state.streak = 0;

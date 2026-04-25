@@ -305,6 +305,7 @@ export default function WeakPracticeScreen() {
             activeInputIndex={engine.activeInputIndex}
             setActiveInputIndex={engine.setActiveInputIndex}
             setIsKeyboardVisible={engine.setIsKeyboardVisible}
+            suppressOpenKeyboardOnFocusRef={engine.suppressOpenKeyboardOnFocusRef}
             requiredLines={requiredLines}
             inputRef={engine.inputRef}
             notebookScrollViewRef={engine.notebookScrollViewRef}
@@ -380,7 +381,6 @@ export default function WeakPracticeScreen() {
         onKeyPress={engine.handleKeyboardKeyPress}
         onDelete={engine.handleKeyboardDelete}
         onSubmit={() => engine.handleKeyboardSubmit(problem)}
-        onClose={engine.dismissKeyboard}
         bottomOffset={Platform.OS === "ios" ? insets.bottom : 0}
       />
 

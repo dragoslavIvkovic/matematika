@@ -89,8 +89,27 @@ export default function LearnScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* 2. Subscription Status */}
-        <Animated.View entering={FadeInDown.delay(50).duration(400)}>
+        {/* 2. Daily Practice Card — hero element */}
+        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <DailyPracticeCard
+            onSetup={() => setShowDailyModal(true)}
+            onStart={() => void openDailyPractice()}
+            freeDailyPlayLocked={freeDailyPlayLocked}
+          />
+        </Animated.View>
+
+        {/* 3. Stats + Subscription badge — single responsive row */}
+        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.statsRow}>
+          <View style={styles.miniStat}>
+            <Ionicons name="checkmark-circle" size={14} color={C.accent} />
+            <Text style={styles.miniStatValue}>{totalSolved}</Text>
+            <Text style={styles.miniStatLabel}>Solved</Text>
+          </View>
+          <View style={styles.miniStat}>
+            <Ionicons name="trophy" size={14} color={C.primary} />
+            <Text style={styles.miniStatValue}>{completedCount}</Text>
+            <Text style={styles.miniStatLabel}>Levels</Text>
+          </View>
           {isPremium ? (
             <View style={styles.subBadge}>
               <MaterialCommunityIcons name="crown" size={16} color={C.warning} />
@@ -113,29 +132,6 @@ export default function LearnScreen() {
               <Text style={styles.subBadgeText}>Free</Text>
             </TouchableOpacity>
           )}
-        </Animated.View>
-
-        {/* 3. Daily Practice Card — hero element */}
-        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-          <DailyPracticeCard
-            onSetup={() => setShowDailyModal(true)}
-            onStart={() => void openDailyPractice()}
-            freeDailyPlayLocked={freeDailyPlayLocked}
-          />
-        </Animated.View>
-
-        {/* 4. Solved / Levels stats */}
-        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.statsRow}>
-          <View style={styles.miniStat}>
-            <Ionicons name="checkmark-circle" size={14} color={C.accent} />
-            <Text style={styles.miniStatValue}>{totalSolved}</Text>
-            <Text style={styles.miniStatLabel}>Solved</Text>
-          </View>
-          <View style={styles.miniStat}>
-            <Ionicons name="trophy" size={14} color={C.primary} />
-            <Text style={styles.miniStatValue}>{completedCount}</Text>
-            <Text style={styles.miniStatLabel}>Levels</Text>
-          </View>
         </Animated.View>
 
         {/* 5. Secondary practice cards — full-width, stacked */}
@@ -169,7 +165,8 @@ export default function LearnScreen() {
 
         {/* Level roadmap */}
         <Animated.View entering={FadeInDown.delay(250).duration(400)} style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Level 1 – Whole positive numbers</Text>
+          <Text style={styles.sectionTitle}>Choose your level</Text>
+          <Text style={styles.sectionSubtitle}>Level 1 – Whole positive numbers</Text>
         </Animated.View>
 
         {LEVEL_CONFIGS.map((config, index) => {
@@ -307,16 +304,15 @@ const styles = StyleSheet.create({
   },
   scrollContent: { padding: 16, gap: 14 },
 
-  // Subscription badge
+  // Subscription badge (now inline in stats row)
   subBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    alignSelf: "flex-start",
     backgroundColor: C.surface,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 100,
+    paddingVertical: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: C.borderLight,
     ...homeCardShadow.surface,
@@ -327,10 +323,11 @@ const styles = StyleSheet.create({
     color: C.primary,
   },
 
-  // Stats
+  // Stats + badge row
   statsRow: {
     flexDirection: "row",
-    gap: 12,
+    alignItems: "center",
+    gap: 10,
     marginVertical: 2,
   },
   miniStat: {
@@ -403,12 +400,18 @@ const styles = StyleSheet.create({
   },
 
   // Section header
-  sectionHeader: { marginTop: 10, marginBottom: 4 },
+  sectionHeader: { marginTop: 10, marginBottom: 4, gap: 2 },
   sectionTitle: {
     fontFamily: "Inter_800ExtraBold",
     fontSize: 20,
     color: C.text,
     letterSpacing: -0.5,
+  },
+  sectionSubtitle: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    color: C.textMuted,
+    letterSpacing: -0.1,
   },
 
   // Roadmap

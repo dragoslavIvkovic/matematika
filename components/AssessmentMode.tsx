@@ -486,10 +486,6 @@ export function AssessmentMode({ onComplete, onCancel }: AssessmentModeProps) {
         onKeyPress={handleKeyboardKeyPress}
         onDelete={handleKeyboardDelete}
         onSubmit={handleKeyboardSubmit}
-        onClose={() => {
-          setIsKeyboardVisible(false);
-          inputRef.current?.blur();
-        }}
         bottomOffset={Platform.OS === "ios" ? 49 + insets.bottom : 60}
       />
     </View>

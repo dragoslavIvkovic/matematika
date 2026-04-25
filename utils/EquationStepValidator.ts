@@ -117,7 +117,7 @@ export const EquationStepValidator = {
         if (type === "*") {
           val1 = b / a;
           steps.push({
-            display: `${variable} = ${b} / ${a}`,
+            display: `${variable} = ${b} ÷ ${a}`,
             variations: [`${variable}=${b}/${a}`],
           });
           steps.push({
@@ -150,7 +150,7 @@ export const EquationStepValidator = {
             variations: [`${a}${variable}=${val1}`],
           });
           steps.push({
-            display: `${variable} = ${val1} / ${a}`,
+            display: `${variable} = ${val1} ÷ ${a}`,
             variations: [`${variable}=${val1}/${a}`],
           });
           steps.push({
@@ -168,7 +168,7 @@ export const EquationStepValidator = {
             variations: [`${a}${variable}=${val1}`],
           });
           steps.push({
-            display: `${variable} = ${val1} / ${a}`,
+            display: `${variable} = ${val1} ÷ ${a}`,
             variations: [`${variable}=${val1}/${a}`],
           });
           steps.push({
@@ -183,11 +183,11 @@ export const EquationStepValidator = {
         if (type === "+") {
           val1 = c - b;
           steps.push({
-            display: `${variable}/${a} = ${c} - ${b}`,
+            display: `${variable} ÷ ${a} = ${c} - ${b}`,
             variations: [`${variable}/${a}=${c}-${b}`],
           });
           steps.push({
-            display: `${variable}/${a} = ${val1}`,
+            display: `${variable} ÷ ${a} = ${val1}`,
             variations: [`${variable}/${a}=${val1}`],
           });
           steps.push({
@@ -201,11 +201,11 @@ export const EquationStepValidator = {
         } else if (type === "-") {
           val1 = c + b;
           steps.push({
-            display: `${variable}/${a} = ${c} + ${b}`,
+            display: `${variable} ÷ ${a} = ${c} + ${b}`,
             variations: [`${variable}/${a}=${c}+${b}`, `${variable}/${a}=${b}+${c}`],
           });
           steps.push({
-            display: `${variable}/${a} = ${val1}`,
+            display: `${variable} ÷ ${a} = ${val1}`,
             variations: [`${variable}/${a}=${val1}`],
           });
           steps.push({

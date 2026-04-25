@@ -20,6 +20,8 @@ interface NotebookInputProps {
   activeInputIndex: number;
   setActiveInputIndex: React.Dispatch<React.SetStateAction<number>>;
   setIsKeyboardVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  /** Kada je true, onFocus ne otvara custom tastaturu (npr. odmah posle zatvaranja Modala). */
+  suppressOpenKeyboardOnFocusRef?: React.RefObject<boolean>;
   requiredLines: number;
   inputRef: React.RefObject<TextInput | null>;
   notebookScrollViewRef: React.RefObject<ScrollView | null>;
@@ -33,6 +35,7 @@ export function NotebookInput({
   setTypedAnswers,
   setActiveInputIndex,
   setIsKeyboardVisible,
+  suppressOpenKeyboardOnFocusRef,
   requiredLines,
   inputRef,
   notebookScrollViewRef,
@@ -89,7 +92,9 @@ export function NotebookInput({
               value={ans}
               onFocus={() => {
                 setActiveInputIndex(idx);
-                setIsKeyboardVisible(true);
+                if (!suppressOpenKeyboardOnFocusRef?.current) {
+                  setIsKeyboardVisible(true);
+                }
                 setTimeout(() => {
                   notebookScrollViewRef.current?.scrollTo({
                     y: 200 + idx * 46,

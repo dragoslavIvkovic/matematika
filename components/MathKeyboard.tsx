@@ -15,7 +15,6 @@ interface MathKeyboardProps {
   onKeyPress: (key: string) => void;
   onDelete: () => void;
   onSubmit: () => void;
-  onClose: () => void;
   bottomOffset?: number;
 }
 
@@ -26,7 +25,6 @@ export function MathKeyboard({
   onKeyPress,
   onDelete,
   onSubmit,
-  onClose,
   bottomOffset = 0,
 }: MathKeyboardProps) {
   const [mode, setMode] = useState<KeyboardMode>("math");
@@ -52,7 +50,7 @@ export function MathKeyboard({
     ["1", "2", "3", "+"],
     ["4", "5", "6", "-"],
     ["7", "8", "9", "*"],
-    [".", "0", "=", "/"],
+    [".", "0", "=", "÷"],
     ["ABC", "x", "y", "DEL"],
   ];
 
@@ -68,9 +66,9 @@ export function MathKeyboard({
   const renderKey = (key: string) => {
     const isAction = ["ABC", "123"].includes(key);
     const isDelete = key === "DEL";
-    const isLightMinusDivide = key === "-" || key === "/";
+    const isLightMinusDivide = key === "-" || key === "÷";
     const isEquals = key === "=";
-    const isOperator = ["+", "-", "*", "/", "=", "(", ")"].includes(key);
+    const isOperator = ["+", "-", "*", "÷", "=", "(", ")"].includes(key);
     const isSpecial = ["x", "y"].includes(key);
 
     let content: React.ReactNode = (
@@ -124,15 +122,8 @@ export function MathKeyboard({
         tint="light"
         style={styles.keyboardInner}
       >
-        {/* Top Control Bar */}
         <View style={styles.topBar}>
-          <View style={styles.topBarSide}>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Ionicons name="chevron-down" size={24} color={C.textMuted} />
-            </TouchableOpacity>
-          </View>
           <View style={styles.handle} />
-          <View style={styles.topBarSide} />
         </View>
 
         {/* Keys Grid */}
@@ -154,9 +145,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    width: "100%",
     zIndex: 1000,
   },
   keyboardInner: {
+    width: "100%",
     backgroundColor: Platform.OS === "ios" ? C.onColorWhite70 : C.borderLight,
     paddingTop: 6,
     paddingBottom: Platform.OS === "ios" ? 20 : 12,
@@ -170,26 +163,16 @@ const styles = StyleSheet.create({
     elevation: 20,
   },
   topBar: {
-    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 12,
     marginBottom: 4,
     height: 24,
-  },
-  topBarSide: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
   },
   handle: {
     width: 36,
     height: 5,
     borderRadius: 2.5,
     backgroundColor: C.border,
-  },
-  closeBtn: {
-    padding: 4,
   },
   grid: {
     gap: 4,

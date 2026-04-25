@@ -11,6 +11,14 @@ import { EquationStepValidator } from "@/utils/EquationStepValidator";
 import { type ErrorAction, LevelManager } from "@/utils/LevelManager";
 import type { GeneratedProblem, LevelId } from "@/utils/ProblemGenerator";
 
+/**
+ * Samo čisto sabiranje/oduzimanje (1.1, 1.3): kratka poruka, bez "Correct procedure".
+ * Ne koristiti `type` — nivoi 1.5/1.6 imaju +/− u jednačini, ali im treba i korak i postupak.
+ */
+function shouldHideErrorProcedure(p: GeneratedProblem): boolean {
+  return p.level === "1.1" || p.level === "1.3";
+}
+
 export interface CorrectResult {
   levelComplete: boolean;
   newLevel?: LevelId;
@@ -194,10 +202,18 @@ export function useQuizEngine(config: QuizEngineConfig = {}) {
 
           dismissKeyboard();
 
+          const hideProcedure = shouldHideErrorProcedure(problem);
+          const mainMessage =
+            errorAction?.type === "show_theory" || errorAction?.type === "fallback_level"
+              ? errorAction.message
+              : hideProcedure
+                ? "Not quite right. Try again."
+                : validation.modalMessage || "That's not correct. Check your work.";
+
           setErrorModal({
             visible: true,
-            message: validation.modalMessage || "That's not correct. Check your work.",
-            procedure: validation.expectedProcedure || [],
+            message: mainMessage,
+            procedure: hideProcedure ? [] : validation.expectedProcedure || [],
             failedAtStep: failedStep,
             action: errorAction,
           });
@@ -295,7 +311,6 @@ export function useQuizEngine(config: QuizEngineConfig = {}) {
     handleKeyboardSubmit,
     handleErrorDismiss,
     resetQuizState,
-    dismissKeyboard,
     animateResultCard,
 
     // Store actions (re-exposed for convenience)

@@ -14,10 +14,8 @@ export const APP_CONFIG = {
   ERRORS_BEFORE_FALLBACK: 3,
 
   /**
-   * How many wrong attempts in total (cumulative on the level)
-   * before the learner is sent to the previous level.
-   *
-   * Example: 3 = after 3 total mistakes on the level → go back
+   * Nakon ovoliko **ukupnih** grešaka na trenutnom nivou → korisnik ide na nivo odmah ispod (1.1 nema nivo ispod).
+   * 3 = posle 3. greške (levelErrorCount >= 3) → spuštanje.
    */
   ERRORS_BEFORE_LEVEL_DROP: 3,
 

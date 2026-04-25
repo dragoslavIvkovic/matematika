@@ -84,6 +84,7 @@ export default function DailyPracticeScreen() {
     setActiveInputIndex,
     isKeyboardVisible,
     setIsKeyboardVisible,
+    suppressOpenKeyboardOnFocusRef,
     isChecking,
     isCorrect,
     isAnswered,
@@ -92,7 +93,6 @@ export default function DailyPracticeScreen() {
     handleKeyboardKeyPress,
     handleKeyboardDelete,
     handleKeyboardSubmit,
-    dismissKeyboard,
   } = engine;
 
   // Track start event once
@@ -267,6 +267,7 @@ export default function DailyPracticeScreen() {
             activeInputIndex={activeInputIndex}
             setActiveInputIndex={setActiveInputIndex}
             setIsKeyboardVisible={setIsKeyboardVisible}
+            suppressOpenKeyboardOnFocusRef={suppressOpenKeyboardOnFocusRef}
             requiredLines={requiredLines}
             inputRef={inputRef}
             notebookScrollViewRef={notebookScrollViewRef}
@@ -341,7 +342,6 @@ export default function DailyPracticeScreen() {
         onKeyPress={handleKeyboardKeyPress}
         onDelete={handleKeyboardDelete}
         onSubmit={() => handleKeyboardSubmit(problem)}
-        onClose={dismissKeyboard}
         bottomOffset={Platform.OS === "ios" ? insets.bottom : 0}
       />
 

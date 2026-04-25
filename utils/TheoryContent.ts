@@ -95,144 +95,212 @@ const THEORY: Record<string, TheorySection> = {
   },
   "1.3": {
     title: "Solving Equations x ± a = b",
-    subtitle: "Moving terms and changing operations",
+    subtitle: "Moving terms — addition and subtraction",
     concept:
       "When solving equations of the form x ± a = b, we can move terms from one side of the equation to the other side.",
     rules: [
       {
         icon: "swap-horizontal",
-        text: "When a term moves to the opposite side, we change the operation.",
+        text: "Rule: When a term moves to the opposite side, we change the operation: addition becomes subtraction, and subtraction becomes addition.",
         highlight: true,
-      },
-      {
-        icon: "add-circle",
-        text: "Addition (+) becomes subtraction (-)",
-      },
-      {
-        icon: "remove-circle",
-        text: "Subtraction (-) becomes addition (+)",
       },
     ],
     examples: [
       {
-        equation: "x + 7 = 19",
-        steps: ["x = 19 - 7", "x = 12"],
-        explanation:
-          "Move 7 to the right side. It was addition, so we change it to subtraction: x = 19 - 7 = 12.",
+        equation: "1. Addition case: x + a = b",
+        steps: [
+          "Equation: x + a = b",
+          "We move a to the right side. It was addition, so we change it to subtraction:",
+          "x = b − a",
+          "Example:",
+          "x + 7 = 19",
+          "Move 7 to the right side. It was addition, so we change it to subtraction:",
+          "x = 19 − 7",
+          "x = 12",
+        ],
+        explanation: "The unknown x is 12.",
       },
       {
-        equation: "x - 5 = 23",
-        steps: ["x = 23 + 5", "x = 28"],
-        explanation:
-          "Move 5 to the right side. It was subtraction, so we change it to addition: x = 23 + 5 = 28.",
+        equation: "2. Subtraction case: x − a = b",
+        steps: [
+          "Equation: x − a = b",
+          "We move a to the right side. It was subtraction, so we change it to addition:",
+          "x = b + a",
+          "Example:",
+          "x − 5 = 23",
+          "Move 5 to the right side. It was subtraction, so we change it to addition:",
+          "x = 23 + 5",
+          "x = 28",
+        ],
+        explanation: "The unknown x is 28.",
       },
     ],
-    tip: "Think of the = sign as a gate. When numbers pass through it, their operation flips to its opposite!",
+    tip: "When a number crosses the equals sign, flip the operation: + becomes −, and − becomes +.",
   },
 
   "1.4": {
-    title: "Solving Equations ax = b and x / a = b",
+    title: "Solving Equations ax = b and x ÷ a = b",
     subtitle: "Moving multiplication and division",
     concept:
-      "When solving equations of the form ax = b and x / a = b, we can move terms from one side of the equation to the other side.",
+      "When solving equations of the form ax = b and x ÷ a = b, we can move terms from one side of the equation to the other side.",
     rules: [
       {
         icon: "swap-horizontal",
-        text: "When a term moves to the opposite side, we use the opposite operation.",
+        text: "Rule: When a term moves to the opposite side, we use the opposite mathematical operation (multiplication becomes division, and division becomes multiplication).",
         highlight: true,
-      },
-      {
-        icon: "close-circle",
-        text: "Multiplication (*) becomes division (/)",
-      },
-      {
-        icon: "ellipse",
-        text: "Division (/) becomes multiplication (*)",
       },
     ],
     examples: [
       {
-        equation: "3x = 18",
-        steps: ["x = 18 / 3", "x = 6"],
-        explanation:
-          "Move 3 (multiplication) to the right side. It was multiplication, so we change it to division: x = 18 / 3 = 6.",
+        equation: "1. Multiplication case: ax = b",
+        steps: [
+          "Equation: ax = b",
+          "We move a (which is multiplying x) to the right side. It was multiplication, so we change it to division:",
+          "x = b ÷ a",
+          "Example:",
+          "3x = 18",
+          "Move 3 (which is multiplying x) to the right side. It was multiplication, so we change it to division:",
+          "x = 18 ÷ 3",
+          "x = 6",
+        ],
+        explanation: "The unknown x is 6.",
       },
       {
-        equation: "x / 4 = 7",
-        steps: ["x = 7 * 4", "x = 28"],
-        explanation:
-          "Move 4 (division) to the right side. It was division, so we change it to multiplication: x = 7 * 4 = 28.",
+        equation: "2. Division case: x ÷ a = b",
+        steps: [
+          "Equation: x ÷ a = b",
+          "We move a (which is dividing x) to the right side. It was division, so we change it to multiplication:",
+          "x = b × a",
+          "Example:",
+          "x ÷ 4 = 7",
+          "Move 4 (division) to the right side. It was division, so we change it to multiplication:",
+          "x = 7 × 4",
+          "x = 28",
+        ],
+        explanation: "The unknown x is 28.",
       },
     ],
-    tip: "If something multiplies x, divide to undo it. If something divides x, multiply to undo it!",
+    tip: "Multiply to undo division; divide to undo multiplication when you move a across the equals sign.",
   },
 
   "1.5": {
-    title: "Two-Step Equations ax ± b = c",
-    subtitle: "Move constant first, then coefficient",
+    title: "Solving Equations ax ± b = c",
+    subtitle: "Move the constant, then the coefficient",
     concept:
-      "When solving equations of the form ax ± b = c, we first move the constant term b, then the coefficient a, using the opposite operations.",
+      "When solving equations of the form ax ± b = c, we first move the constant term b, then coefficient a, using the opposite operations.",
     rules: [
       {
         icon: "layers",
-        text: "Step 1: Move the constant b to the opposite side using the opposite operation.",
+        text: "Move the constant b to the opposite side (use the opposite operation, addition becomes subtraction and subtraction becomes addition).",
         highlight: true,
       },
       {
         icon: "git-branch",
-        text: "Step 2: Move the coefficient a to the opposite side (multiplication becomes division).",
+        text: "Then move the coefficient a to the opposite side (multiplication becomes division).",
         highlight: true,
       },
     ],
     examples: [
       {
-        equation: "3x + 5 = 17",
-        steps: ["3x = 17 - 5", "3x = 12", "x = 12 / 3", "x = 4"],
-        explanation:
-          "First, move 5 to the right side (+5 becomes -5). Then move 3 (multiplies x) to the right side (becomes division). x = 12 / 3 = 4.",
+        equation: "1. Addition case: ax + b = c",
+        steps: [
+          "Equation: ax + b = c",
+          "First, move b to the right side. It was addition, so it becomes subtraction:",
+          "ax = c − b",
+          "Then, move a (which is multiplying x) to the right side. It was multiplication, so it becomes division:",
+          "x = (c − b) ÷ a",
+          "Example:",
+          "3x + 5 = 17",
+          "Move 5 to the right side. It was addition, so it becomes subtraction.",
+          "3x = 17 − 5",
+          "3x = 12",
+          "Then move 3 (which is multiplying x) to the right side. It was multiplication, so it becomes division.",
+          "x = 12 ÷ 3",
+          "x = 4",
+        ],
+        explanation: "The solution is x = 4.",
       },
       {
-        equation: "4x - 6 = 14",
-        steps: ["4x = 14 + 6", "4x = 20", "x = 20 / 4", "x = 5"],
-        explanation:
-          "First, move 6 to the right side (-6 becomes +6). Then move 4 (multiplies x) to the right side (becomes division). x = 20 / 4 = 5.",
+        equation: "2. Subtraction case: ax − b = c",
+        steps: [
+          "Equation: ax − b = c",
+          "First, move b to the right side. It was subtraction, so it becomes addition:",
+          "ax = c + b",
+          "Then, move a (which is multiplying x) to the right side. It was multiplication, so it becomes division:",
+          "x = (c + b) ÷ a",
+          "Example:",
+          "4x − 6 = 14",
+          "First, move 6 to the right side. It was subtraction, so it becomes addition:",
+          "4x = 14 + 6",
+          "4x = 20",
+          "Then, move 4 (which is multiplying x) to the right side. It was multiplication, so it becomes division.",
+          "x = 20 ÷ 4",
+          "x = 5",
+        ],
+        explanation: "The solution is x = 5.",
       },
     ],
-    tip: "Always handle addition/subtraction BEFORE handling multiplication/division.",
+    tip: "Always move the constant (±) first, then divide by the coefficient a.",
   },
 
   "1.6": {
-    title: "Two-Step Equations x / a ± b = c",
-    subtitle: "Move constant first, then divisor",
+    title: "Solving Equations x ÷ a ± b = c",
+    subtitle: "Move the constant, then the divisor",
     concept:
-      "When solving equations of the form x / a ± b = c, we first move the constant term b, then the coefficient a, using the opposite operations.",
+      "When solving equations of the form x ÷ a ± b = c, we first move the constant term b, then the divisor a, using the opposite operations.",
     rules: [
       {
         icon: "layers",
-        text: "Step 1: Move the constant b to the opposite side using the opposite operation.",
+        text: "Move the constant b to the opposite side (use the opposite operation: addition becomes subtraction, and subtraction becomes addition).",
         highlight: true,
       },
       {
         icon: "git-branch",
-        text: "Step 2: Move the coefficient a to the opposite side (division becomes multiplication).",
+        text: "Then move the divisor a to the opposite side (division becomes multiplication).",
         highlight: true,
       },
     ],
     examples: [
       {
-        equation: "x / 3 + 4 = 10",
-        steps: ["x / 3 = 10 - 4", "x / 3 = 6", "x = 6 * 3", "x = 18"],
-        explanation:
-          "Move 4 to the right side (+4 becomes -4). Then move 3 (divides x) to the right side (becomes multiplication). x = 6 * 3 = 18.",
+        equation: "1. Addition case: x ÷ a + b = c",
+        steps: [
+          "Equation: x ÷ a + b = c",
+          "First, move b to the right side. It was addition, so it becomes subtraction:",
+          "x ÷ a = c − b",
+          "Then, move a (which is dividing x) to the right side. It was division, so it becomes multiplication:",
+          "x = (c − b) × a",
+          "Example:",
+          "x ÷ 3 + 4 = 10",
+          "Move 4 to the right side. It was addition, so it becomes subtraction:",
+          "x ÷ 3 = 10 − 4",
+          "x ÷ 3 = 6",
+          "Then, move 3 (which is dividing x) to the right side. It was division, so it becomes multiplication:",
+          "x = 6 × 3",
+          "x = 18",
+        ],
+        explanation: "The solution is x = 18.",
       },
       {
-        equation: "x / 5 - 2 = 7",
-        steps: ["x / 5 = 7 + 2", "x / 5 = 9", "x = 9 * 5", "x = 45"],
-        explanation:
-          "Move 2 to the right side (-2 becomes +2). Then move 5 (divides x) to the right side (becomes multiplication). x = 9 * 5 = 45.",
+        equation: "2. Subtraction case: x ÷ a − b = c",
+        steps: [
+          "Equation: x ÷ a − b = c",
+          "First, move b to the right side. It was subtraction, so it becomes addition:",
+          "x ÷ a = c + b",
+          "Then, move a (which is dividing x) to the right side. It was division, so it becomes multiplication:",
+          "x = (c + b) × a",
+          "Example:",
+          "x ÷ 5 − 2 = 7",
+          "Move 2 to the right side. It was subtraction, so it becomes addition:",
+          "x ÷ 5 = 7 + 2",
+          "x ÷ 5 = 9",
+          "Then, move 5 (which is dividing x) to the right side. It was division, so it becomes multiplication.",
+          "x = 9 × 5",
+          "x = 45",
+        ],
+        explanation: "The solution is x = 45.",
       },
     ],
-    tip: "Follow the reverse order of operations when solving: move what's furthest from x first!",
+    tip: "First isolate x ÷ a, then multiply by a to get x by itself.",
   },
 };
 

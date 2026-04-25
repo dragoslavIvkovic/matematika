@@ -1,38 +1,13 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
-import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 
 import { Platform, StyleSheet, View } from "react-native";
 import Colors from "@/constants/colors";
+import { getDefaultClassicTabBarStyle } from "@/constants/tabBarStyle";
 
-function NativeTabLayout() {
-  return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <Icon
-          sf={{
-            default: "pencil.and.ruler",
-            selected: "pencil.and.ruler.fill",
-          }}
-        />
-        <Label>Learn</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="practice">
-        <Icon sf={{ default: "house", selected: "house.fill" }} />
-        <Label>Practice</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="progress">
-        <Icon sf={{ default: "chart.bar.fill", selected: "chart.bar.fill" }} />
-        <Label>Progress</Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
-  );
-}
-
-function ClassicTabLayout() {
+function TabLayoutContent() {
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
   const C = Colors.light;
@@ -43,14 +18,7 @@ function ClassicTabLayout() {
         tabBarActiveTintColor: C.primary,
         tabBarInactiveTintColor: C.textMuted,
         headerShown: false,
-        tabBarStyle: {
-          position: "absolute",
-          backgroundColor: isIOS ? C.transparent : C.white,
-          borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: C.border,
-          elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
-        },
+        tabBarStyle: getDefaultClassicTabBarStyle(),
         tabBarBackground: () =>
           isIOS ? (
             <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
@@ -99,9 +67,11 @@ function ClassicTabLayout() {
   );
 }
 
+/**
+ * Uvek korišćenje React Navigation `Tabs` (ne iOS `NativeTabs`).
+ * Ispod prilagođene MathKeyboard, Native tabs ne izlažu visinu u kontekst i
+ * lebde iznad sadržaja — preklapanje. Ovde se dobija ispravno `useBottomTabBarHeight`.
+ */
 export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
+  return <TabLayoutContent />;
 }

@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import Animated, { FadeIn, FadeInDown, FadeOut } from "react-native-reanimated";
@@ -23,6 +24,7 @@ import { NotebookInput } from "@/components/NotebookInput";
 import { OwlMascot } from "@/components/OwlMascot";
 import { TheoryScreen } from "@/components/TheoryScreen";
 import Colors from "@/constants/colors";
+import { useMathKeyboardTabOffset } from "@/hooks/useMathKeyboardTabOffset";
 import { useQuizEngine } from "@/hooks/useQuizEngine";
 import { useSubscription } from "@/providers/SubscriptionProvider";
 import { useAnalyticsStore } from "@/store/analyticsStore";
@@ -54,6 +56,8 @@ type ScreenMode =
 
 export default function PracticeScreen() {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const mathKeyboardTabOffset = useMathKeyboardTabOffset();
   const { action, level } = useLocalSearchParams();
 
   const [mode, setMode] = useState<ScreenMode>("loading");
@@ -138,7 +142,6 @@ export default function PracticeScreen() {
     handleKeyboardKeyPress,
     handleKeyboardDelete,
     handleKeyboardSubmit,
-    dismissKeyboard,
   } = engine;
 
   // ── Generate new problem ──
@@ -272,9 +275,10 @@ export default function PracticeScreen() {
       rerender();
       startPractice(mgr);
     } else {
-      generateNew(mgr);
+      // Try again: same equation as before, empty inputs (daily/weak practice already do this)
+      resetQuizState();
     }
-  }, [errorModal, engineHandleErrorDismiss, startPractice, generateNew, rerender, managerRef]);
+  }, [errorModal, engineHandleErrorDismiss, startPractice, resetQuizState, rerender, managerRef]);
 
   // ── Handle next problem ──
   const handleNextProblem = useCallback(() => {
@@ -430,6 +434,10 @@ export default function PracticeScreen() {
   const streakProgress = manager.getStreakProgress();
   const requiredLines = problem ? EquationStepValidator.getRequiredLines(problem.level) : 1;
 
+  const scrollPaddingBottom = isKeyboardVisible
+    ? mathKeyboardTabOffset + Math.min(360, windowHeight * 0.4)
+    : 24;
+
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       {Platform.OS === "ios" && (
@@ -482,7 +490,7 @@ export default function PracticeScreen() {
       <ScrollView
         ref={notebookScrollViewRef}
         style={styles.scroll}
-        contentContainerStyle={[styles.scrollContent, isKeyboardVisible && { paddingBottom: 380 }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollPaddingBottom }]}
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
       >
@@ -576,8 +584,7 @@ export default function PracticeScreen() {
         onKeyPress={handleKeyboardKeyPress}
         onDelete={handleKeyboardDelete}
         onSubmit={() => handleKeyboardSubmit(problem)}
-        onClose={dismissKeyboard}
-        bottomOffset={Platform.OS === "ios" ? 49 + insets.bottom : 60}
+        bottomOffset={mathKeyboardTabOffset}
       />
 
       {/* ── Error Modal ── */}
